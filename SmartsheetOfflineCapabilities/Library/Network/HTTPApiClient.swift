@@ -16,14 +16,6 @@ enum BodyEncoding {
     case urlEncoded
 }
 
-//struct HTTPRequest {
-//    let url: URL
-//    let method: HTTPMethod
-//    let headers: [String: String]
-//    let queryParameters: [String: String]?
-//    let body: Data?
-//}
-
 /// A lightweight HTTP client for performing network requests using URLSession.
 /// Supports injection of custom URLSessionProtocol for testability.
 class HTTPApiClient: ObservableObject {
@@ -43,13 +35,15 @@ class HTTPApiClient: ObservableObject {
     ///   - headers: The request headers.
     ///   - queryParameters: Optional query parameters to append to the URL.
     ///   - body: Optional HTTP body.
+    ///   - encoding: The body encoding type. Defaults to .json.
     /// - Returns: A result containing either the response data or an error.
     func request(
         url: String,
         method: HTTPMethod,
-        headers: [String: String],
+        headers: [String: String] = [:],
         queryParameters: [String: String]? = nil,
-        body: Data? = nil
+        body: Data? = nil,
+        encoding: BodyEncoding = .json
     ) async -> Result<Data, Error> {
         guard var components = URLComponents(string: url) else {
             return .failure(URLError(.badURL))

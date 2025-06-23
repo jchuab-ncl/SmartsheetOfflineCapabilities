@@ -17,19 +17,12 @@ final class LoginViewModel: ObservableObject {
     
     // MARK: Published Properties
     
-//    @Published var username: String = "test"
-//    @Published var password: String = "test"
-    @Published var isLoggingIn: Bool = false
+    @Published var isLoginInProgress: Bool = false
     @Published var errorMessage: String?
     @Published var presentNextScreen: Bool = false
-    
-    // MARK: Computed properties
-
-//    var isLoginDisabled: Bool {
-//        username.isEmpty || password.isEmpty
-//    }
-    
+       
     // MARK: Initializers
+    
     
     init(
         authenticationService: AuthenticationServiceProtocol = Dependencies.shared.authenticationService
@@ -41,6 +34,8 @@ final class LoginViewModel: ObservableObject {
             .removeDuplicates()
             .sink(receiveValue: { [weak self] value in
                 self?.errorMessage = value
+                self?.isLoginInProgress = value.isEmpty
+                self?.presentNextScreen = value.isEmpty
             })
             .store(in: &cancellables)
     }
@@ -48,17 +43,8 @@ final class LoginViewModel: ObservableObject {
     // MARK: Public methods
 
     func login() {
-        isLoggingIn = true
-        
-        /// Testing error handling
-//        errorMessage = "Incorrect username or password. Double check and try again."
+        isLoginInProgress = true
         authenticationService.login()
-
-        //TODO: Handling screen flow        
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-//            self.isLoggingIn = false
-//            self.presentNextScreen = true
-//        }
     }
     
 }

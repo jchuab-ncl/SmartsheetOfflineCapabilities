@@ -13,14 +13,13 @@ struct LoginView: View {
     @State private var isPasswordVisible = false
     @State private var showingError = false
     @State private var presentNextScreen = false
-    
-//    @EnvironmentObject private var authenticationService: AuthenticationService
 
     var body: some View {
         NavigationStack {
             makeScreenContent()
                 .onChange(of: viewModel.errorMessage) { _, newValue in
-                    showingError = newValue != nil
+                    guard let newValue = newValue else { return }
+                    showingError = newValue.isNotEmpty
                 }
                 .alert("Login Failed", isPresented: $showingError, actions: {
                     Button("OK", role: .cancel) {
@@ -38,12 +37,6 @@ struct LoginView: View {
                 }
         }
     }
-    
-    // MARK: Initializers
-    
-//    init(authenticationService: AuthenticationService) {
-//        _viewModel = StateObject(wrappedValue: LoginViewModel(authenticationService: authenticationService))
-//    }
     
     // MARK: Private methods
 
@@ -64,42 +57,6 @@ struct LoginView: View {
                 .multilineTextAlignment(.center)
 
             VStack(spacing: 12) {
-//                TextField("Username", text: $viewModel.username)
-//                    .textFieldStyle(RoundedBorderTextFieldStyle())
-//                    .frame(maxWidth: 300)
-//                    .disabled(viewModel.isLoggingIn)
-//                    .accessibilityIdentifier("Username")
-
-//                ZStack {
-//                    if isPasswordVisible {
-//                        TextField("Password", text: $viewModel.password)
-//                            .textFieldStyle(RoundedBorderTextFieldStyle())
-//                            .frame(maxWidth: 300)
-//                            .disabled(viewModel.isLoggingIn)
-//                            .accessibilityIdentifier("Password")
-//                    } else {
-//                        SecureField("Password", text: $viewModel.password)
-//                            .textFieldStyle(RoundedBorderTextFieldStyle())
-//                            .frame(maxWidth: 300)
-//                            .disabled(viewModel.isLoggingIn)
-//                            .accessibilityIdentifier("PasswordSecure")
-//                    }
-
-//                    HStack {
-//                        Spacer()
-//                        Button(action: {
-//                            isPasswordVisible.toggle()
-//                        }) {
-//                            Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
-//                                .foregroundColor(.gray)
-//                        }
-//                        .padding(.trailing, 12)
-//                        .contentShape(Rectangle())
-//                    }
-//                    .frame(maxWidth: 300)
-//                    .accessibilityIdentifier("ShowHidePassword")
-//                }
-
                 makeLoginButton()
             }
 
@@ -110,21 +67,13 @@ struct LoginView: View {
     private func makeLoginButton() -> some View {
         Button(action: {
             viewModel.login()
-                        
-            //TODO: Error handling
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.1) {
-                if viewModel.errorMessage == nil {
-                    presentNextScreen = true
-                }
-            }
         }) {
             ZStack {
                 RoundedRectangle(cornerRadius: 8)
-                    //viewModel.isLoginDisabled ? Color(.lightGray) :
                     .fill(Colors.blueNCL)
                     .frame(height: 44)
 
-                if viewModel.isLoggingIn {
+                if viewModel.isLoginInProgress {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 } else {
@@ -135,11 +84,11 @@ struct LoginView: View {
             }
         }
         .frame(maxWidth: 300)
-//        .disabled(viewModel.isLoginDisabled)
+        .disabled(viewModel.isLoginInProgress)
         .accessibilityIdentifier("Login")
     }
 }
 
-//#Preview {
-//    LoginView()
-//}
+#Preview {
+    LoginView()
+}

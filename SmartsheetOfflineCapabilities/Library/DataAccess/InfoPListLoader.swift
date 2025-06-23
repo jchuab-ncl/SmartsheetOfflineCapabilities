@@ -10,7 +10,6 @@ import Foundation
 enum InfoPlistLoaderKey: String {
     case smartsheetsClientId = "SMARTSHEETS_CLIENT_ID"
     case smartsheetsSecret = "SMARTSHEETS_SECRET"
-    case smartsheetsCallbackURL = "SMARTSHEETS_CALLBACK_URL"
 }
 
 /// A utility to safely retrieve values from Info.plist at runtime.

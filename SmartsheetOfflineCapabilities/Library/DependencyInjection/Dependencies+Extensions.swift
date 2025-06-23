@@ -10,7 +10,7 @@ public enum AuthenticationServiceDependencyKey: DependencyKey {
 }
 
 extension Dependencies {
-    /// Analytics Service instance from `DependencyInjection`.
+    /// Authentication Service instance from `Dependencies`.
     public var authenticationService: AuthenticationServiceProtocol {
         get { self[AuthenticationServiceDependencyKey.self] }
         set { self[AuthenticationServiceDependencyKey.self] = newValue }

@@ -13,36 +13,14 @@ final class LoginViewModelTests: XCTestCase {
 
     func test_initialState_shouldBeEmptyAndNotLoggingIn() {
         let viewModel = LoginViewModel()
-        XCTAssertTrue(viewModel.username.isEmpty)
-        XCTAssertTrue(viewModel.password.isEmpty)
-        XCTAssertFalse(viewModel.isLoggingIn)
-        XCTAssertTrue(viewModel.isLoginDisabled)
-    }
-
-    func test_isLoginDisabled_shouldBeTrueIfEitherFieldIsEmpty() {
-        let viewModel = LoginViewModel()
-        
-        viewModel.username = "user"
-        viewModel.password = ""
-        XCTAssertTrue(viewModel.isLoginDisabled)
-
-        viewModel.username = ""
-        viewModel.password = "pass"
-        XCTAssertTrue(viewModel.isLoginDisabled)
-    }
-
-    func test_isLoginDisabled_shouldBeFalseIfBothFieldsAreFilled() {
-        let viewModel = LoginViewModel()
-        viewModel.username = "user"
-        viewModel.password = "pass"
-        XCTAssertFalse(viewModel.isLoginDisabled)
+        XCTAssertFalse(viewModel.isLoginInProgress)
     }
 
     func test_login_shouldSetIsLoggingInToTrue() {
         let viewModel = LoginViewModel()
-        XCTAssertFalse(viewModel.isLoggingIn)
+        XCTAssertFalse(viewModel.isLoginInProgress)
         viewModel.login()
-        XCTAssertTrue(viewModel.isLoggingIn)
+        XCTAssertTrue(viewModel.isLoginInProgress)
     }
 }
 

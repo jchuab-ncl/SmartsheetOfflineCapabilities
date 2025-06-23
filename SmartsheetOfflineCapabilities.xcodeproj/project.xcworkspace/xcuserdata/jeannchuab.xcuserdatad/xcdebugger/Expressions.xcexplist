@@ -10,5 +10,16 @@
             </PersistentString>
          </PersistentStrings>
       </ContextState>
+      <ContextState
+         contextName = "KeychainService.save&lt;SmartsheetOfflineCapabilities.SmartsheetTokenResponse&gt;(_:for:):KeychainService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "SecItemAdd(query as CFDictionary, nil) == errSecSuccess">
+            </PersistentString>
+            <PersistentString
+               value = "SecItemAdd(query as CFDictionary, nil)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
    </ContextStates>
 </VariablesViewState>
