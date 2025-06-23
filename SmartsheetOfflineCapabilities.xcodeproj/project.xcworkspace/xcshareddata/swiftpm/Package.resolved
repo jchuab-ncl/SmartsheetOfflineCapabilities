@@ -1,0 +1,15 @@
+{
+  "originHash" : "3e557b3fbbc1915ea16f914debccbfbba58238b4793ec265e2915563cf48e11c",
+  "pins" : [
+    {
+      "identity" : "spreadsheetview#",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jeannchuab/SpreadsheetView#",
+      "state" : {
+        "branch" : "master",
+        "revision" : "f8e669fc34988d1c5b0d1aceb06d675f841d08ba"
+      }
+    }
+  ],
+  "version" : 3
+}
