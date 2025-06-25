@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Network
 
 enum HTTPMethod: String {
     case GET, POST, PUT, DELETE
@@ -73,6 +74,28 @@ class HTTPApiClient: ObservableObject {
             return .success(data)
         } catch {
             return .failure(error)
+        }
+    }
+    
+    /// Asynchronously checks whether there is an active internet connection.
+    /// - Returns: `true` if internet is reachable, `false` otherwise.
+    func isInternetAvailable() async -> Bool {
+        await withCheckedContinuation { continuation in
+            let monitor = NWPathMonitor()
+            let queue = DispatchQueue(label: "InternetMonitor")
+
+            monitor.pathUpdateHandler = { path in
+                let isConnected = path.status == .satisfied
+                if isConnected {
+                    print("✅ Internet connection is available.")
+                } else {
+                    print("❌ No internet connection.")
+                }
+                continuation.resume(returning: isConnected)
+                monitor.cancel()
+            }
+
+            monitor.start(queue: queue)
         }
     }
 }

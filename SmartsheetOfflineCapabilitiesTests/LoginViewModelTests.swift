@@ -13,14 +13,14 @@ final class LoginViewModelTests: XCTestCase {
 
     func test_initialState_shouldBeEmptyAndNotLoggingIn() {
         let viewModel = LoginViewModel()
-        XCTAssertFalse(viewModel.isLoginInProgress)
+        XCTAssertFalse(viewModel.status)
     }
 
     func test_login_shouldSetIsLoggingInToTrue() {
         let viewModel = LoginViewModel()
-        XCTAssertFalse(viewModel.isLoginInProgress)
+        XCTAssertFalse(viewModel.status)
         viewModel.login()
-        XCTAssertTrue(viewModel.isLoginInProgress)
+        XCTAssertTrue(viewModel.status)
     }
 }
 

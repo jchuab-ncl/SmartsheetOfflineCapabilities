@@ -19,5 +19,7 @@
 	<string>hz3m5jsezpv67czzuc3</string>
 	<key>SMARTSHEETS_SECRET</key>
 	<string>dtotr8udgs7ogrljcjj</string>
+    <key>SMARTSHEETS_BASE_URL</key>
+    <string>https://app.smartsheet.com</string>
 </dict>
 </plist>

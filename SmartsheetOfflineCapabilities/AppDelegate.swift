@@ -16,7 +16,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         if let url = launchOptions?[.url] as? URL {
             print("Deep Link URL: \(url)")
-            Dependencies.shared.authenticationService.handleOAuthCallback(url: url)
+            
+            do {
+                try Dependencies.shared.authenticationService.handleOAuthCallback(url: url)
+            } catch {
+                // TODO: Handle error
+            }
         }
         
         DependencyEnvironment.configureDependencies()
@@ -36,9 +41,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 //        return true
 //    }
     
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        print("🔗 Received URL: \(url.absoluteString)")
-        Dependencies.shared.authenticationService.handleOAuthCallback(url: url)
-        return true
-    }
+//    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+//        print("🔗 Received URL: \(url.absoluteString)")
+//        
+//        do {
+//            try Dependencies.shared.authenticationService.handleOAuthCallback(url: url)
+//        } catch {
+//            // TODO: Handle error
+//        }
+//        
+//        return true
+//    }
 }

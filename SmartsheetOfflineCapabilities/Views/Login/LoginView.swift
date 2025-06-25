@@ -11,30 +11,33 @@ struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel()
     
     @State private var isPasswordVisible = false
-    @State private var showingError = false
+//    @State private var showingError = false
     @State private var presentNextScreen = false
 
     var body: some View {
         NavigationStack {
             makeScreenContent()
-                .onChange(of: viewModel.errorMessage) { _, newValue in
-                    guard let newValue = newValue else { return }
-                    showingError = newValue.isNotEmpty
-                }
-                .alert("Login Failed", isPresented: $showingError, actions: {
-                    Button("OK", role: .cancel) {
-                        viewModel.errorMessage = nil
-                    }
-                }, message: {
-                    Text(viewModel.errorMessage ?? "Unknown error")
-                })
+//                .onChange(of: viewModel.message) { _, newValue in
+//                    guard let newValue = newValue else { return }
+//                    showingError = newValue.isNotEmpty
+//                }
+//                .alert("Login Failed", isPresented: $showingError, actions: {
+//                    Button("OK", role: .cancel) {
+//                        viewModel.message = nil
+//                    }
+//                }, message: {
+//                    Text(viewModel.message ?? "Unknown error")
+//                })
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding()
                 .background(Color(.systemGroupedBackground))
-                .navigationDestination(isPresented: Binding(get: { viewModel.presentNextScreen  }, set: { _,_ in })) {                    
+                .navigationDestination(isPresented: Binding(get: { viewModel.presentNextScreen  }, set: { _,_ in })) {
                     SelectFileView()
                         .navigationBarBackButtonHidden()                                        
                 }
+        }
+        .onAppear {
+            viewModel.onAppear()
         }
     }
     
@@ -59,7 +62,16 @@ struct LoginView: View {
             VStack(spacing: 12) {
                 makeLoginButton()
             }
-
+                        
+            if let message = viewModel.message {
+                Text(viewModel.message ?? "")
+                    .font(.footnote)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .transition(.slide)
+                    .animation(.easeInOut, value: message)
+            }
+            
             Spacer()
         }
     }
@@ -73,7 +85,7 @@ struct LoginView: View {
                     .fill(Colors.blueNCL)
                     .frame(height: 44)
 
-                if viewModel.isLoginInProgress {
+                if viewModel.status == .loading {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 } else {
@@ -84,7 +96,7 @@ struct LoginView: View {
             }
         }
         .frame(maxWidth: 300)
-        .disabled(viewModel.isLoginInProgress)
+        .disabled(viewModel.status == .loading)
         .accessibilityIdentifier("Login")
     }
 }

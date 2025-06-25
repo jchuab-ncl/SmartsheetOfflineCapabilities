@@ -3,12 +3,7 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "InfoPlistLoader.().init():InfoPListLoader.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "Bundle.main.infoDictionary">
-            </PersistentString>
-         </PersistentStrings>
+         contextName = "KeychainService.delete(for:):KeychainService.swift">
       </ContextState>
       <ContextState
          contextName = "KeychainService.save&lt;SmartsheetOfflineCapabilities.SmartsheetTokenResponse&gt;(_:for:):KeychainService.swift">
@@ -20,6 +15,33 @@
                value = "SecItemAdd(query as CFDictionary, nil)">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "AuthenticationService.login():AuthenticationService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "isInternetAvailable">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in LoginView.makeScreenContent():LoginView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "viewModel.message">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "InfoPlistLoader.().init():InfoPListLoader.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "Bundle.main.infoDictionary">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in LoginViewModel.init(authenticationService:):LoginViewModel.swift">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

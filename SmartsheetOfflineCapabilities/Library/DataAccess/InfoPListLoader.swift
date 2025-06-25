@@ -10,11 +10,12 @@ import Foundation
 enum InfoPlistLoaderKey: String {
     case smartsheetsClientId = "SMARTSHEETS_CLIENT_ID"
     case smartsheetsSecret = "SMARTSHEETS_SECRET"
+    case smartsheetsBaseUrl = "SMARTSHEETS_BASE_URL"
 }
 
 /// A utility to safely retrieve values from Info.plist at runtime.
-final class SecretsLoader {
-    static let shared = SecretsLoader()
+final class InfoPlistLoader {
+    static let shared = InfoPlistLoader()
 
     private let infoDict: [String: Any]
 

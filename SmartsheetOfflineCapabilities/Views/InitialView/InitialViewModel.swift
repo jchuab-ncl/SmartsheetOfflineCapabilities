@@ -1,14 +1,14 @@
 //
-//  LoginViewModel.swift
+//  InitialViewModel.swift
 //  SmartsheetOfflineCapabilities
 //
-//  Created by Jeann Luiz Chuab on 09/06/25.
+//  Created by Jeann Luiz Chuab on 25/06/25.
 //
 
 import Combine
 import Foundation
 
-final class LoginViewModel: ObservableObject {
+final class InitialViewModel: ObservableObject {
     
     // MARK: Private Properties
     
@@ -18,8 +18,7 @@ final class LoginViewModel: ObservableObject {
     // MARK: Published Properties
     
     @Published var status: ProgressStatus = .initial
-    @Published var message: String?
-    @Published var messageIcon: String?
+    @Published var errorMessage: String?
     @Published var presentNextScreen: Bool = false
        
     // MARK: Initializers
@@ -39,44 +38,23 @@ final class LoginViewModel: ObservableObject {
                 self?.status = result.status
                 
                 if result.message == .storedCredentialsFound || result.status == .success {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                        self?.presentNextScreen = true
-                    }
+                    self?.presentNextScreen = true
+                } else {
+                    self?.errorMessage = result.message.description
                 }
-                self?.message = "\(result.status.icon) \(result.message.description)"
             })
             .store(in: &cancellables)
     }
-    
-    // MARK: Public methods
-
+        
     @MainActor
-    func login() {
+    func tryAutoLogin() {
         Task {
             status = .loading
             do {
-                try await authenticationService.login()
+                try authenticationService.autoLogin()
             } catch let error as AuthenticationServiceMessage {
-                self.message = error.rawValue
-                status = .initial
+                print(error)
             }
-        }
-    }
-    
-    @MainActor
-    func onAppear() {
-        Task {
-            status = .loading
-                        
-            // Check if the app is launching for the first time after installation.
-            // If so, clear all Keychain data and mark the app as having launched to prevent future deletions.
-            if !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") {
-                // First launch after install — clean keychain
-                let _ = KeychainService.shared.deleteAll()
-                UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
-            }
-            
-            authenticationService.autoLogin()
         }
     }
 }

@@ -11,23 +11,21 @@ import SwiftUI
 struct SmartsheetOfflineCapabilitiesApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
-//    @StateObject private var httpClient: HTTPApiClient
-//    @StateObject private var authenticationService: AuthenticationService
 
     init() {
-//        let client = HTTPApiClient()
-//        _httpClient = StateObject(wrappedValue: client)
-//        _authenticationService = StateObject(wrappedValue: AuthenticationService(httpApiClient: client))
+
     }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            InitialView()
                 .onOpenURL { url in
-                    Dependencies.shared.authenticationService.handleOAuthCallback(url: url)
+                    do {
+                        try Dependencies.shared.authenticationService.handleOAuthCallback(url: url)
+                    } catch {
+                        //TODO: Handle error
+                    }
                 }
-//                .environmentObject(authenticationService)
         }
     }
 }

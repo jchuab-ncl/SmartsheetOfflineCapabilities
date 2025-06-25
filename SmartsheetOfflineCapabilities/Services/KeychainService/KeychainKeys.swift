@@ -5,7 +5,7 @@
 //  Created by Jeann Luiz Chuab on 23/06/25.
 //
 
-enum KeychainKeys {
-    static let smartsheetAccessToken = "smartsheet_access_token"
-    static let smartsheetRefreshToken = "smartsheet_access_token"
+enum KeychainKeys: String {
+    case smartsheetAccessToken = "smartsheet_access_token"
+    case smartsheetRefreshToken = "smartsheet_refresh_token"
 }
