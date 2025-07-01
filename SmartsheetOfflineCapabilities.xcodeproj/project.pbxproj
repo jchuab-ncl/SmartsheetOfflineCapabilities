@@ -31,6 +31,7 @@
 		61A3203C2DF334C700826C9D /* SmartsheetOfflineCapabilities.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartsheetOfflineCapabilities.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61A320492DF334C800826C9D /* SmartsheetOfflineCapabilitiesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmartsheetOfflineCapabilitiesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61A320532DF334C800826C9D /* SmartsheetOfflineCapabilitiesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmartsheetOfflineCapabilitiesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A941C6A2E14527C00882386 /* SmartsheetOfflineCapabilities.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = SmartsheetOfflineCapabilities.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -41,15 +42,6 @@
 			);
 			target = 61A3203B2DF334C700826C9D /* SmartsheetOfflineCapabilities */;
 		};
-		9ACB7D3C2E01B07600D6DA18 /* Exceptions for "SmartsheetOfflineCapabilities" folder in "SmartsheetOfflineCapabilitiesTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Library/Network/HTTPApiClient.swift,
-				Library/Network/URLSessionMock.swift,
-				Library/Network/URLSessionProtocol.swift,
-			);
-			target = 61A320482DF334C800826C9D /* SmartsheetOfflineCapabilitiesTests */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -57,7 +49,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				9A8AD1942E02019100C15418 /* Exceptions for "SmartsheetOfflineCapabilities" folder in "SmartsheetOfflineCapabilities" target */,
-				9ACB7D3C2E01B07600D6DA18 /* Exceptions for "SmartsheetOfflineCapabilities" folder in "SmartsheetOfflineCapabilitiesTests" target */,
 			);
 			path = SmartsheetOfflineCapabilities;
 			sourceTree = "<group>";
@@ -103,6 +94,7 @@
 		61A320332DF334C700826C9D = {
 			isa = PBXGroup;
 			children = (
+				9A941C6A2E14527C00882386 /* SmartsheetOfflineCapabilities.xctestplan */,
 				61A3203E2DF334C700826C9D /* SmartsheetOfflineCapabilities */,
 				61A3204C2DF334C800826C9D /* SmartsheetOfflineCapabilitiesTests */,
 				61A320562DF334C800826C9D /* SmartsheetOfflineCapabilitiesUITests */,

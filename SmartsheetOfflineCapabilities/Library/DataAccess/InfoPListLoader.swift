@@ -7,19 +7,26 @@
 
 import Foundation
 
-enum InfoPlistLoaderKey: String {
+public enum InfoPlistLoaderKey: String {
     case smartsheetsClientId = "SMARTSHEETS_CLIENT_ID"
     case smartsheetsSecret = "SMARTSHEETS_SECRET"
     case smartsheetsBaseUrl = "SMARTSHEETS_BASE_URL"
 }
 
-/// A utility to safely retrieve values from Info.plist at runtime.
-final class InfoPlistLoader {
-    static let shared = InfoPlistLoader()
+/// A protocol for loading configuration values from a property list (Info.plist).
+public protocol InfoPlistLoaderProtocol {
+    /// Retrieves the value associated with the specified key.
+    /// - Parameter key: The key for the value to retrieve.
+    /// - Returns: A string value if found, otherwise nil.
+    func get(_ key: InfoPlistLoaderKey) -> String?
+}
 
+/// A concrete implementation of `InfoPlistLoading` for accessing Info.plist values at runtime.
+final class InfoPlistLoader: InfoPlistLoaderProtocol {
     private let infoDict: [String: Any]
 
-    private init() {
+    /// Initializes the loader by reading from the app's main bundle Info.plist.
+    init() {
         self.infoDict = Bundle.main.infoDictionary ?? [:]
     }
 

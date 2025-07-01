@@ -8,24 +8,44 @@
 import Foundation
 import Network
 
-enum HTTPMethod: String {
+public enum HTTPMethod: String {
     case GET, POST, PUT, DELETE
 }
 
-enum BodyEncoding {
+public enum BodyEncoding {
     case json
     case urlEncoded
 }
 
+/// Protocol for HTTP API Client functionality.
+public protocol HTTPApiClientProtocol {
+    func request(
+        url: String,
+        method: HTTPMethod,
+        headers: [String: String],
+        queryParameters: [String: String]?,
+        body: Data?,
+        encoding: BodyEncoding
+    ) async -> Result<Data, Error>
+    
+    func request(
+        url: String,
+        method: HTTPMethod,
+        headers: [String: String],
+        queryParameters: [String: String]?
+    ) async -> Result<Data, Error>
+
+    func isInternetAvailable() async -> Bool
+}
+
 /// A lightweight HTTP client for performing network requests using URLSession.
 /// Supports injection of custom URLSessionProtocol for testability.
-class HTTPApiClient: ObservableObject {
-
+public class HTTPApiClient: HTTPApiClientProtocol {
     private let session: URLSessionProtocol
 
     /// Creates a new instance of HTTPApiClient.
     /// - Parameter session: A URLSession-like instance for performing requests. Defaults to URLSession.shared.
-    init(session: URLSessionProtocol = URLSession.shared) {
+    public init(session: URLSessionProtocol = URLSession.shared) {
         self.session = session
     }
 
@@ -38,7 +58,7 @@ class HTTPApiClient: ObservableObject {
     ///   - body: Optional HTTP body.
     ///   - encoding: The body encoding type. Defaults to .json.
     /// - Returns: A result containing either the response data or an error.
-    func request(
+    public func request(
         url: String,
         method: HTTPMethod,
         headers: [String: String] = [:],
@@ -77,9 +97,32 @@ class HTTPApiClient: ObservableObject {
         }
     }
     
+    /// Sends an HTTP request and returns the result asynchronously.
+    /// - Parameters:
+    ///   - url: The URL string for the request.
+    ///   - method: The HTTP method to use.
+    ///   - headers: The request headers.
+    ///   - queryParameters: Optional query parameters to append to the URL.
+    /// - Returns: A result containing either the response data or an error.
+    public func request(
+        url: String,
+        method: HTTPMethod,
+        headers: [String : String],
+        queryParameters: [String : String]?
+    ) async -> Result<Data, any Error> {
+        return await self.request(
+            url: url,
+            method: method,
+            headers: headers,
+            queryParameters: queryParameters,
+            body: nil,
+            encoding: .json
+        )
+    }
+    
     /// Asynchronously checks whether there is an active internet connection.
     /// - Returns: `true` if internet is reachable, `false` otherwise.
-    func isInternetAvailable() async -> Bool {
+    public func isInternetAvailable() async -> Bool {
         await withCheckedContinuation { continuation in
             let monitor = NWPathMonitor()
             let queue = DispatchQueue(label: "InternetMonitor")

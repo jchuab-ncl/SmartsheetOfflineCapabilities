@@ -7,6 +7,8 @@
 
 import Foundation
 
+@testable import SmartsheetOfflineCapabilities
+
 /// A mock implementation of URLSessionProtocol for unit testing HTTPApiClient.
 /// Allows simulation of network responses without real network activity.
 class URLSessionMock: URLSessionProtocol {

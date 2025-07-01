@@ -32,7 +32,8 @@ class AuthenticationService: AuthenticationServiceProtocol {
    
     // MARK: Private properties
     
-    private let httpApiClient: HTTPApiClient
+    private let httpApiClient: HTTPApiClientProtocol
+    private let infoPListLoader: InfoPlistLoaderProtocol
     private var code: String = "EMPTY"
     
     // MARK: Public properties
@@ -45,7 +46,11 @@ class AuthenticationService: AuthenticationServiceProtocol {
         
     // MARK: Initializers
     
-    init(httpApiClient: HTTPApiClient) {
+    init(
+        infoPListLoader: InfoPlistLoaderProtocol = Dependencies.shared.infoPlistLoader,
+        httpApiClient: HTTPApiClientProtocol = Dependencies.shared.httpApiClient
+    ) {
+        self.infoPListLoader = infoPListLoader
         self.httpApiClient = httpApiClient
         self.currentResult.message = .empty
     }
@@ -62,7 +67,7 @@ class AuthenticationService: AuthenticationServiceProtocol {
             return
         }
         
-        guard let smartsheetsClientId = InfoPlistLoader.shared.get(.smartsheetsClientId)
+        guard let smartsheetsClientId = infoPListLoader.get(.smartsheetsClientId)
         else {
             try publishError(.missingClientIDOrRedirectURI)
             return
@@ -81,7 +86,7 @@ class AuthenticationService: AuthenticationServiceProtocol {
             return
         }
         
-        guard let baseUrl = InfoPlistLoader.shared.get(.smartsheetsBaseUrl) else {
+        guard let baseUrl = infoPListLoader.get(.smartsheetsBaseUrl) else {
             try publishError(.invalidAuthURL)
             return
         }
@@ -148,8 +153,8 @@ class AuthenticationService: AuthenticationServiceProtocol {
     /// - Parameter code: The authorization code received from the OAuth login flow.
     private func exchangeCodeForToken(code: String) throws {
         guard
-            let clientID = InfoPlistLoader.shared.get(.smartsheetsClientId),
-            let clientSecret = InfoPlistLoader.shared.get(.smartsheetsSecret)
+            let clientID = infoPListLoader.get(.smartsheetsClientId),
+            let clientSecret = infoPListLoader.get(.smartsheetsSecret)
         else {
             try publishError(.missingClientIDOrSecret)
             return

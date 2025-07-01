@@ -7,7 +7,8 @@
 
 struct DependencyEnvironment {
     static func configureDependencies() {
-        let apiClient = HTTPApiClient()
-        Dependencies.shared.authenticationService = AuthenticationService(httpApiClient: apiClient)
+        Dependencies.shared.httpApiClient = HTTPApiClient()
+        Dependencies.shared.infoPlistLoader = InfoPlistLoader()
+        Dependencies.shared.authenticationService = AuthenticationService()
     }
 }

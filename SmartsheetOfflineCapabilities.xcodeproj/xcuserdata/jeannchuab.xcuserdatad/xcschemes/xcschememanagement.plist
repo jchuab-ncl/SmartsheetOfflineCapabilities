@@ -4,15 +4,43 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>Playground (Playground).xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 		<key>SmartsheetOfflineCapabilities.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
+		<key>SmartsheetOfflineCapabilitiesTests.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+		<key>SmartsheetOfflineCapabilitiesUITests.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
 		</dict>
 		<key>SpreadsheetConcepts.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>61A3203B2DF334C700826C9D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>61A320482DF334C800826C9D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

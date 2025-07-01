@@ -1,0 +1,37 @@
+{
+  "configurations" : [
+    {
+      "id" : "84B189E6-51D7-4532-BFBC-9EB35D4A4D10",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:SmartsheetOfflineCapabilities.xcodeproj",
+      "identifier" : "61A3203B2DF334C700826C9D",
+      "name" : "SmartsheetOfflineCapabilities"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:SmartsheetOfflineCapabilities.xcodeproj",
+        "identifier" : "61A320482DF334C800826C9D",
+        "name" : "SmartsheetOfflineCapabilitiesTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:SmartsheetOfflineCapabilities.xcodeproj",
+        "identifier" : "61A320522DF334C800826C9D",
+        "name" : "SmartsheetOfflineCapabilitiesUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
