@@ -37,9 +37,35 @@ public enum InfoPlistLoaderDependencyKey: DependencyKey {
 }
 
 extension Dependencies {
-    /// HTTPApiClient instance from `Dependencies`.
+    /// InfoPListLoader instance from `Dependencies`.
     public var infoPlistLoader: InfoPlistLoaderProtocol {
         get { self[InfoPlistLoaderDependencyKey.self] }
         set { self[InfoPlistLoaderDependencyKey.self] = newValue }
+    }
+}
+
+/// KeychainService
+public enum KeychainServiceDependencyKey: DependencyKey {
+    public typealias DataType = KeychainServiceProtocol
+}
+
+extension Dependencies {
+    /// KeychainService instance from `Dependencies`.
+    public var keychainService: KeychainServiceProtocol {
+        get { self[KeychainServiceDependencyKey.self] }
+        set { self[KeychainServiceDependencyKey.self] = newValue }
+    }
+}
+
+/// SheetService
+public enum SheetServiceDependencyKey: DependencyKey {
+    public typealias DataType = SheetServiceProtocol
+}
+
+extension Dependencies {
+    /// SheetService instance from `Dependencies`.
+    public var sheetService: SheetServiceProtocol {
+        get { self[SheetServiceDependencyKey.self] }
+        set { self[SheetServiceDependencyKey.self] = newValue }
     }
 }

@@ -34,6 +34,8 @@ class AuthenticationService: AuthenticationServiceProtocol {
     
     private let httpApiClient: HTTPApiClientProtocol
     private let infoPListLoader: InfoPlistLoaderProtocol
+    private let keychainService: KeychainServiceProtocol
+    
     private var code: String = "EMPTY"
     
     // MARK: Public properties
@@ -46,11 +48,18 @@ class AuthenticationService: AuthenticationServiceProtocol {
         
     // MARK: Initializers
     
+    /// Initializes the AuthenticationService with provided dependencies for HTTP requests, Info.plist loading, and secure storage.
+    /// - Parameters:
+    ///   - httpApiClient: The client responsible for performing network requests. Defaults to the shared dependency.
+    ///   - infoPListLoader: The loader responsible for fetching configuration values from Info.plist. Defaults to the shared dependency.
+    ///   - keychainService: The service used for securely storing authentication tokens. Defaults to the shared dependency.
     init(
+        httpApiClient: HTTPApiClientProtocol = Dependencies.shared.httpApiClient,
         infoPListLoader: InfoPlistLoaderProtocol = Dependencies.shared.infoPlistLoader,
-        httpApiClient: HTTPApiClientProtocol = Dependencies.shared.httpApiClient
+        keychainService: KeychainServiceProtocol = Dependencies.shared.keychainService
     ) {
         self.infoPListLoader = infoPListLoader
+        self.keychainService = keychainService
         self.httpApiClient = httpApiClient
         self.currentResult.message = .empty
     }
@@ -143,8 +152,8 @@ class AuthenticationService: AuthenticationServiceProtocol {
     // MARK: Private methods
     
     private func tokensAreStored() -> Bool {
-        let smartsheetAccessToken = KeychainService.shared.load(for: .smartsheetAccessToken)
-        let smartsheetRefreshToken = KeychainService.shared.load(for: .smartsheetRefreshToken)
+        let smartsheetAccessToken = keychainService.load(for: .smartsheetAccessToken)
+        let smartsheetRefreshToken = keychainService.load(for: .smartsheetRefreshToken)
         
         return smartsheetAccessToken != nil && smartsheetRefreshToken != nil
     }
@@ -181,8 +190,8 @@ class AuthenticationService: AuthenticationServiceProtocol {
             case .success(let data):
                 if let tokenResponse = try? JSONDecoder().decode(SmartsheetTokenResponse.self, from: data) {
                     print("Token response: \(tokenResponse)")
-                    let accessTokenSaved = KeychainService.shared.save(tokenResponse.accessToken, for: .smartsheetAccessToken)
-                    let refreshTokenSaved = KeychainService.shared.save(tokenResponse.refreshToken, for: .smartsheetRefreshToken)
+                    let accessTokenSaved = keychainService.save(tokenResponse.accessToken, for: .smartsheetAccessToken)
+                    let refreshTokenSaved = keychainService.save(tokenResponse.refreshToken, for: .smartsheetRefreshToken)
                                         
                     if !accessTokenSaved {
                         try publishError(.failedToSaveAccessToken)

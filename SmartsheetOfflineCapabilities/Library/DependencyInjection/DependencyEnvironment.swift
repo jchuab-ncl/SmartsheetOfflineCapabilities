@@ -9,6 +9,8 @@ struct DependencyEnvironment {
     static func configureDependencies() {
         Dependencies.shared.httpApiClient = HTTPApiClient()
         Dependencies.shared.infoPlistLoader = InfoPlistLoader()
+        Dependencies.shared.keychainService = KeychainService()
         Dependencies.shared.authenticationService = AuthenticationService()
+        Dependencies.shared.sheetService = SheetService()
     }
 }

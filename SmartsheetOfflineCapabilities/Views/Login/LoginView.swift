@@ -11,23 +11,11 @@ struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel()
     
     @State private var isPasswordVisible = false
-//    @State private var showingError = false
     @State private var presentNextScreen = false
 
     var body: some View {
         NavigationStack {
             makeScreenContent()
-//                .onChange(of: viewModel.message) { _, newValue in
-//                    guard let newValue = newValue else { return }
-//                    showingError = newValue.isNotEmpty
-//                }
-//                .alert("Login Failed", isPresented: $showingError, actions: {
-//                    Button("OK", role: .cancel) {
-//                        viewModel.message = nil
-//                    }
-//                }, message: {
-//                    Text(viewModel.message ?? "Unknown error")
-//                })
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding()
                 .background(Color(.systemGroupedBackground))

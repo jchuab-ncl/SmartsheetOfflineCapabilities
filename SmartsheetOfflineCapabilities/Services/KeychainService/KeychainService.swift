@@ -8,10 +8,17 @@
 import Foundation
 import Security
 
+/// A protocol that defines secure storage operations for string values.
+public protocol KeychainServiceProtocol {
+    func save(_ value: String, for key: KeychainKeys) -> Bool
+    func load(for key: KeychainKeys) -> String?
+    func delete(for key: KeychainKeys) -> Bool
+    func deleteAll() -> Bool
+}
+
 /// A service responsible for securely storing and retrieving data using the iOS Keychain.
 /// Provides support for storing plain strings and Codable objects.
-final class KeychainService {
-    static let shared = KeychainService()
+final class KeychainService: KeychainServiceProtocol {
 
     /// Saves a string value to the Keychain under the specified key.
     /// - Parameters:

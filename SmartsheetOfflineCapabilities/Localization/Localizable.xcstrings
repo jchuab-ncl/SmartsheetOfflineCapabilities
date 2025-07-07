@@ -26,6 +26,9 @@
     "Modified: %@" : {
 
     },
+    "No files to display" : {
+
+    },
     "Password" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -37,7 +40,13 @@
         }
       }
     },
+    "Please try again." : {
+
+    },
     "Select a Sheet" : {
+
+    },
+    "Something went wrong." : {
 
     },
     "Username" : {

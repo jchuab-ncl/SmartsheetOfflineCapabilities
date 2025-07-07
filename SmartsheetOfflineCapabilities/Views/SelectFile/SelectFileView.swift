@@ -19,6 +19,8 @@ struct SheetFile: Identifiable, Hashable {
 
 struct SelectFileView: View {
     
+    @StateObject private var viewModel = SelectFileViewModel()
+    
     @State private var selectedFile: SheetFile?
     @State private var searchText = ""
     
@@ -117,9 +119,9 @@ struct SelectFileView: View {
 
     var filteredFiles: [SheetFile] {
         if searchText.isEmpty {
-            return mockFiles
+            return viewModel.sheetsList
         }
-        return mockFiles.filter { file in
+        return viewModel.sheetsList.filter { file in
             let lowerSearch = searchText.lowercased()
             return
                 file.name.lowercased().contains(lowerSearch) ||
@@ -136,30 +138,101 @@ struct SelectFileView: View {
             GeometryReader { geometry in
                 let isPad = geometry.size.width > 600
                 Group {
-                    if isPad {
-                        ScrollView {
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                                ForEach(filteredFiles) { file in
-                                    makeFileCard(file: file)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)).shadow(radius: 2))
-                                        .padding(.horizontal)
-                                }
-                            }
-                            .padding(.vertical)
-                        }
+                    if viewModel.status == .loading {
+                        ProgressView()
+                            .frame(width: geometry.size.width)
+                            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                    } else if viewModel.status == .error {
+                        makeErrorView()
+                    } else if filteredFiles.isEmpty {
+                        makeEmptyView()
+                    } else if isPad {
+                        makeiPadView()
                     } else {
                         List(filteredFiles) { file in
                             makeFileCard(file: file)
                         }
                     }
                 }
+                .refreshable {
+                    viewModel.loadSheets()
+                }
                 .searchable(text: $searchText)
                 .navigationTitle("Select a Sheet")
+            }
+            .onAppear {
+                viewModel.loadSheets()
             }
         }
         .navigationDestination(item: $selectedFile) { _ in
             SpreadsheetViewWrapper()
+        }
+    }
+    
+    private func makeiPadView() -> some View {
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                ForEach(filteredFiles) { file in
+                    makeFileCard(file: file)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)).shadow(radius: 2))
+                        .padding(.horizontal)
+                }
+            }
+            .padding(.vertical)
+        }
+    }
+        
+    private func makeErrorView() -> some View {
+        ZStack {
+            GeometryReader { geometry in
+                VStack(spacing: 12) {
+                    Spacer()
+                    
+                    Image(systemName: "exclamationmark.triangle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 60)
+                        .foregroundColor(.orange)
+                    Text("Something went wrong.")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    Text("Please try again.")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    
+                    Spacer()
+                }
+                .frame(width: geometry.size.width)
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+            }
+        }
+    }
+    
+    private func makeEmptyView() -> some View {
+        ZStack {
+            GeometryReader { geometry in
+                VStack(spacing: 12) {
+                    Spacer()
+                    
+                    Image(systemName: "doc.text.magnifyingglass")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 60)
+                        .foregroundColor(.gray.opacity(0.5))
+                    Text("No files to display")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                    
+                    Spacer()
+                }
+                .frame(width: geometry.size.width)
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+            }
         }
     }
 

@@ -3,7 +3,12 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "KeychainService.delete(for:):KeychainService.swift">
+         contextName = "closure #1 in LoginView.makeScreenContent():LoginView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "viewModel.message">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "KeychainService.save&lt;SmartsheetOfflineCapabilities.SmartsheetTokenResponse&gt;(_:for:):KeychainService.swift">
@@ -17,20 +22,26 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "AuthenticationService.login():AuthenticationService.swift">
+         contextName = "closure #1 in LoginViewModel.init(authenticationService:):LoginViewModel.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in SelectFileViewModel.init(sheetService:):SelectFileViewModel.swift">
          <PersistentStrings>
             <PersistentString
-               value = "isInternetAvailable">
+               value = "self?.status">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "closure #1 in LoginView.makeScreenContent():LoginView.swift">
+         contextName = "closure #1 in closure #1 in closure #1 in SelectFileView.body.getter:SelectFileView.swift">
          <PersistentStrings>
             <PersistentString
-               value = "viewModel.message">
+               value = "viewModel.status">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "KeychainService.delete(for:):KeychainService.swift">
       </ContextState>
       <ContextState
          contextName = "InfoPlistLoader.().init():InfoPListLoader.swift">
@@ -41,7 +52,12 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "closure #1 in LoginViewModel.init(authenticationService:):LoginViewModel.swift">
+         contextName = "AuthenticationService.login():AuthenticationService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "isInternetAvailable">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
    </ContextStates>
 </VariablesViewState>
