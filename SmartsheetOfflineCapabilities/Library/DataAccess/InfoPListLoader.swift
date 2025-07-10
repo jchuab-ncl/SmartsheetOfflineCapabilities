@@ -10,6 +10,7 @@ import Foundation
 public enum InfoPlistLoaderKey: String {
     case smartsheetsClientId = "SMARTSHEETS_CLIENT_ID"
     case smartsheetsSecret = "SMARTSHEETS_SECRET"
+    case smartsheetsAuthUrl = "SMARTSHEETS_AUTH_URL"
     case smartsheetsBaseUrl = "SMARTSHEETS_BASE_URL"
 }
 

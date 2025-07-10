@@ -1,0 +1,59 @@
+//
+//  SheetDetailViewModel.swift
+//  SmartsheetOfflineCapabilities
+//
+//  Created by Jeann Luiz Chuab on 08/07/25.
+//
+
+import Combine
+import Foundation
+
+@MainActor
+final class SheetDetailViewModel: ObservableObject {
+    
+    // MARK: - Published Properties
+    
+    @Published var status: ProgressStatus = .initial
+        
+    // MARK: Private Properties
+    
+    private let sheetService: SheetServiceProtocol
+    private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - Initializers
+
+    /// Initializes the view model with a given sheet service.
+    /// - Parameter sheetService: The service used to retrieve sheet details. Defaults to a concrete implementation.
+    init(sheetService: SheetServiceProtocol = Dependencies.shared.sheetService) {
+        self.sheetService = sheetService
+    }
+    
+    // MARK: - Public Methods
+    
+    func loadSheetContent(sheetId: String) {
+        Task {
+            status = .loading
+            
+            do {
+                let result = try await sheetService.getSheet(sheetId: sheetId)
+    
+//                let files = result.data.map {
+//                    SheetFile(
+//                        id: Int64($0.id),
+//                        name: $0.name,
+//                        accessLevel: $0.accessLevel,
+//                        permalink: $0.permalink,
+//                        createdAt: ISO8601DateFormatter().date(from: $0.createdAt) ?? .now,
+//                        modifiedAt: ISO8601DateFormatter().date(from: $0.modifiedAt) ?? .now
+//                    )
+//                }.sorted(by: { $0.name < $1.name })
+//    
+//                self.sheetsList = files
+                
+                status = .success
+            } catch {
+                status = .error
+            }
+        }
+    }
+}
