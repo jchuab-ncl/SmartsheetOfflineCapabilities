@@ -15,7 +15,7 @@ public struct SheetServiceResultType: Equatable {
 
 public protocol SheetServiceProtocol {
     func getSheets() async throws -> SheetListResponse
-    func getSheet(sheetId: String) async throws -> SheetDetailResponse
+    func getSheet(sheetId: Int64) async throws -> SheetDetailResponse
 }
 
 public final class SheetService: SheetServiceProtocol {
@@ -78,7 +78,7 @@ public final class SheetService: SheetServiceProtocol {
         }
     }
     
-    public func getSheet(sheetId: String) async throws -> SheetDetailResponse {
+    public func getSheet(sheetId: Int64) async throws -> SheetDetailResponse {
         let result = await httpApiClient.request(
             url: try baseSheetsURL(path: "/sheets/\(sheetId)"),
             method: .GET,

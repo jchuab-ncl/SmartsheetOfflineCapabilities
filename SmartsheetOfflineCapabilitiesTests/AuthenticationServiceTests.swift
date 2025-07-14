@@ -13,24 +13,24 @@ import XCTest
 
 final class AuthenticationServiceTests: XCTestCase {
     var cancellables = Set<AnyCancellable>()
+    var keychainMock: KeychainServiceMock!
     
     override func setUpWithError() throws {
-        //TODO: Create Keychain mock
-        _ = KeychainService.shared.deleteAll()
+        keychainMock = KeychainServiceMock()
+        _ = keychainMock.deleteAll()
     }
     
     override func tearDownWithError() throws {
-        _ = KeychainService.shared.deleteAll()
+        _ = keychainMock.deleteAll()
     }
     
     func test_autoLogin_withStoredTokens_publishesStoredCredentialsFound() async {
         let expectation = expectation(description: "Waiting for result")
-        
-        _ = KeychainService.shared.save("access", for: .smartsheetAccessToken)
-        _ = KeychainService.shared.save("refresh", for: .smartsheetRefreshToken)
+        _ = keychainMock.save("token", for: .smartsheetAccessToken)
+        _ = keychainMock.save("refreshToken", for: .smartsheetRefreshToken)
         
         let httpApiClientMock = HTTPApiClientMock()
-        let sut = AuthenticationService(httpApiClient: httpApiClientMock)
+        let sut = AuthenticationService(httpApiClient: httpApiClientMock, keychainService: keychainMock)
         
         sut.autoLogin()
         var resultToTest = AuthenticationServiceResultType(message: .empty, status: .initial)
@@ -56,7 +56,7 @@ final class AuthenticationServiceTests: XCTestCase {
         let expectation = expectation(description: "Waiting for result")
         
         let httpApiClientMock = HTTPApiClientMock()
-        let sut = AuthenticationService(httpApiClient: httpApiClientMock)
+        let sut = AuthenticationService(httpApiClient: httpApiClientMock, keychainService: KeychainServiceMock())
         
         var resultToTest = AuthenticationServiceResultType(message: .empty, status: .initial)
         
@@ -170,8 +170,8 @@ final class AuthenticationServiceTests: XCTestCase {
         
         let infoPlistLoaderMock = InfoPlistLoaderMock(mockData: [:]) // Simulating missing keys
         let sut = AuthenticationService(
-            infoPListLoader: infoPlistLoaderMock,
-            httpApiClient: httpApiClientMock
+            httpApiClient: httpApiClientMock,
+            infoPListLoader: infoPlistLoaderMock
         )
         
         var result: AuthenticationServiceResultType = .init(message: .empty, status: .initial)

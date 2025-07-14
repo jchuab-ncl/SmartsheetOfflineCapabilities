@@ -1,10 +1,13 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
+    "Back" : {
 
     },
-    "Back" : {
+    "Done" : {
+
+    },
+    "Edit Content" : {
 
     },
     "Login" : {

@@ -3,12 +3,26 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "closure #1 in LoginView.makeScreenContent():LoginView.swift">
+         contextName = "SheetServiceTests.testGetSheetsFailure():SheetServiceTests.swift">
          <PersistentStrings>
             <PersistentString
-               value = "viewModel.message">
+               value = "(error as NSError).domain">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.Coordinator.numberOfColumns(in:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.sheetDetailResponse">
+            </PersistentString>
+            <PersistentString
+               value = "self.sheetDetailResponse?.columns?.count">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in SheetDetailViewModel.loadSheetContent(sheetId:):SheetDetailViewModel.swift">
       </ContextState>
       <ContextState
          contextName = "KeychainService.save&lt;SmartsheetOfflineCapabilities.SmartsheetTokenResponse&gt;(_:for:):KeychainService.swift">
@@ -23,6 +37,30 @@
       </ContextState>
       <ContextState
          contextName = "closure #1 in LoginViewModel.init(authenticationService:):LoginViewModel.swift">
+      </ContextState>
+      <ContextState
+         contextName = "AuthenticationService.login():AuthenticationService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "isInternetAvailable">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in LoginView.makeScreenContent():LoginView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "viewModel.message">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.getSheets():SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "error.localizedDescription">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "closure #1 in SelectFileViewModel.init(sheetService:):SelectFileViewModel.swift">
@@ -44,18 +82,26 @@
          contextName = "KeychainService.delete(for:):KeychainService.swift">
       </ContextState>
       <ContextState
-         contextName = "InfoPlistLoader.().init():InfoPListLoader.swift">
+         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
-               value = "Bundle.main.infoDictionary">
+               value = "self.sheetDetailResponse">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "AuthenticationService.login():AuthenticationService.swift">
+         contextName = "SpreadsheetViewWrapper.makeCoordinator():SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
-               value = "isInternetAvailable">
+               value = "self.sheetDetailResponse">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "InfoPlistLoader.().init():InfoPListLoader.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "Bundle.main.infoDictionary">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

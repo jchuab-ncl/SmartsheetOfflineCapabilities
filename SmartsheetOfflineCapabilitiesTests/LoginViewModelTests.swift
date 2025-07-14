@@ -27,25 +27,24 @@ final class LoginViewModelTests: XCTestCase {
     //TODO: This unit test need to be improved
     func test_login_shouldSetIsLoggingInToTrue() async {
         
+        // Given
         let expectation = self.expectation(description: "Waiting status updates")
-        
         let sut = LoginViewModel()
-        await sut.login()
-        
         var allStatus: [ProgressStatus] = []
-        
+
         // When
         sut.$status
             .collect(2)
-            .sink {
-                allStatus.append(contentsOf: $0)
+            .sink { status in
+                allStatus.append(contentsOf: status)
                 expectation.fulfill()
             }
             .store(in: &cancellables)
         
-        await fulfillment(of: [expectation], timeout: 1)
+        await sut.login()
         
+        // Then        
+        await fulfillment(of: [expectation], timeout: 3)
         XCTAssertEqual(allStatus, [.initial, .loading])
     }
 }
-

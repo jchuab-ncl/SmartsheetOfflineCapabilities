@@ -5,7 +5,6 @@
 //  Created by Jeann Luiz Chuab on 08/07/25.
 //
 
-import Combine
 import Foundation
 
 @MainActor
@@ -14,11 +13,11 @@ final class SheetDetailViewModel: ObservableObject {
     // MARK: - Published Properties
     
     @Published var status: ProgressStatus = .initial
+    @Published var sheetDetailResponse: SheetDetailResponse?
         
     // MARK: Private Properties
     
     private let sheetService: SheetServiceProtocol
-    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initializers
 
@@ -30,26 +29,12 @@ final class SheetDetailViewModel: ObservableObject {
     
     // MARK: - Public Methods
     
-    func loadSheetContent(sheetId: String) {
+    func loadSheetContent(sheetId: Int64) {
         Task {
             status = .loading
             
             do {
-                let result = try await sheetService.getSheet(sheetId: sheetId)
-    
-//                let files = result.data.map {
-//                    SheetFile(
-//                        id: Int64($0.id),
-//                        name: $0.name,
-//                        accessLevel: $0.accessLevel,
-//                        permalink: $0.permalink,
-//                        createdAt: ISO8601DateFormatter().date(from: $0.createdAt) ?? .now,
-//                        modifiedAt: ISO8601DateFormatter().date(from: $0.modifiedAt) ?? .now
-//                    )
-//                }.sorted(by: { $0.name < $1.name })
-//    
-//                self.sheetsList = files
-                
+                sheetDetailResponse = try await sheetService.getSheet(sheetId: sheetId)
                 status = .success
             } catch {
                 status = .error

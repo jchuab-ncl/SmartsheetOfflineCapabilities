@@ -11,7 +11,8 @@ import SwiftUI
 
 class CustomEditableCell: Cell {
     private var hostingController: UIHostingController<EditableCellView>?
-    var text: String = "" {
+    var text: String = ""
+    {
         didSet {
             updateContent()
         }
@@ -37,6 +38,10 @@ class CustomEditableCell: Cell {
     }
 
     private func updateContent() {
+        // Remove the old hosting view if it exists
+        hostingController?.view.removeFromSuperview()
+        
+        // Create the SwiftUI view
         let view = EditableCellView(text: Binding(get: {
             self.text
         }, set: { newText in
@@ -44,8 +49,10 @@ class CustomEditableCell: Cell {
             print("LOG:", newText)
             // Optional: notify model or delegate
         }))
-
+        
+        // Create and assign new hosting controller
         hostingController = UIHostingController(rootView: view)
+        
         if let hostingView = hostingController?.view {
             hostingView.backgroundColor = .clear
             hostingView.frame = contentView.bounds

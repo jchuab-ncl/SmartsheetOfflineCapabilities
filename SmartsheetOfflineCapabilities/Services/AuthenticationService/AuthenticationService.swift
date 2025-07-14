@@ -95,12 +95,12 @@ class AuthenticationService: AuthenticationServiceProtocol {
             return
         }
         
-        guard let baseUrl = infoPListLoader.get(.smartsheetsBaseUrl) else {
+        guard let authUrl = infoPListLoader.get(.smartsheetsAuthUrl) else {
             try publishError(.invalidAuthURL)
             return
         }
         
-        var components = URLComponents(string: "\(baseUrl)/b/authorize")
+        var components = URLComponents(string: "\(authUrl)/b/authorize")
         components?.queryItems = [
             URLQueryItem(name: "client_id", value: smartsheetsClientId),
             URLQueryItem(name: "response_type", value: responseType),

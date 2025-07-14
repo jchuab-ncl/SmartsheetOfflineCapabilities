@@ -184,6 +184,49 @@ public struct UserSettings: Codable, Equatable {
 public struct Workspace: Codable, Equatable {
     public let id: Int
     public let name: String
-    public let accessLevel: String
+    public let accessLevel: String?
     public let permalink: String?
 }
+
+// MARK: Mock
+
+public struct SheetDetailResponseMock {
+    public static func makeMock() -> SheetDetailResponse {
+        return SheetDetailResponse(
+            id: 1,
+            fromId: nil,
+            ownerId: nil,
+            accessLevel: "EDITOR",
+            attachments: [],
+            cellImageUploadEnabled: true,
+            columns: [],
+            createdAt: "2025-07-10T12:00:00Z",
+            crossSheetReferences: [],
+            dependenciesEnabled: false,
+            discussions: [],
+            effectiveAttachmentOptions: [],
+            favorite: false,
+            ganttEnabled: false,
+            hasSummaryFields: false,
+            isMultiPicklistEnabled: false,
+            modifiedAt: "2025-07-11T12:00:00Z",
+            name: "Mocked Sheet",
+            owner: "Mock Owner",
+            permalink: "https://example.com/sheet/1",
+            projectSettings: nil,
+            readOnly: false,
+            resourceManagementEnabled: false,
+            resourceManagementType: nil,
+            rows: [],
+            showParentRowsForFilters: false,
+            source: SheetSource(id: 123, type: "template"),
+            summary: nil,
+            totalRowCount: 0,
+            userPermissions: nil,
+            userSettings: nil,
+            version: 1,
+            workspace: nil
+        )
+    }
+}
+

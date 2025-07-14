@@ -22,6 +22,6 @@
 	<key>SMARTSHEETS_BASE_URL</key>
 	<string>https://api.smartsheet.com/2.0</string>
 	<key>SMARTSHEETS_AUTH_URL</key>
-	<string>https://app.smartsheet.com/2.0</string>
+	<string>https://app.smartsheet.com</string>
 </dict>
 </plist>

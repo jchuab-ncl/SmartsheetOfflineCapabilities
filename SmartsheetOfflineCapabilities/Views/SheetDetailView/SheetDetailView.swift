@@ -19,9 +19,8 @@ struct SheetDetailView: View {
             if viewModel.status == .loading {
                 ProgressView()
             } else {
-                VStack(alignment: .leading, spacing: 12) {
-                    SpreadsheetViewWrapper()
-                    Spacer()
+                if let sheetDetailResponse = viewModel.sheetDetailResponse {
+                    SpreadsheetViewWrapper(sheetDetailResponse: sheetDetailResponse)
                 }
             }
         }
@@ -34,7 +33,7 @@ struct SheetDetailView: View {
             }
         }
         .onAppear {
-            viewModel.loadSheetContent(sheetId: "\(sheetFile.id)")
+            viewModel.loadSheetContent(sheetId: sheetFile.id)
         }
     }
     
