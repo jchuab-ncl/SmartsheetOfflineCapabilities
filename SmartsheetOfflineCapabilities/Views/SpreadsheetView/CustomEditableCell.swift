@@ -11,12 +11,19 @@ import SwiftUI
 
 class CustomEditableCell: Cell {
     private var hostingController: UIHostingController<EditableCellView>?
+    
     var text: String = ""
     {
         didSet {
             updateContent()
         }
     }
+    
+    var isEditable: Bool = true
+    var pickListValues: [String] = []
+    var columnType: ColumnType = .textNumber
+    var isHeaderOrEnumerated: Bool = false
+    var contactOptions: [Contact] = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -35,6 +42,7 @@ class CustomEditableCell: Cell {
         super.prepareForReuse()
         hostingController?.view.removeFromSuperview()
         hostingController = nil
+        isHeaderOrEnumerated = false
     }
 
     private func updateContent() {
@@ -42,13 +50,23 @@ class CustomEditableCell: Cell {
         hostingController?.view.removeFromSuperview()
         
         // Create the SwiftUI view
-        let view = EditableCellView(text: Binding(get: {
-            self.text
-        }, set: { newText in
-            self.text = newText
-            print("LOG:", newText)
-            // Optional: notify model or delegate
-        }))
+        let view = EditableCellView(
+            text: Binding(
+                get: {
+                    self.text
+                },
+                set: { newText in
+                    self.text = newText
+                    print("LOG:", newText)
+                // Optional: notify model or delegate
+                }
+            ),
+            isEditable: isEditable,
+            pickListValues: pickListValues,
+            columnType: columnType,
+            isHeaderOrEnumerated: isHeaderOrEnumerated,
+            contactOptions: contactOptions
+        )
         
         // Create and assign new hosting controller
         hostingController = UIHostingController(rootView: view)

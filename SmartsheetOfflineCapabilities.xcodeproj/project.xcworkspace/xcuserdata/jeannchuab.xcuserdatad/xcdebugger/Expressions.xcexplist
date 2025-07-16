@@ -3,10 +3,10 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "SheetServiceTests.testGetSheetsFailure():SheetServiceTests.swift">
+         contextName = "InfoPlistLoader.().init():InfoPListLoader.swift">
          <PersistentStrings>
             <PersistentString
-               value = "(error as NSError).domain">
+               value = "Bundle.main.infoDictionary">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -23,6 +23,14 @@
       </ContextState>
       <ContextState
          contextName = "closure #1 in SheetDetailViewModel.loadSheetContent(sheetId:):SheetDetailViewModel.swift">
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:widthForColumn:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.sheetDetailResponse?.columns?[column]">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "KeychainService.save&lt;SmartsheetOfflineCapabilities.SmartsheetTokenResponse&gt;(_:for:):KeychainService.swift">
@@ -55,10 +63,29 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #1 in closure #4 in EditableCellView.body.getter:EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "columnType">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "SheetService.getSheets():SheetService.swift">
          <PersistentStrings>
             <PersistentString
                value = "error.localizedDescription">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in closure #3 in closure #2 in EditableCellView.buildContactSheet():EditableCellView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #3 in closure #1 in EditableCellView.buildContactSheet():EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedNames">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -85,6 +112,9 @@
          contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
+               value = "self.sheetDetailResponse?.columns?[indexPath.column - 1]">
+            </PersistentString>
+            <PersistentString
                value = "self.sheetDetailResponse">
             </PersistentString>
          </PersistentStrings>
@@ -98,10 +128,10 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "InfoPlistLoader.().init():InfoPListLoader.swift">
+         contextName = "SheetServiceTests.testGetSheetsFailure():SheetServiceTests.swift">
          <PersistentStrings>
             <PersistentString
-               value = "Bundle.main.infoDictionary">
+               value = "(error as NSError).domain">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

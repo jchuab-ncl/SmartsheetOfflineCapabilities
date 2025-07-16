@@ -1,7 +1,13 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "Back" : {
+
+    },
+    "Clear date" : {
 
     },
     "Done" : {
@@ -41,6 +47,9 @@
 
     },
     "Select a Sheet" : {
+
+    },
+    "Select Value" : {
 
     },
     "Something went wrong." : {

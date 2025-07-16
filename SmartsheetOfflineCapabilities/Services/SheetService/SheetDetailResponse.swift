@@ -61,15 +61,94 @@ public struct CreatedBy: Codable, Equatable {
     public let name: String?
 }
 
+public enum ColumnType: String, Codable {
+    case abstractDateTime = "ABSTRACT_DATETIME"
+    case checkbox = "CHECKBOX"
+    case contactList = "CONTACT_LIST"
+    case date = "DATE"
+    case dateTime = "DATETIME"
+    case duration = "DURATION"
+    case multiContactList = "MULTI_CONTACT_LIST"
+    case multiPicklist = "MULTI_PICKLIST"
+    case picklist = "PICKLIST"
+    case predecessor = "PREDECESSOR"
+    case textNumber = "TEXT_NUMBER"
+    
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "ABSTRACT_DATETIME": self = .abstractDateTime
+        case "CHECKBOX": self = .checkbox
+        case "CONTACT_LIST": self = .contactList
+        case "DATE": self = .date
+        case "DATETIME": self = .dateTime
+        case "DURATION": self = .duration
+        case "MULTI_CONTACT_LIST": self = .multiContactList
+        case "MULTI_PICKLIST": self = .multiPicklist
+        case "PICKLIST": self = .picklist
+        case "PREDECESSOR": self = .predecessor
+        case "TEXT_NUMBER": self = .textNumber
+        default:
+            return nil
+        }
+    }
+}
+
+public struct Contact: Codable, Equatable {
+    public let email: String
+    public let name: String
+}
+
 public struct Column: Codable, Equatable {
     public let id: Int
     public let index: Int
     public let title: String
-    public let type: String
+    public let type: ColumnType
     public let primary: Bool?
     public let hidden: Bool?
     public let locked: Bool?
     public let lockedForUser: Bool?
+    public let options: [String]?
+    public let width: Int
+    public let systemColumnType: String?
+    public let contactOptions: [Contact]?
+    
+    public enum CodingKeys: CodingKey {
+        case id
+        case index
+        case title
+        case type
+        case primary
+        case hidden
+        case locked
+        case lockedForUser
+        case options
+        case width
+        case systemColumnType
+        case contactOptions
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(Int.self, forKey: .id)
+        self.index = try container.decode(Int.self, forKey: .index)
+        self.title = try container.decode(String.self, forKey: .title)
+         
+        let value = try container.decode(String.self, forKey: .type)
+        if let columnType = ColumnType.init(rawValue: value) {
+            self.type = columnType
+        } else {
+            self.type = .textNumber
+        }
+        
+        self.primary = try container.decodeIfPresent(Bool.self, forKey: .primary)
+        self.hidden = try container.decodeIfPresent(Bool.self, forKey: .hidden)
+        self.locked = try container.decodeIfPresent(Bool.self, forKey: .locked)
+        self.lockedForUser = try container.decodeIfPresent(Bool.self, forKey: .lockedForUser)
+        self.options = try container.decodeIfPresent([String].self, forKey: .options)
+        self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 0
+        self.systemColumnType = try container.decodeIfPresent(String.self, forKey: .systemColumnType)
+        self.contactOptions = try container.decodeIfPresent([Contact].self, forKey: .contactOptions)
+    }
 }
 
 public struct CrossSheetReference: Codable, Equatable {
@@ -123,21 +202,50 @@ public struct Row: Codable, Equatable {
     public let cells: [SheetCell]?
 }
 
+/// Represents a single cell in a Smartsheet row.
 public struct SheetCell: Codable, Equatable {
+    /// The unique identifier of the column this cell belongs to.
     public let columnId: Int
-    public let value: String?
-    public let displayValue: String?
+
+    /// The raw value of the cell, decoded as a String. It can be originally a String or an Int.
+    public var value: String?
+
+    /// The formatted value as displayed in the Smartsheet UI.
+    public var displayValue: String?
+
+    /// The format applied to the cell, if any.
     public let format: String?
+
+    /// The formula expression for the cell, if present.
     public let formula: String?
 
+    /// Coding keys used for decoding from JSON.
     enum CodingKeys: String, CodingKey {
-        case columnId
-        case value
-        case displayValue
-        case format
-        case formula
+        case columnId, value, displayValue, format, formula
     }
 
+    /// A static placeholder instance of an empty SheetCell.
+    public static var empty = SheetCell(columnId: 0, value: nil, displayValue: nil, format: nil, formula: nil)
+
+    /// Creates a new instance of `SheetCell` with the provided values.
+    /// - Parameters:
+    ///   - columnId: The identifier of the column this cell belongs to.
+    ///   - value: The raw value of the cell, stored as a `String`. Can be derived from a `String` or an `Int`.
+    ///   - displayValue: The formatted display value shown in the Smartsheet UI.
+    ///   - format: A format string applied to the cell, if any.
+    ///   - formula: The formula string used to calculate the cell’s value, if applicable.
+    public init(columnId: Int, value: String?, displayValue: String?, format: String?, formula: String?) {
+        self.columnId = columnId
+        self.value = value
+        self.displayValue = displayValue
+        self.format = format
+        self.formula = formula
+    }
+
+    /// Decodes a `SheetCell` from a `Decoder`, handling `value` as either a `String` or an `Int`.
+    /// This allows compatibility with Smartsheet's variable JSON structure for cell values.
+    /// - Parameter decoder: The decoder instance used to decode this struct.
+    /// - Throws: An error if decoding fails.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         columnId = try container.decode(Int.self, forKey: .columnId)
@@ -229,4 +337,3 @@ public struct SheetDetailResponseMock {
         )
     }
 }
-
