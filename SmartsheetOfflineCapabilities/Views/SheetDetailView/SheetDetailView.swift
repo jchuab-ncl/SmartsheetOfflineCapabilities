@@ -12,7 +12,7 @@ struct SheetDetailView: View {
     
     @StateObject private var viewModel = SheetDetailViewModel()
     
-    let sheetFile: SheetFile
+    let sheetFile: CachedSheet
 
     var body: some View {        
         ZStack {

@@ -8,20 +8,20 @@
 
 import SwiftUI
 
-struct SheetFile: Identifiable, Hashable {
-    let id: Int64
-    let name: String
-    let accessLevel: String
-    let permalink: String
-    let createdAt: Date
-    let modifiedAt: Date
-}
+//struct SheetFile: Identifiable, Hashable {
+//    let id: Int64
+//    let name: String
+//    let accessLevel: String
+//    let permalink: String
+//    let createdAt: Date
+//    let modifiedAt: Date
+//}
 
 struct SelectFileView: View {
     
     @StateObject private var viewModel = SelectFileViewModel()
     
-    @State private var selectedFile: SheetFile?
+    @State private var selectedFile: CachedSheet?
     @State private var searchText = ""
     
 //    var mockFiles: [SheetFile] {
@@ -117,19 +117,20 @@ struct SelectFileView: View {
 //        ].sorted { $0.name < $1.name }
 //    }
 
-    var filteredFiles: [SheetFile] {
+    var filteredFiles: [CachedSheet] {
         if searchText.isEmpty {
             return viewModel.sheetsList
         }
         return viewModel.sheetsList.filter { file in
             let lowerSearch = searchText.lowercased()
             return
-                file.name.lowercased().contains(lowerSearch) ||
-                file.accessLevel.lowercased().contains(lowerSearch) ||
-                file.permalink.lowercased().contains(lowerSearch) ||
-                String(file.id).contains(lowerSearch) ||
-                formattedDate(file.createdAt).lowercased().contains(lowerSearch) ||
-                formattedDate(file.modifiedAt).lowercased().contains(lowerSearch)
+                file.name.lowercased().contains(lowerSearch)
+//            ||
+//                file.accessLevel.lowercased().contains(lowerSearch) ||
+//                file.permalink.lowercased().contains(lowerSearch) ||
+//                String(file.id).contains(lowerSearch) ||
+//                formattedDate(file.createdAt).lowercased().contains(lowerSearch) ||
+//                formattedDate(file.modifiedAt).lowercased().contains(lowerSearch)
         }
     }
 
@@ -236,7 +237,7 @@ struct SelectFileView: View {
         }
     }
 
-    private func makeFileCard(file: SheetFile) -> some View {
+    private func makeFileCard(file: CachedSheet) -> some View {
         Button(action: {
             selectedFile = file
         }) {
@@ -254,7 +255,7 @@ struct SelectFileView: View {
 //                    .font(.footnote)
 //                    .foregroundColor(.secondary)
 
-                Text("Modified: \(formattedDate(file.modifiedAt))")
+                Text("Modified: \(file.modifiedAt)")
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }

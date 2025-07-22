@@ -126,7 +126,13 @@ class AuthenticationService: AuthenticationServiceProtocol {
             try? await Task.sleep(nanoseconds: 1_000_000_000)
            
             if tokensAreStored() {
-                publish(.storedCredentialsFound, .loading)
+                let isInternetAvailable = await httpApiClient.isInternetAvailable()
+                if isInternetAvailable {
+                    try await refreshToken()
+                    publish(.storedCredentialsFound, .loading)
+                } else {
+                    publish(.storedCredentialsFound, .loading)
+                }
             } else {
                 publish(.noSavedCredentials, .initial)
             }
@@ -160,7 +166,7 @@ class AuthenticationService: AuthenticationServiceProtocol {
     
     /// Exchanges an authorization code for an access token using Smartsheet's API.
     /// - Parameter code: The authorization code received from the OAuth login flow.
-    private func exchangeCodeForToken(code: String) throws {
+    private func exchangeCodeForToken(code: String, refreshToken: String = "", grantType: GrantType = .authorizationCode) throws {
         guard
             let clientID = infoPListLoader.get(.smartsheetsClientId),
             let clientSecret = infoPListLoader.get(.smartsheetsSecret)
@@ -171,12 +177,19 @@ class AuthenticationService: AuthenticationServiceProtocol {
         
         let tokenURL = "https://api.smartsheet.com/2.0/token"
         
-        let queryParameters = [
+        var queryParameters = [
             "client_id": clientID,
             "client_secret": clientSecret,
-            "grant_type": GrantType.authorizationCode.rawValue,
-            "code": code
+            "grant_type": grantType.rawValue,
         ]
+        
+        if code.isNotEmpty {
+            queryParameters["code"] = code
+        }
+        
+        if refreshToken.isNotEmpty {
+            queryParameters["refresh_token"] = refreshToken
+        }
         
         Task {
             let result = await httpApiClient.request(
@@ -210,6 +223,15 @@ class AuthenticationService: AuthenticationServiceProtocol {
                 try publishError(.tokenRequestFailed)
             }
         }
+    }
+    
+    func refreshToken() async throws {
+        guard let refreshTokenSaved = keychainService.load(for: .smartsheetRefreshToken) else {
+            try publishError(.failedToLoadRefreshToken)
+            return
+        }
+        
+        try self.exchangeCodeForToken(code: "", refreshToken: refreshTokenSaved, grantType: .refreshToken)
     }
     
     private func publish(_ msg: AuthenticationServiceMessage, _ type: ProgressStatus) {

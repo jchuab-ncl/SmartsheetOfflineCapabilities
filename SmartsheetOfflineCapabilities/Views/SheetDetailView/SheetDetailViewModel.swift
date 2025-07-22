@@ -29,7 +29,7 @@ final class SheetDetailViewModel: ObservableObject {
     
     // MARK: - Public Methods
     
-    func loadSheetContent(sheetId: Int64) {
+    func loadSheetContent(sheetId: Int) {
         Task {
             status = .loading
             

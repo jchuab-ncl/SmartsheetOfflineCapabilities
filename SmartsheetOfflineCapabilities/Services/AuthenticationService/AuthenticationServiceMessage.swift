@@ -13,6 +13,7 @@ enum AuthenticationServiceMessage: String, Error {
     case empty = ""    
     case failedToSaveAccessToken = "Failed to save access token to Keychain."
     case failedToSaveRefreshToken = "Failed to save refresh token to Keychain."
+    case failedToLoadRefreshToken = "Failed to load refresh token from Keychain."
     case invalidAuthURL = "Invalid auth URL."
     case loginRequiresActiveConnection = "Login requires an active internet connection. Please connect to the internet and try again."
     case missingClientIDOrRedirectURI = "Missing ClientID or redirectURI in Info.plist."
