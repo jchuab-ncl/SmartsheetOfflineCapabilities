@@ -21,7 +21,7 @@ public struct Sheet: Codable, Equatable {
     let source: SheetSource?
 }
 
-public struct SheetListResponse: Codable, Equatable {
+public struct SheetList: Codable, Equatable {
     let pageNumber: Int
     let pageSize: Int
     let totalPages: Int

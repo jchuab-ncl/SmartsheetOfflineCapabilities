@@ -12,20 +12,20 @@ struct SheetDetailView: View {
     
     @StateObject private var viewModel = SheetDetailViewModel()
     
-    let sheetFile: CachedSheet
+    let cachedSheetDTO: CachedSheetDTO
 
     var body: some View {        
         ZStack {
             if viewModel.status == .loading {
                 ProgressView()
             } else {
-                if let sheetDetailResponse = viewModel.sheetDetailResponse {
-                    SpreadsheetViewWrapper(sheetDetailResponse: sheetDetailResponse)
+                if let sheetContentDTO = viewModel.sheetContentDTO {
+                    SpreadsheetViewWrapper(sheetContentDTO: sheetContentDTO)
                 }
             }
         }
         .padding()
-        .navigationTitle(sheetFile.name)
+        .navigationTitle(cachedSheetDTO.name)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -33,7 +33,7 @@ struct SheetDetailView: View {
             }
         }
         .onAppear {
-            viewModel.loadSheetContent(sheetId: sheetFile.id)
+            viewModel.loadSheetContent(sheetId: cachedSheetDTO.id)
         }
     }
     

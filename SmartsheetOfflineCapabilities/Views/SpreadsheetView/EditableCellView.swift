@@ -21,7 +21,7 @@ struct EditableCellView: View {
     var pickListValues: [String] = []
     var columnType: ColumnType = .textNumber
     var isHeaderOrEnumerated: Bool = false
-    var contactOptions: [Contact] = []
+    var contactOptions: [ContactDTO] = []
     
     // MARK: View body
 

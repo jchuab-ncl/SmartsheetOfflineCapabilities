@@ -23,7 +23,7 @@ class CustomEditableCell: Cell {
     var pickListValues: [String] = []
     var columnType: ColumnType = .textNumber
     var isHeaderOrEnumerated: Bool = false
-    var contactOptions: [Contact] = []
+    var contactOptions: [ContactDTO] = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)

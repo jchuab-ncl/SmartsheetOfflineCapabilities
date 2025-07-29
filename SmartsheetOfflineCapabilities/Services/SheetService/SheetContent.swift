@@ -5,7 +5,7 @@
 //  Created by Jeann Luiz Chuab on 08/07/25.
 //
 
-public struct SheetDetailResponse: Codable, Equatable {
+public struct SheetContent: Codable, Equatable {
     public let id: Int
     public let fromId: Int?
     public let ownerId: Int?
@@ -61,7 +61,7 @@ public struct CreatedBy: Codable, Equatable {
     public let name: String?
 }
 
-public enum ColumnType: String, Codable {
+public enum ColumnType: String, Codable, Sendable {
     case abstractDateTime = "ABSTRACT_DATETIME"
     case checkbox = "CHECKBOX"
     case contactList = "CONTACT_LIST"
@@ -96,6 +96,24 @@ public enum ColumnType: String, Codable {
 public struct Contact: Codable, Equatable {
     public let email: String
     public let name: String
+    
+    public var asDTO: ContactDTO {
+        return ContactDTO(email: self.email, name: self.name)
+    }
+    
+    public var asCached: CachedContact {
+        return CachedContact(email: self.email, name: self.name)
+    }
+}
+
+extension Array where Element == Contact {
+    public var asDTOs: [ContactDTO] {
+        return self.map(\.asDTO)
+    }
+    
+    public var asCached: [CachedContact] {
+        return self.map(\.asCached)
+    }
 }
 
 public struct Column: Codable, Equatable {
@@ -191,7 +209,7 @@ public struct Row: Codable, Equatable {
     public let id: Int
     public let sheetId: Int?
     public let accessLevel: String?
-    public let rowNumber: Int?
+    public let rowNumber: Int
     public let modifiedAt: String?
     public let createdAt: String?
     public let locked: Bool?
@@ -299,8 +317,8 @@ public struct Workspace: Codable, Equatable {
 // MARK: Mock
 
 public struct SheetDetailResponseMock {
-    public static func makeMock() -> SheetDetailResponse {
-        return SheetDetailResponse(
+    public static func makeMock() -> SheetContent {
+        return SheetContent(
             id: 1,
             fromId: nil,
             ownerId: nil,

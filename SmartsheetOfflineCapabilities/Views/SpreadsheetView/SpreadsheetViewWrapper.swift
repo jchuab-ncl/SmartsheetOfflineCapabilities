@@ -12,12 +12,12 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     
     // MARK: Private properties
     
-    private var sheetDetailResponse: SheetDetailResponse?
+    private var sheetContentDTO: SheetContentDTO?
     
     // MARK: Initializers
     
-    init(sheetDetailResponse: SheetDetailResponse) {
-        self.sheetDetailResponse = sheetDetailResponse
+    init(sheetContentDTO: SheetContentDTO) {
+        self.sheetContentDTO = sheetContentDTO
     }
         
     func makeUIView(context: Context) -> SpreadsheetView {
@@ -34,15 +34,15 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(sheetDetailResponse: self.sheetDetailResponse)
+        Coordinator(sheetContentDTO: self.sheetContentDTO)
     }
 
     class Coordinator: NSObject, SpreadsheetViewDataSource, SpreadsheetViewDelegate {
         
-        private var sheetDetailResponse: SheetDetailResponse?
+        private var sheetContentDTO: SheetContentDTO?
         
-        init(sheetDetailResponse: SheetDetailResponse? = nil) {
-            self.sheetDetailResponse = sheetDetailResponse
+        init(sheetContentDTO: SheetContentDTO? = nil) {
+            self.sheetContentDTO = sheetContentDTO
         }
         
         @objc(spreadsheetView:heightForRow:)
@@ -56,29 +56,32 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
                 return 40
             }
             
-            let width = self.sheetDetailResponse?.columns?[column - 1].width ?? 100
+            guard let width = self.sheetContentDTO?.columns[column - 1].width else {
+                return CGFloat(100)
+            }
             
             return CGFloat(width)
         }
        
         // Implement required data source & delegate methods here
         func numberOfColumns(in spreadsheetView: SpreadsheetView) -> Int {
-            let value = self.sheetDetailResponse?.columns?.count(where: { !($0.hidden ?? false) }) ?? 0
-            return value // + 1 Increasing the number of columns to show a column with line numbers
+            let value = self.sheetContentDTO?.columns.count(where: { !$0.hidden }) ?? 0
+            return value + 1 // Increasing the number of columns to show a column with line numbers
         }
         
         func numberOfRows(in spreadsheetView: SpreadsheetView) -> Int {
-            return (self.sheetDetailResponse?.rows?.count ?? 0) + 1
+            return (self.sheetContentDTO?.rows.count ?? 0) + 1
         }
 
         func spreadsheetView(_ spreadsheetView: SpreadsheetView, cellForItemAt indexPath: IndexPath) -> Cell? {            
             spreadsheetView.bounces = false
             
             spreadsheetView.register(CustomEditableCell.self, forCellWithReuseIdentifier: "Cell")
-            let cell = spreadsheetView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? CustomEditableCell ?? CustomEditableCell()
+            let customEditableCell = spreadsheetView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? CustomEditableCell ?? CustomEditableCell()
             var columnType: ColumnType = .textNumber
             var systemColumnType = ""
-            var contactOptions: [Contact] = []
+            var contactOptions: [ContactDTO] = []
+            var options: [String] = []
             var text = ""
             
             if indexPath.column == 0 {
@@ -87,28 +90,31 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
                 } else {
                     text = "\(indexPath.row)"
                 }
-                cell.isEditable = false
-                cell.isHeaderOrEnumerated = true
+                customEditableCell.isEditable = false
+                customEditableCell.isHeaderOrEnumerated = true
             } else if indexPath.row == 0 {
-                text = self.sheetDetailResponse?.columns?[indexPath.column - 1].title ?? ""
-                cell.isEditable = false
-                cell.isHeaderOrEnumerated = true
+                text = self.sheetContentDTO?.columns[indexPath.column - 1].title ?? ""
+                customEditableCell.isEditable = false
+                customEditableCell.isHeaderOrEnumerated = true
             } else {
-                columnType = self.sheetDetailResponse?.columns?[indexPath.column - 1].type ?? .textNumber
-                systemColumnType = self.sheetDetailResponse?.columns?[indexPath.column - 1].systemColumnType ?? ""
-                contactOptions = self.sheetDetailResponse?.columns?[indexPath.column - 1].contactOptions ?? []
+                let columnId = self.sheetContentDTO?.columns[indexPath.column - 1].id
+                columnType = self.sheetContentDTO?.columns[indexPath.column - 1].type ?? .textNumber
+                systemColumnType = self.sheetContentDTO?.columns[indexPath.column - 1].systemColumnType ?? ""
+                contactOptions = self.sheetContentDTO?.columns[indexPath.column - 1].contactOptions ?? []
+                options = self.sheetContentDTO?.columns[indexPath.column - 1].options ?? []
                 
-                let value = self.sheetDetailResponse?.rows?[indexPath.row - 1].cells?[indexPath.column - 1].displayValue ?? self.sheetDetailResponse?.rows?[indexPath.row - 1].cells?[indexPath.column - 1].value ?? ""
+                let cell = self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })
+                let value = cell?.displayValue ?? cell?.value ?? ""
                 
                 switch columnType {
                 case .abstractDateTime, .contactList, .multiContactList, .checkbox, .duration, .predecessor, .textNumber:
-                    cell.pickListValues = []
-                    cell.contactOptions = contactOptions
+                    customEditableCell.pickListValues = []
+                    customEditableCell.contactOptions = contactOptions
                     text = value
                     break
 
                 case .date:
-                    cell.pickListValues = []
+                    customEditableCell.pickListValues = []
                     text = value.asFormattedDate()
                     break
                     
@@ -121,17 +127,17 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
 
                 case .multiPicklist, .picklist:
                     text = value
-                    cell.pickListValues = self.sheetDetailResponse?.columns?[indexPath.column - 1].options ?? []
+                    customEditableCell.pickListValues = options
                     break
                 }
             }
             
             if systemColumnType.isNotEmpty {
-                cell.isEditable = false
+                customEditableCell.isEditable = false
             }
-            cell.columnType = columnType
-            cell.text = text
-            return cell
+            customEditableCell.columnType = columnType
+            customEditableCell.text = text
+            return customEditableCell
         }
         
         func frozenRows(in spreadsheetView: SpreadsheetView) -> Int {

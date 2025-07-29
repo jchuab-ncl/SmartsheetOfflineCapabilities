@@ -13,7 +13,7 @@ final class SheetDetailViewModel: ObservableObject {
     // MARK: - Published Properties
     
     @Published var status: ProgressStatus = .initial
-    @Published var sheetDetailResponse: SheetDetailResponse?
+    @Published var sheetContentDTO: SheetContentDTO?
         
     // MARK: Private Properties
     
@@ -34,7 +34,7 @@ final class SheetDetailViewModel: ObservableObject {
             status = .loading
             
             do {
-                sheetDetailResponse = try await sheetService.getSheet(sheetId: sheetId)
+                sheetContentDTO = try await sheetService.getSheetContent(sheetId: sheetId)
                 status = .success
             } catch {
                 status = .error

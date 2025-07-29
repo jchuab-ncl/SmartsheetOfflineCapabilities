@@ -13,7 +13,7 @@ final class SelectFileViewModel: ObservableObject {
     
     // MARK: - Published Properties
 
-    @Published var sheetsList: [CachedSheet] = []
+    @Published var sheetsList: [CachedSheetDTO] = []
     @Published var status: ProgressStatus = .initial
     
     // MARK: Private Properties
@@ -36,27 +36,8 @@ final class SelectFileViewModel: ObservableObject {
             status = .loading
             
             do {
-                let result = try await sheetService.getSheets()
-    
-                let files = result.map {
-                    CachedSheet(
-                        id: $0.id,
-                        modifiedAt: $0.modifiedAt,
-                        name: $0.name
-                    )
-                    
-//                    SheetFile(
-//                        id: Int64($0.id),
-//                        name: $0.name,
-//                        accessLevel: $0.accessLevel,
-//                        permalink: $0.permalink,
-//                        createdAt: ISO8601DateFormatter().date(from: $0.createdAt) ?? .now,
-//                        modifiedAt: ISO8601DateFormatter().date(from: $0.modifiedAt) ?? .now
-//                    )
-                }.sorted(by: { $0.name < $1.name })
-    
-                self.sheetsList = files
-                
+                self.sheetsList.removeAll()
+                self.sheetsList = try await sheetService.getSheetList()
                 status = .success
             } catch {
                 status = .error

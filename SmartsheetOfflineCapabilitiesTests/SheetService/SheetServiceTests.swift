@@ -43,7 +43,7 @@ final class SheetServiceTests: XCTestCase {
     }
 
     func testGetSheetsSuccess() async throws {
-        let sampleData = SheetListResponse(
+        let sampleData = SheetList(
             pageNumber: 1,
             pageSize: 10,
             totalPages: 1,
