@@ -13,8 +13,8 @@ import SwiftData
 public final class CachedSheetContent {
     @Attribute(.unique) public var id: Int
     public var name: String
-    @Relationship public var columns: [CachedColumn]
-    @Relationship public var rows: [CachedRow]
+    @Relationship(deleteRule: .cascade) public var columns: [CachedColumn]
+    @Relationship(deleteRule: .cascade) public var rows: [CachedRow]
 
     public init(id: Int, name: String, columns: [CachedColumn], rows: [CachedRow]) {
         self.id = id
@@ -41,6 +41,16 @@ public final class CachedContact {
 }
 
 @Model
+public final class CachedOption {
+    public var value: String
+    @Relationship(inverse: \CachedColumn.options) public var column: CachedColumn?
+
+    public init(value: String) {
+        self.value = value
+    }
+}
+
+@Model
 public final class CachedColumn {
     @Attribute(.unique) public var id: Int
     public var index: Int
@@ -49,14 +59,14 @@ public final class CachedColumn {
     public var systemColumnType: String?
     public var hidden: Bool?
     public var width: Int
-    public var options: [String]
-    @Relationship public var contactOptions: [CachedContact]
+    @Relationship(deleteRule: .cascade) public var options: [CachedOption]
+    @Relationship(deleteRule: .cascade) public var contactOptions: [CachedContact]
 
     public init(
         id: Int,
         index: Int,
         title: String,
-        type: String,
+        type: String = "",
         systemColumnType: String,
         hidden: Bool,
         width: Int = 0,
@@ -70,8 +80,21 @@ public final class CachedColumn {
         self.systemColumnType = systemColumnType
         self.hidden = hidden
         self.width = width
-        self.options = options
-        self.contactOptions = contactOptions
+        self.options = []
+        self.contactOptions = []
+
+        // Fix inverse for options
+        self.options = options.map { value in
+            let option = CachedOption(value: value)
+            option.column = self
+            return option
+        }
+
+        // Fix inverse for contactOptions
+        self.contactOptions = contactOptions.map {
+            $0.column = self
+            return $0
+        }
     }
 }
 
@@ -93,7 +116,7 @@ public final class CachedCell {
 public final class CachedRow {
     @Attribute(.unique) public var id: Int
     public var rowNumber: Int
-    @Relationship public var cells: [CachedCell]
+    @Relationship(deleteRule: .cascade) public var cells: [CachedCell]
 
     public init(id: Int, rowNumber: Int, cells: [CachedCell]) {
         self.id = id

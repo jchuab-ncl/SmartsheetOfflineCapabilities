@@ -233,6 +233,12 @@ public final class SheetService: SheetServiceProtocol {
     private func getSheetContentFromStorage(sheetId: Int) async throws -> SheetContentDTO {
         let sheetContentDTO = try await MainActor.run {
             let context = swiftDataService.modelContext
+            
+            // Testing
+            let test = FetchDescriptor<CachedSheetContent>()
+            let data = try context.fetch(test)
+            print("LOG: ", data)
+            
             let descriptor = FetchDescriptor<CachedSheetContent>(predicate: #Predicate { $0.id == sheetId })
             guard let cachedSheet = try context.fetch(descriptor).first else {
                 print("❌ No cached sheet content found for id \(sheetId)")
@@ -248,7 +254,7 @@ public final class SheetService: SheetServiceProtocol {
                     systemColumnType: $0.systemColumnType ?? "",
                     hidden: $0.hidden ?? true,
                     width: $0.width,
-                    options: $0.options,
+                    options: $0.options.map { $0.value },
                     contactOptions: $0.contactOptions.asDTOs
                 ) }
                 .filter { !($0.hidden) }
@@ -312,6 +318,11 @@ public final class SheetService: SheetServiceProtocol {
             )
 
             context.insert(cachedSheet)
+            do {
+                try context.save()
+            } catch {
+                print("✅ Error storing sheet content: \(sheetListResponse.name) in SwiftData. Error: \(error)")
+            }
             print("✅ Sheet content: \(sheetListResponse.name) stored in SwiftData")
         }
     }

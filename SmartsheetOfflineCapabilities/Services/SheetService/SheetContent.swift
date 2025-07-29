@@ -116,6 +116,28 @@ extension Array where Element == Contact {
     }
 }
 
+//public struct Option: Codable, Equatable {
+//    public let value: String
+//
+//    public var asDTO: OptionDTO {
+//        return OptionDTO(value: self.value)
+//    }
+//
+//    public var asCached: CachedOption {
+//        return CachedOption(value: self.value)
+//    }
+//}
+//
+//extension Array where Element == Option {
+//    public var asDTOs: [OptionDTO] {
+//        return self.map(\.asDTO)
+//    }
+//
+//    public var asCached: [CachedOption] {
+//        return self.map(\.asCached)
+//    }
+//}
+
 public struct Column: Codable, Equatable {
     public let id: Int
     public let index: Int

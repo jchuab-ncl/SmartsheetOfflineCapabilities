@@ -13,12 +13,23 @@ public protocol SwiftDataProtocol {
 }
 
 public final class SwiftDataService: SwiftDataProtocol {
-    public let sharedModelContainer: ModelContainer
+    private let sharedModelContainer: ModelContainer
     public var modelContext: ModelContext
 
     public init() {
-        let schema = Schema([CachedSheet.self, CachedSheetContent.self])
-        let config = ModelConfiguration("SmartsheetOffline", schema: schema)
+        
+        // All models should be included here
+        let schema = Schema([
+            CachedSheet.self,
+            CachedSheetContent.self,
+            CachedColumn.self,
+            CachedRow.self,
+            CachedCell.self,
+            CachedContact.self,
+            CachedOption.self
+        ])
+        
+        let config = ModelConfiguration("SmartsheetOffline", schema: schema, isStoredInMemoryOnly: false)
         self.sharedModelContainer = try! ModelContainer(for: schema, configurations: [config])
         self.modelContext = ModelContext(self.sharedModelContainer)
     }
