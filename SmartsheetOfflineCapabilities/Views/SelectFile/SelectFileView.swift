@@ -5,12 +5,14 @@
 //  Created by Jeann Luiz Chuab on 11/06/25.
 //
 
-
+import SwiftData
 import SwiftUI
 
 struct SelectFileView: View {
     
-    @StateObject private var viewModel = SelectFileViewModel()
+    @Environment(\.modelContext) private var modelContext: ModelContext
+    
+    @StateObject private var viewModel: SelectFileViewModel
     
     @State private var selectedFile: CachedSheetDTO?
     @State private var searchText = ""
@@ -58,9 +60,17 @@ struct SelectFileView: View {
             }
         }
         .navigationDestination(item: $selectedFile) { file in
-            SheetDetailView(cachedSheetDTO: file)
+            SheetDetailView(cachedSheetDTO: file, modelContext: modelContext)
         }
     }
+    
+    // MARK: Initializers
+    
+    init(modelContext: ModelContext) {
+        self._viewModel = .init(wrappedValue: SelectFileViewModel(modelContext: modelContext))
+    }
+    
+    // MARK: Private methods
     
     private func makeiPadView() -> some View {
         ScrollView {
@@ -158,6 +168,6 @@ struct SelectFileView: View {
     }
 }
 
-#Preview {
-    SelectFileView()
-}
+//#Preview {
+//    SelectFileView()
+//}

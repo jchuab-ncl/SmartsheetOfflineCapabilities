@@ -14,14 +14,19 @@ struct SmartsheetOfflineCapabilitiesApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([CachedSheet.self])
+        let schema = Schema([
+            CachedSheet.self,
+            CachedSheetContent.self,
+            CachedColumn.self,
+            CachedRow.self,
+            CachedCell.self,
+            CachedContact.self,
+            CachedOption.self
+        ])
+        
         let config = ModelConfiguration("SmartsheetOffline", schema: schema)
         return try! ModelContainer(for: schema, configurations: [config])
     }()
-
-    init() {
-
-    }
 
     var body: some Scene {
         WindowGroup {
@@ -33,6 +38,8 @@ struct SmartsheetOfflineCapabilitiesApp: App {
                         //TODO: Handle error
                     }
                 }
+                .preferredColorScheme(.light)
         }
+        .modelContainer(sharedModelContainer)
     }
 }

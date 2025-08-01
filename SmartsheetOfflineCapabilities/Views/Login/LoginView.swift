@@ -5,9 +5,12 @@
 //  Created by Jeann Luiz Chuab on 09/06/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct LoginView: View {
+    @Environment(\.modelContext) private var modelContext: ModelContext
+    
     @StateObject private var viewModel = LoginViewModel()
     
     @State private var isPasswordVisible = false
@@ -20,8 +23,8 @@ struct LoginView: View {
                 .padding()
                 .background(Color(.systemGroupedBackground))
                 .navigationDestination(isPresented: Binding(get: { viewModel.presentNextScreen  }, set: { _,_ in })) {
-                    SelectFileView()
-                        .navigationBarBackButtonHidden()                                        
+                    SelectFileView(modelContext: modelContext)
+                        .navigationBarBackButtonHidden()
                 }
         }
         .onAppear {

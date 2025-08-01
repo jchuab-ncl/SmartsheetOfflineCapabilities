@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftData // TODO: Remove?
+import SwiftData
 
 public struct SheetServiceResultType: Equatable {
     var sheetList: SheetList?
@@ -23,10 +23,10 @@ public final class SheetService: SheetServiceProtocol {
     
     // MARK: Private properties
     
+    private var modelContext: ModelContext
     private let httpApiClient: HTTPApiClientProtocol
     private let infoPListLoader: InfoPlistLoaderProtocol
     private let keychainService: KeychainServiceProtocol
-    private let swiftDataService: SwiftDataProtocol
     
     // MARK: Initializers
 
@@ -35,17 +35,17 @@ public final class SheetService: SheetServiceProtocol {
     ///   - httpApiClient: The client responsible for making HTTP requests. Defaults to the shared dependency.
     ///   - infoPlistLoader: The loader responsible for fetching configuration values from Info.plist. Defaults to the shared dependency.
     ///   - keychainService: The service responsible for accessing secure credentials. Defaults to the shared dependency.
-    ///   - swiftDataService: The service responsible for interacting with SwiftData. Defaults to the shared dependency.
+    ///   - modelContext: The SwiftData model context used to initialize the sheet service.
     public init(
         httpApiClient: HTTPApiClientProtocol = Dependencies.shared.httpApiClient,
         infoPListLoader: InfoPlistLoaderProtocol = Dependencies.shared.infoPlistLoader,
         keychainService: KeychainServiceProtocol = Dependencies.shared.keychainService,
-        swiftDataService: SwiftDataProtocol = Dependencies.shared.swiftDataService
+        modelContext: ModelContext
     ) {
         self.httpApiClient = httpApiClient
         self.infoPListLoader = infoPListLoader
         self.keychainService = keychainService
-        self.swiftDataService = swiftDataService
+        self.modelContext = modelContext
     }
     
     // MARK: Public methods
@@ -76,6 +76,8 @@ public final class SheetService: SheetServiceProtocol {
             return try await getSheetContentFromStorage(sheetId: sheetId)
         }
     }
+    
+    // MARK: Private methods
     
     /// Fetches detailed information for a specific sheet from the Smartsheet API.
     /// - Parameter sheetId: The unique identifier of the sheet to retrieve.
@@ -116,7 +118,7 @@ public final class SheetService: SheetServiceProtocol {
                         id: row.id,
                         rowNumber: row.rowNumber,
                         cells: (row.cells ?? []).map { cell in
-                            CellDTO(columnId: cell.columnId, value: cell.value, displayValue: cell.displayValue)
+                            CellDTO(columnId: cell.columnId, value: cell.value ?? "", displayValue: cell.displayValue ?? "")
                         }
                     )
                 }
@@ -197,7 +199,7 @@ public final class SheetService: SheetServiceProtocol {
     private func storeSheetList(sheetListResponse: SheetList) async throws {
         try await MainActor.run {
             // Store response in SwiftData
-            let context = swiftDataService.modelContext
+            let context = modelContext
 
             // Clear old entries
             let existing = try context.fetch(FetchDescriptor<CachedSheet>())
@@ -215,7 +217,7 @@ public final class SheetService: SheetServiceProtocol {
     
     private func getSheetListFromStorage() async throws -> [CachedSheetDTO] {
         try await MainActor.run {
-            let context = swiftDataService.modelContext
+            let context = modelContext
             let descriptor = FetchDescriptor<CachedSheet>(sortBy: [SortDescriptor(\.name)])
             let results = try context.fetch(descriptor)
 
@@ -232,7 +234,7 @@ public final class SheetService: SheetServiceProtocol {
     
     private func getSheetContentFromStorage(sheetId: Int) async throws -> SheetContentDTO {
         let sheetContentDTO = try await MainActor.run {
-            let context = swiftDataService.modelContext
+            let context = modelContext
             
             // Testing
             let test = FetchDescriptor<CachedSheetContent>()
@@ -278,7 +280,7 @@ public final class SheetService: SheetServiceProtocol {
     
     private func storeSheetContent(sheetListResponse: SheetContent) async throws {
         try await MainActor.run {
-            let context = swiftDataService.modelContext
+            let context = modelContext
 
             // Clear existing data for this sheet if needed
             let existing = try context.fetch(FetchDescriptor<CachedSheetContent>())
@@ -304,7 +306,7 @@ public final class SheetService: SheetServiceProtocol {
             // Convert rows and cells
             let cachedRows: [CachedRow] = (sheetListResponse.rows ?? []).map { (row: Row) in
                 let cachedCells: [CachedCell] = (row.cells ?? []).map { (cell: SheetCell) in
-                    CachedCell(columnId: cell.columnId, value: cell.value, displayValue: cell.displayValue)
+                    CachedCell(columnId: cell.columnId, value: cell.value ?? "", displayValue: cell.displayValue ?? "")
                 }
                 return CachedRow(id: row.id, rowNumber: row.rowNumber, cells: cachedCells)
             }

@@ -5,14 +5,15 @@
 //  Created by Jeann Luiz Chuab on 08/07/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct SheetDetailView: View {
     @Environment(\.dismiss) private var dismiss
     
-    @StateObject private var viewModel = SheetDetailViewModel()
+    @StateObject private var viewModel: SheetDetailViewModel
     
-    let cachedSheetDTO: CachedSheetDTO
+    private let cachedSheetDTO: CachedSheetDTO
 
     var body: some View {        
         ZStack {
@@ -36,6 +37,23 @@ struct SheetDetailView: View {
             viewModel.loadSheetContent(sheetId: cachedSheetDTO.id)
         }
     }
+    
+    // MARK: Initializers
+    
+    /// Initializes the `SheetDetailView` with the provided cached sheet DTO and model context.
+    ///
+    /// - Parameters:
+    ///   - cachedSheetDTO: The cached sheet metadata used to display the sheet name and fetch detailed content.
+    ///   - modelContext: The SwiftData model context used by the view model to access stored data.
+    init(
+        cachedSheetDTO: CachedSheetDTO,
+        modelContext: ModelContext
+    ) {
+        self.cachedSheetDTO = cachedSheetDTO
+        self._viewModel = .init(wrappedValue: SheetDetailViewModel(modelContext: modelContext))
+    }
+    
+    // MARK: Private methods
     
     private func makeBackButton() -> some View {
         Button(action: {

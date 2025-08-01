@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 
 @MainActor
 final class SheetDetailViewModel: ObservableObject {
@@ -22,9 +23,9 @@ final class SheetDetailViewModel: ObservableObject {
     // MARK: - Initializers
 
     /// Initializes the view model with a given sheet service.
-    /// - Parameter sheetService: The service used to retrieve sheet details. Defaults to a concrete implementation.
-    init(sheetService: SheetServiceProtocol = Dependencies.shared.sheetService) {
-        self.sheetService = sheetService
+    /// - Parameter modelContext: The SwiftData model context used by the view model to access stored data.
+    init(modelContext: ModelContext) {
+        self.sheetService = SheetService(modelContext: modelContext)
     }
     
     // MARK: - Public Methods

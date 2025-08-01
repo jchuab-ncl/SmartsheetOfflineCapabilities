@@ -7,10 +7,10 @@
 
 import Combine
 import Foundation
+import SwiftData
 
 @MainActor
-final class SelectFileViewModel: ObservableObject {
-    
+final class SelectFileViewModel: ObservableObject {            
     // MARK: - Published Properties
 
     @Published var sheetsList: [CachedSheetDTO] = []
@@ -23,10 +23,10 @@ final class SelectFileViewModel: ObservableObject {
 
     // MARK: - Initializers
 
-    /// Initializes the view model with a given sheet service.
-    /// - Parameter sheetService: The service used to fetch sheet data. Defaults to a concrete implementation.
-    init(sheetService: SheetServiceProtocol = SheetService()) {
-        self.sheetService = sheetService
+    /// Initializes the view model with a model context used to create the sheet service.
+    /// - Parameter modelContext: The SwiftData model context used to initialize the sheet service.
+    init(modelContext: ModelContext) {
+        self.sheetService = SheetService(modelContext: modelContext)
     }
 
     // MARK: - Public Methods
