@@ -13,6 +13,6 @@ struct InitialView: View {
     }
 }
 
-//#Preview {
-//    InitialView(authenticationService: mock)
-//}
+#Preview {
+    InitialView()
+}

@@ -66,6 +66,11 @@ struct SelectFileView: View {
     
     // MARK: Initializers
     
+    /// Initializes the `SelectFileView` with a given SwiftData `ModelContext`.
+    /// This initializer sets up the associated `SelectFileViewModel` using the provided context,
+    /// allowing the view to load and manage cached sheet metadata.
+    ///
+    /// - Parameter modelContext: The `ModelContext` used to initialize the view model and access SwiftData storage.
     init(modelContext: ModelContext) {
         self._viewModel = .init(wrappedValue: SelectFileViewModel(modelContext: modelContext))
     }
