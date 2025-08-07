@@ -8,25 +8,33 @@
 import Foundation
 import SwiftData
 
-public struct SheetServiceResultType: Equatable {
-    var sheetList: SheetList?
-    var message: SheetServiceMessage
-    var status: ProgressStatus
-}
-
 public protocol SheetServiceProtocol {
+    var resultSheetHasUpdatesToPublishDTO: Protected<[CachedSheetHasUpdatesToPublishDTO]> { get }
+    
     func getSheetList() async throws -> [CachedSheetDTO]
+    func getSheetListHasUpdatesToPublish() async throws
     func getSheetContent(sheetId: Int) async throws -> SheetContentDTO
+    func addSheetHasUpdatesToPublish(sheetId: Int, name: String, newValue: String, oldValue: String, rowId: Int, columnId: Int) async throws
+//    func hasUpdatesToPublish(sheetId: Int) -> Bool
 }
 
 public final class SheetService: SheetServiceProtocol {
-    
     // MARK: Private properties
     
     private var modelContext: ModelContext
     private let httpApiClient: HTTPApiClientProtocol
     private let infoPListLoader: InfoPlistLoaderProtocol
     private let keychainService: KeychainServiceProtocol
+    
+    /// Used to set the value locally
+    @Protected private(set) var currentSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO] = []
+    
+    // MARK: Public properties
+    
+    /// Used to observe changes externally
+    public var resultSheetHasUpdatesToPublishDTO: Protected<[CachedSheetHasUpdatesToPublishDTO]> {
+        $currentSheetHasUpdatesToPublishDTO
+    }
     
     // MARK: Initializers
 
@@ -63,6 +71,24 @@ public final class SheetService: SheetServiceProtocol {
         }
     }
     
+    public func getSheetListHasUpdatesToPublish() async throws {
+        try await MainActor.run {
+            let context = modelContext
+            let descriptor = FetchDescriptor<CachedSheetHasUpdatesToPublish>(sortBy: [SortDescriptor(\.name)])
+            let results = try context.fetch(descriptor)
+
+            guard !results.isEmpty else {
+                print("No sheets with updatdes to publish found")
+                return
+            }
+
+            print("📦 Loaded sheets with updatedes to publish (\(results.count))")
+            currentSheetHasUpdatesToPublishDTO = results
+                .map { CachedSheetHasUpdatesToPublishDTO(from: $0) }
+                .sorted { $0.name < $1.name }
+        }
+    }
+    
     /// Retrieves detailed content for a specific sheet, either from the Smartsheet API or from local storage depending on network availability.
     /// - Parameter sheetId: The unique identifier of the sheet to retrieve.
     /// - Returns: A `CachedSheetContentDTO` object containing the full content of the requested sheet.
@@ -76,6 +102,69 @@ public final class SheetService: SheetServiceProtocol {
             return try await getSheetContentFromStorage(sheetId: sheetId)
         }
     }
+    
+    public func addSheetHasUpdatesToPublish(
+        sheetId: Int,
+        name: String,
+        newValue: String,
+        oldValue: String,
+        rowId: Int,
+        columnId: Int
+    ) async throws {
+        do {
+            let descriptor = FetchDescriptor<CachedSheetHasUpdatesToPublish>(
+                predicate: #Predicate { $0.id == sheetId }
+            )
+
+            let existing = try modelContext.fetch(descriptor)
+            guard existing.isEmpty else {
+                // Already exists, no need to insert again
+                return
+            }
+
+            let newItem = CachedSheetHasUpdatesToPublish(
+                id: sheetId,
+                name: name,
+                newValue: newValue,
+                oldValue: oldValue,
+                rowId: rowId,
+                columnId: columnId
+            )
+            modelContext.insert(newItem)
+
+            try modelContext.save()
+            
+            /// Calling this method to publish the changes
+            try await getSheetListHasUpdatesToPublish()
+            print("✅ Added sheet with pending updates: Name: \(name) SheetID: \(sheetId)")
+
+        } catch {
+            print("❌ Failed to add sheet with pending updates: Name: \(error) SheetID: \(sheetId)")
+            throw error
+        }
+    }
+    
+    /// Returns whether the specified sheet has local changes that need to be published.
+    ///
+    /// This method fetches the `CachedSheet` from SwiftData using the given `sheetId` and
+    /// returns the value of its `hasUpdatesToPublish` flag.
+    ///
+    /// - Parameter sheetId: The unique identifier of the sheet to check.
+    /// - Returns: `true` if the sheet has pending updates; otherwise, `false`.
+//    public func hasUpdatesToPublish(sheetId: Int) -> Bool {
+//        do {
+//            let descriptor = FetchDescriptor<CachedSheetHasUpdatesToPublish>(predicate: #Predicate { $0.id == sheetId })
+//            if try modelContext.fetch(descriptor).first != nil {
+//                return true
+//            } else {
+//                print("❌ No CachedSheet found with id \(sheetId)")
+//                return false
+//            }
+//        } catch {
+//            print("❌ Failed to check updates for sheet \(sheetId): \(error)")
+//            return false
+//        }
+//    }
     
     // MARK: Private methods
     

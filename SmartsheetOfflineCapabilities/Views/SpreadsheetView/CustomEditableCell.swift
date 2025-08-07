@@ -9,6 +9,10 @@ import UIKit
 import SpreadsheetView
 import SwiftUI
 
+protocol CustomEditableCellDelegate: AnyObject {
+    func didChangeText(newValue: String, oldValue: String, rowId: Int, columnId: Int)
+}
+
 class CustomEditableCell: Cell {
     private var hostingController: UIHostingController<EditableCellView>?
     
@@ -19,9 +23,12 @@ class CustomEditableCell: Cell {
         }
     }
     
+    var delegate: CustomEditableCellDelegate?
     var isEditable: Bool = true
     var pickListValues: [String] = []
     var columnType: ColumnType = .textNumber
+    var rowId: Int = 0
+    var columnId: Int = 0
     var isHeaderOrEnumerated: Bool = false
     var contactOptions: [ContactDTO] = []
 
@@ -55,10 +62,10 @@ class CustomEditableCell: Cell {
                 get: {
                     self.text
                 },
-                set: { newText in
-                    self.text = newText
-                    print("LOG:", newText)
-                // Optional: notify model or delegate
+                set: { newValue in
+                    let oldValue = self.text
+                    self.text = newValue
+                    self.delegate?.didChangeText(newValue: newValue, oldValue: oldValue, rowId: self.rowId, columnId: self.columnId)
                 }
             ),
             isEditable: isEditable,

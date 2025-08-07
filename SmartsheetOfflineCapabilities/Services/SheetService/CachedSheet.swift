@@ -23,6 +23,12 @@ final public class CachedSheet {
     public var modifiedAt: String
     public var name: String
 
+    /// Initializes a new `CachedSheet` model to be stored using SwiftData.
+    ///
+    /// - Parameters:
+    ///   - id: The unique identifier of the sheet (matches the Smartsheet API sheet ID).
+    ///   - modifiedAt: A string representing the last modification timestamp of the sheet (as provided by the API).
+    ///   - name: The name of the sheet.
     init(
         id: Int,
         modifiedAt: String,

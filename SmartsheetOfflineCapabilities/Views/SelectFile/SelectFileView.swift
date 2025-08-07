@@ -9,10 +9,9 @@ import SwiftData
 import SwiftUI
 
 struct SelectFileView: View {
-    
     @Environment(\.modelContext) private var modelContext: ModelContext
     
-    @StateObject private var viewModel: SelectFileViewModel
+    @StateObject private var viewModel = SelectFileViewModel()
     
     @State private var selectedFile: CachedSheetDTO?
     @State private var searchText = ""
@@ -45,7 +44,15 @@ struct SelectFileView: View {
                         makeiPadView()
                     } else {
                         List(filteredFiles) { file in
-                            makeFileCard(file: file)
+                            makeCard(sheet: file)
+                        }
+                        
+                        Spacer()
+                        
+                        if !viewModel.isInternetAvailable {
+                            Text("Offline mode. No connection available at the moment.")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -60,19 +67,8 @@ struct SelectFileView: View {
             }
         }
         .navigationDestination(item: $selectedFile) { file in
-            SheetDetailView(cachedSheetDTO: file, modelContext: modelContext)
+            SheetDetailView(cachedSheetDTO: file, /*modelContext: modelContext*/)
         }
-    }
-    
-    // MARK: Initializers
-    
-    /// Initializes the `SelectFileView` with a given SwiftData `ModelContext`.
-    /// This initializer sets up the associated `SelectFileViewModel` using the provided context,
-    /// allowing the view to load and manage cached sheet metadata.
-    ///
-    /// - Parameter modelContext: The `ModelContext` used to initialize the view model and access SwiftData storage.
-    init(modelContext: ModelContext) {
-        self._viewModel = .init(wrappedValue: SelectFileViewModel(modelContext: modelContext))
     }
     
     // MARK: Private methods
@@ -81,7 +77,7 @@ struct SelectFileView: View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                 ForEach(filteredFiles) { file in
-                    makeFileCard(file: file)
+                    makeCard(sheet: file)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)).shadow(radius: 2))
                         .padding(.horizontal)
@@ -144,17 +140,24 @@ struct SelectFileView: View {
         }
     }
 
-    private func makeFileCard(file: CachedSheetDTO) -> some View {
+    private func makeCard(sheet: CachedSheetDTO) -> some View {
         Button(action: {
-            selectedFile = file
+            selectedFile = sheet
         }) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(file.name)
+                Text(sheet.name)
                     .font(.headline)
 
-                Text("Modified: \(file.modifiedAt)")
+                Text("Modified: \(sheet.modifiedAt)")
                     .font(.footnote)
                     .foregroundColor(.secondary)
+                
+                if viewModel.sheetsListHasUpdatesToPublish.first(where: { $0.id == sheet.id }) != nil {
+                    Text("Sheet has content to be sent to server.")
+                        .foregroundStyle(.red)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 8)
@@ -173,6 +176,6 @@ struct SelectFileView: View {
     }
 }
 
-//#Preview {
-//    SelectFileView()
-//}
+#Preview {
+    SelectFileView()
+}

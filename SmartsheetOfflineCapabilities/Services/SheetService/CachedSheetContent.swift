@@ -145,6 +145,10 @@ public struct SheetContentDTO: Identifiable, Hashable, Sendable {
         self.columns = columns
         self.rows = rows
     }
+    
+    static var empty: SheetContentDTO {
+        return .init(id: 0, name: "", columns: [], rows: [])
+    }
 }
 
 public struct ContactDTO: Hashable, Sendable {

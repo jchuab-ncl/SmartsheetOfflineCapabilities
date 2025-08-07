@@ -8,9 +8,7 @@
 import SwiftData
 import SwiftUI
 
-struct LoginView: View {
-    @Environment(\.modelContext) private var modelContext: ModelContext
-    
+struct LoginView: View {   
     @StateObject private var viewModel = LoginViewModel()
     
     @State private var isPasswordVisible = false
@@ -23,7 +21,7 @@ struct LoginView: View {
                 .padding()
                 .background(Color(.systemGroupedBackground))
                 .navigationDestination(isPresented: Binding(get: { viewModel.presentNextScreen  }, set: { _,_ in })) {
-                    SelectFileView(modelContext: modelContext)
+                    SelectFileView()
                         .navigationBarBackButtonHidden()
                 }
         }

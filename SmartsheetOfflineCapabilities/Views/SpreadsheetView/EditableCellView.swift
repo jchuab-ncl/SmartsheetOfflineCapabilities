@@ -80,7 +80,7 @@ struct EditableCellView: View {
                     .foregroundColor(.red)
                 }
                 
-                Button("Done") {
+                Button("Close") {
                     isEditing = false
                 }
             }

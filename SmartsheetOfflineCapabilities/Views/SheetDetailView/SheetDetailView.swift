@@ -11,26 +11,30 @@ import SwiftUI
 struct SheetDetailView: View {
     @Environment(\.dismiss) private var dismiss
     
-    @StateObject private var viewModel: SheetDetailViewModel
+    @StateObject private var viewModel = SheetDetailViewModel()
     
-    private let cachedSheetDTO: CachedSheetDTO
+    private let cachedSheetDTO: CachedSheetDTO    
 
     var body: some View {        
         ZStack {
             if viewModel.status == .loading {
                 ProgressView()
             } else {
-                if let sheetContentDTO = viewModel.sheetContentDTO {
-                    SpreadsheetViewWrapper(sheetContentDTO: sheetContentDTO)
-                }
+                SpreadsheetViewWrapper(sheetContentDTO: viewModel.sheetContentDTO)
             }
         }
         .padding()
         .navigationTitle(cachedSheetDTO.name)
         .navigationBarBackButtonHidden(true)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .topBarLeading) {
                 makeBackButton()
+            }
+            
+            if viewModel.showSaveButton {
+                ToolbarItem(placement: .topBarTrailing) {
+                    makeSaveButton()
+                }
             }
         }
         .onAppear {
@@ -44,13 +48,8 @@ struct SheetDetailView: View {
     ///
     /// - Parameters:
     ///   - cachedSheetDTO: The cached sheet metadata used to display the sheet name and fetch detailed content.
-    ///   - modelContext: The SwiftData model context used by the view model to access stored data.
-    init(
-        cachedSheetDTO: CachedSheetDTO,
-        modelContext: ModelContext
-    ) {
+    init(cachedSheetDTO: CachedSheetDTO) {
         self.cachedSheetDTO = cachedSheetDTO
-        self._viewModel = .init(wrappedValue: SheetDetailViewModel(modelContext: modelContext))
     }
     
     // MARK: Private methods
@@ -61,7 +60,17 @@ struct SheetDetailView: View {
         }) {
             HStack {
                 Image(systemName: "chevron.left")
-                Text("Back") // Custom back button label
+                Text("Back")
+            }
+        }
+    }
+    
+    private func makeSaveButton() -> some View {
+        Button(action: {
+            viewModel.saveSheetContent()
+        }) {
+            HStack {
+                Text("Save")
             }
         }
     }

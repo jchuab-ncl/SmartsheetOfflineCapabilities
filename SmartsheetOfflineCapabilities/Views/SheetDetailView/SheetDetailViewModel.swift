@@ -5,6 +5,7 @@
 //  Created by Jeann Luiz Chuab on 08/07/25.
 //
 
+import Combine
 import Foundation
 import SwiftData
 
@@ -14,18 +15,36 @@ final class SheetDetailViewModel: ObservableObject {
     // MARK: - Published Properties
     
     @Published var status: ProgressStatus = .initial
-    @Published var sheetContentDTO: SheetContentDTO?
+    @Published var sheetContentDTO: SheetContentDTO = .empty
+    @Published var showSaveButton = false    
         
     // MARK: Private Properties
     
     private let sheetService: SheetServiceProtocol
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initializers
-
-    /// Initializes the view model with a given sheet service.
-    /// - Parameter modelContext: The SwiftData model context used by the view model to access stored data.
-    init(modelContext: ModelContext) {
-        self.sheetService = SheetService(modelContext: modelContext)
+    
+    /// Initializes a new instance of `SheetDetailViewModel`.
+    ///
+    /// This initializer sets up the `sheetService` dependency and subscribes to the
+    /// `resultSheetHasUpdatesToPublishDTO` publisher to automatically determine if
+    /// the current sheet has updates pending publication. If the current sheet is found
+    /// in the updates list, `showSaveButton` is set to `true`.
+    ///
+    /// - Parameter sheetService: A service conforming to `SheetServiceProtocol`, used for
+    ///   loading and tracking sheet content. Defaults to `Dependencies.shared.sheetService`.
+    init(sheetService: SheetServiceProtocol = Dependencies.shared.sheetService) {
+        
+        self.sheetService = sheetService
+        
+        sheetService.resultSheetHasUpdatesToPublishDTO
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink(receiveValue: { [weak self] result in
+                self?.showSaveButton = result.first(where: { $0.id == self?.sheetContentDTO.id }) != nil
+            })
+            .store(in: &cancellables)
     }
     
     // MARK: - Public Methods
@@ -36,10 +55,16 @@ final class SheetDetailViewModel: ObservableObject {
             
             do {
                 sheetContentDTO = try await sheetService.getSheetContent(sheetId: sheetId)
+                try await sheetService.getSheetListHasUpdatesToPublish()
+                
                 status = .success
             } catch {
                 status = .error
             }
         }
+    }
+    
+    func saveSheetContent() {
+        
     }
 }

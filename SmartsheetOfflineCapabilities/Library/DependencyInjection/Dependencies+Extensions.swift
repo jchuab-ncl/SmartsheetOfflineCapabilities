@@ -69,16 +69,3 @@ extension Dependencies {
         set { self[SheetServiceDependencyKey.self] = newValue }
     }
 }
-
-/// SwiftData
-//public enum SwiftDataDependencyKey: DependencyKey {
-//    public typealias DataType = SwiftDataProtocol
-//}
-
-//extension Dependencies {
-//    /// SheetService instance from `Dependencies`.
-//    public var swiftDataService: SwiftDataProtocol {
-//        get { self[SwiftDataDependencyKey.self] }
-//        set { self[SwiftDataDependencyKey.self] = newValue }
-//    }
-//}

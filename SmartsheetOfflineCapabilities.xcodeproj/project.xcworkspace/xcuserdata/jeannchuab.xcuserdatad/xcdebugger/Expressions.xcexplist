@@ -6,10 +6,10 @@
          contextName = "SpreadsheetViewWrapper.Coordinator.numberOfColumns(in:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
-               value = "self.cachedSheetContentDTO">
+               value = "self.cachedSheetContentDTO?.columns.count">
             </PersistentString>
             <PersistentString
-               value = "self.cachedSheetContentDTO?.columns.count">
+               value = "self.cachedSheetContentDTO">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -33,10 +33,13 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "closure #2 in closure #1 in SheetService.getSheetContentFromStorage(sheetId:):SheetService.swift">
+         contextName = "SpreadsheetViewWrapper.Coordinator.init(cachedSheetContentDTO:):SpreadsheetViewWrapper.swift">
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.hasUpdatesToPublish(sheetId:):SheetService.swift">
          <PersistentStrings>
             <PersistentString
-               value = "$0.title">
+               value = "cachedSheet.hasUpdatesToPublish">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -76,6 +79,14 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "SpreadsheetViewWrapper.Coordinator.numberOfRows(in:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.cachedSheetContentDTO?.rows">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in SheetDetailViewModel.loadSheetContent(sheetId:):SheetDetailViewModel.swift">
          <PersistentStrings>
             <PersistentString
@@ -85,6 +96,9 @@
                value = "sheetContentDTO">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in SheetService.getSheetContentOnline(sheetId:):SheetService.swift">
       </ContextState>
       <ContextState
          contextName = "SheetService.getSheets():SheetService.swift">
@@ -103,21 +117,16 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "SpreadsheetViewWrapper.Coordinator.numberOfRows(in:):SpreadsheetViewWrapper.swift">
+         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
-               value = "self.cachedSheetContentDTO?.rows">
+               value = "self.sheetContentDTO?.columns[indexPath.column - 1]">
             </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in SheetService.getSheetContentOnline(sheetId:):SheetService.swift">
-      </ContextState>
-      <ContextState
-         contextName = "AuthenticationService.login():AuthenticationService.swift">
-         <PersistentStrings>
             <PersistentString
-               value = "isInternetAvailable">
+               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })?">
+            </PersistentString>
+            <PersistentString
+               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -130,16 +139,10 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
+         contextName = "AuthenticationService.login():AuthenticationService.swift">
          <PersistentStrings>
             <PersistentString
-               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells">
-            </PersistentString>
-            <PersistentString
-               value = "self.sheetContentDTO?.columns[indexPath.column - 1]">
-            </PersistentString>
-            <PersistentString
-               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })?">
+               value = "isInternetAvailable">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -201,6 +204,9 @@
          contextName = "closure #3 in closure #1 in SheetService.storeSheetContent(sheetListResponse:):SheetService.swift">
       </ContextState>
       <ContextState
+         contextName = "closure #1 in closure #2 in SelectFileView.makeFileCard(file:):SelectFileView.swift">
+      </ContextState>
+      <ContextState
          contextName = "closure #2 in EditableCellView.body.getter:EditableCellView.swift">
          <PersistentStrings>
             <PersistentString
@@ -209,7 +215,12 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "SpreadsheetViewWrapper.Coordinator.init(cachedSheetContentDTO:):SpreadsheetViewWrapper.swift">
+         contextName = "closure #2 in closure #1 in SheetService.getSheetContentFromStorage(sheetId:):SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "$0.title">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
    </ContextStates>
 </VariablesViewState>

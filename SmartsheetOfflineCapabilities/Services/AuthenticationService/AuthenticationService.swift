@@ -35,13 +35,14 @@ class AuthenticationService: AuthenticationServiceProtocol {
     private let httpApiClient: HTTPApiClientProtocol
     private let infoPListLoader: InfoPlistLoaderProtocol
     private let keychainService: KeychainServiceProtocol
-    
     private var code: String = "EMPTY"
+    
+    /// Used to set the value locally
+    @Protected private(set) var currentResult: AuthenticationServiceResultType = .init(message: .empty, status: .initial)
     
     // MARK: Public properties
     
-    @Protected private(set) var currentResult: AuthenticationServiceResultType = .init(message: .empty, status: .initial)
-    
+    /// Used to observe changes externally
     public var resultType: Protected<AuthenticationServiceResultType> {
         $currentResult
     }
@@ -218,7 +219,7 @@ class AuthenticationService: AuthenticationServiceProtocol {
                     
                     publish(.credentialsSuccessfullyValidated, .success)
                 }
-            case .failure(let error):
+            case .failure(_):
                 //TODO: Handle case where user doesn't give permissions
                 try publishError(.tokenRequestFailed)
             }

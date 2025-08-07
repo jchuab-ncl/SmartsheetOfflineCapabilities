@@ -10,7 +10,7 @@
     "Clear date" : {
 
     },
-    "Done" : {
+    "Close" : {
 
     },
     "Edit Content" : {
@@ -32,6 +32,9 @@
     "No files to display" : {
 
     },
+    "Offline mode. No connection available at the moment." : {
+
+    },
     "Password" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -46,10 +49,16 @@
     "Please try again." : {
 
     },
+    "Save" : {
+
+    },
     "Select a Sheet" : {
 
     },
     "Select Value" : {
+
+    },
+    "Sheet has content to be sent to server." : {
 
     },
     "Something went wrong." : {
