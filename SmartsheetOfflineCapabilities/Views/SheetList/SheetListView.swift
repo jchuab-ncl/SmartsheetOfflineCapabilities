@@ -1,5 +1,5 @@
 //
-//  SelectFileView.swift
+//  SheetListView.swift
 //  SmartsheetOfflineCapabilities
 //
 //  Created by Jeann Luiz Chuab on 11/06/25.
@@ -8,10 +8,10 @@
 import SwiftData
 import SwiftUI
 
-struct SelectFileView: View {
+struct SheetListView: View {
     @Environment(\.modelContext) private var modelContext: ModelContext
     
-    @StateObject private var viewModel = SelectFileViewModel()
+    @StateObject private var viewModel = SheetListViewModel()
     
     @State private var selectedFile: CachedSheetDTO?
     @State private var searchText = ""
@@ -67,7 +67,7 @@ struct SelectFileView: View {
             }
         }
         .navigationDestination(item: $selectedFile) { file in
-            SheetDetailView(cachedSheetDTO: file, /*modelContext: modelContext*/)
+            SheetContentView(cachedSheetDTO: file, /*modelContext: modelContext*/)
         }
     }
     
@@ -177,5 +177,5 @@ struct SelectFileView: View {
 }
 
 #Preview {
-    SelectFileView()
+    SheetListView()
 }

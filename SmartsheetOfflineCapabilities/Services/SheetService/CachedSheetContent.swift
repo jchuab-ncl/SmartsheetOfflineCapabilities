@@ -1,5 +1,5 @@
 //
-//  CachedSheetDetailResponse.swift
+//  CachedSheetContent.swift
 //  SmartsheetOfflineCapabilities
 //
 //  Created by Jeann Luiz Chuab on 25/07/25.

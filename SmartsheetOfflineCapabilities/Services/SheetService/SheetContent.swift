@@ -1,5 +1,5 @@
 //
-//  SheetDetailResponse.swift
+//  SheetContent.swift
 //  SmartsheetOfflineCapabilities
 //
 //  Created by Jeann Luiz Chuab on 08/07/25.
@@ -338,7 +338,7 @@ public struct Workspace: Codable, Equatable {
 
 // MARK: Mock
 
-public struct SheetDetailResponseMock {
+public struct SheetContentMock {
     public static func makeMock() -> SheetContent {
         return SheetContent(
             id: 1,

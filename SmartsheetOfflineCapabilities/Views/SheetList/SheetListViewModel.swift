@@ -1,5 +1,5 @@
 //
-//  SelectFileViewModel.swift
+//  SheetListViewModel.swift
 //  SmartsheetOfflineCapabilities
 //
 //  Created by Jeann Luiz Chuab on 11/06/25.
@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @MainActor
-final class SelectFileViewModel: ObservableObject {            
+final class SheetListViewModel: ObservableObject {            
     // MARK: - Published Properties
 
     @Published var isInternetAvailable: Bool = true

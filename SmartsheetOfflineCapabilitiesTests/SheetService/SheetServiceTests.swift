@@ -68,7 +68,7 @@ final class SheetServiceTests: XCTestCase {
     }
 
     func testGetSheetSuccess() async throws {
-        let sampleSheet = SheetDetailResponseMock.makeMock()
+        let sampleSheet = SheetContentMock.makeMock()
         
         httpApiClientMock.requestResult = .success(try JSONEncoder().encode(sampleSheet))
 

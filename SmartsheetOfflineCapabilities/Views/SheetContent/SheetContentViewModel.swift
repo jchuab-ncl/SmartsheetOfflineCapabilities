@@ -1,5 +1,5 @@
 //
-//  SheetDetailViewModel.swift
+//  SheetContentViewModel.swift
 //  SmartsheetOfflineCapabilities
 //
 //  Created by Jeann Luiz Chuab on 08/07/25.
@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @MainActor
-final class SheetDetailViewModel: ObservableObject {
+final class SheetContentViewModel: ObservableObject {
     
     // MARK: - Published Properties
     
@@ -25,7 +25,7 @@ final class SheetDetailViewModel: ObservableObject {
     
     // MARK: - Initializers
     
-    /// Initializes a new instance of `SheetDetailViewModel`.
+    /// Initializes a new instance of `SheetContentViewModel`.
     ///
     /// This initializer sets up the `sheetService` dependency and subscribes to the
     /// `resultSheetHasUpdatesToPublishDTO` publisher to automatically determine if

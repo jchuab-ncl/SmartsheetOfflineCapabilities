@@ -1,5 +1,5 @@
 //
-//  SheetDetailView.swift
+//  SheetContentView.swift
 //  SmartsheetOfflineCapabilities
 //
 //  Created by Jeann Luiz Chuab on 08/07/25.
@@ -8,10 +8,10 @@
 import SwiftData
 import SwiftUI
 
-struct SheetDetailView: View {
+struct SheetContentView: View {
     @Environment(\.dismiss) private var dismiss
     
-    @StateObject private var viewModel = SheetDetailViewModel()
+    @StateObject private var viewModel = SheetContentViewModel()
     
     private let cachedSheetDTO: CachedSheetDTO    
 
@@ -44,7 +44,7 @@ struct SheetDetailView: View {
     
     // MARK: Initializers
     
-    /// Initializes the `SheetDetailView` with the provided cached sheet DTO and model context.
+    /// Initializes the `SheetContentView` with the provided cached sheet DTO and model context.
     ///
     /// - Parameters:
     ///   - cachedSheetDTO: The cached sheet metadata used to display the sheet name and fetch detailed content.
