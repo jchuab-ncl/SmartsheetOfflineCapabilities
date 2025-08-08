@@ -13,6 +13,8 @@ struct SheetContentView: View {
     
     @StateObject private var viewModel = SheetContentViewModel()
     
+    @State private var showDiscardAlert = false
+    
     private let cachedSheetDTO: CachedSheetDTO    
 
     var body: some View {        
@@ -56,18 +58,35 @@ struct SheetContentView: View {
     
     private func makeBackButton() -> some View {
         Button(action: {
-            dismiss()
+            if viewModel.showSaveButton {
+                showDiscardAlert = true
+            } else {
+                dismiss()
+            }
         }) {
             HStack {
                 Image(systemName: "chevron.left")
                 Text("Back")
             }
         }
+        .alert("Discard changes?", isPresented: $showDiscardAlert) {
+            Button("Yes", role: .destructive) {
+                viewModel.removeSheetContentChanges(sheetId: cachedSheetDTO.id)
+                dismiss()
+            }
+            Button("No", role: .cancel) {
+                showDiscardAlert = false
+            }
+        } message: {
+            Text("You have unsaved changes. Are you sure you want to leave without saving?")
+        }
     }
     
     private func makeSaveButton() -> some View {
         Button(action: {
-            viewModel.saveSheetContent()
+            viewModel.saveSheetContent(sheetId: cachedSheetDTO.id) {
+                dismiss()
+            }
         }) {
             HStack {
                 Text("Save")

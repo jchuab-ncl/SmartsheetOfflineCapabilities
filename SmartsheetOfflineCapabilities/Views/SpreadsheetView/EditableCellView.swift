@@ -12,18 +12,18 @@ struct EditableCellView: View {
     @FocusState private var isFocused: Bool
     @State private var isEditing: Bool = false
 
+    // Stage edits here; commit to `text` on Done
+    @State private var draftText: String = ""
+
     // State for contact selection
     @State private var selectedNames: Set<String> = []
-    
+
     // MARK: Private properties
-    
     var isEditable: Bool = false
     var pickListValues: [String] = []
     var columnType: ColumnType = .textNumber
     var isHeaderOrEnumerated: Bool = false
     var contactOptions: [ContactDTO] = []
-    
-    // MARK: View body
 
     var body: some View {
         Text(text)
@@ -34,19 +34,18 @@ struct EditableCellView: View {
             .background(Color.gray.opacity(0.1))
             .cornerRadius(6)
             .onTapGesture {
+                // Initialize the draft from current bound value
+                draftText = text
                 isEditing = true
             }
             .sheet(isPresented: Binding(
-                get: {
-                    isEditing && isEditable
-                },
-                set: { newValue in
-                    isEditing = newValue
-                }
+                get: { isEditing && isEditable },
+                set: { newValue in isEditing = newValue }
             )) {
                 makeSheet()
             }
             .onAppear {
+                // Keep existing contact preselect when rendering cells (non-blocking)
                 if !contactOptions.isEmpty {
                     selectedNames = Set(
                         text.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
@@ -54,7 +53,7 @@ struct EditableCellView: View {
                 }
             }
     }
-    
+
     private func makeSheet() -> some View {
         VStack {
             Text("Edit Content")
@@ -68,38 +67,50 @@ struct EditableCellView: View {
             } else if !contactOptions.isEmpty {
                 buildContactSheet()
             } else {
-                TextEditor(text: $text)
+                // Bind editor to the draft
+                TextEditor(text: $draftText)
                     .padding()
             }
 
             HStack(spacing: 40) {
                 if columnType == .date {
                     Button("Clear date") {
-                        text = ""
+                        draftText = ""
                     }
                     .foregroundColor(.red)
                 }
-                
-                Button("Close") {
+
+                Button("Done") {
+                    // Commit the staged value and close
+                    text = draftText
                     isEditing = false
                 }
             }
             .padding(.bottom, 16)
         }
+        .onAppear {
+            // Re-seed draft (and contact selection) each time the sheet shows
+            draftText = text
+            if !contactOptions.isEmpty {
+                selectedNames = Set(
+                    draftText.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                )
+            }
+        }
         .presentationDetents([.medium, .large])
     }
-    
+
     private func buildDateSheet() -> some View {
         let bindingDate = Binding<Date>(
             get: {
                 let formatter = DateFormatter()
                 formatter.dateFormat = "MM/dd/yy"
-                return formatter.date(from: text) ?? Date()
+                return formatter.date(from: draftText) ?? Date()
             },
             set: { newDate in
                 let formatter = DateFormatter()
                 formatter.dateFormat = "MM/dd/yy"
-                text = formatter.string(from: newDate)
+                draftText = formatter.string(from: newDate)
             }
         )
 
@@ -108,10 +119,10 @@ struct EditableCellView: View {
             .labelsHidden()
             .padding()
     }
-    
+
     private func buildPickerSheet() -> some View {
-        Picker("Select Value", selection: $text) {
-            ForEach([""] + pickListValues.sorted(by: { $0 < $1 }), id: \.self) { value in
+        Picker("Select Value", selection: $draftText) {
+            ForEach([""] + pickListValues.sorted(), id: \.self) { value in
                 Text(value).tag(value)
             }
         }
@@ -140,7 +151,8 @@ struct EditableCellView: View {
                     } else {
                         selectedNames.insert(value)
                     }
-                    text = selectedNames.sorted().joined(separator: ", ")
+                    // Stage the concatenated selection
+                    draftText = selectedNames.sorted().joined(separator: ", ")
                 }
             }
         }

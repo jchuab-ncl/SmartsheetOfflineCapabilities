@@ -53,11 +53,10 @@ class Coordinator: NSObject, SpreadsheetViewDelegate {
 }
 
 extension Coordinator: CustomEditableCellDelegate {
-    
     func didChangeText(newValue: String, oldValue: String, rowId: Int, columnId: Int) {
-        Task {
-            do {
-                try await sheetService.addSheetHasUpdatesToPublish(
+        /// Saving the changes that the user mades in memory so this could be saved if the user clicks on Save button
+        sheetService.addSheetWithUpdatesToPublishInMemoryRepo(sheet:
+                .init(
                     sheetId: sheetContentDTO.id,
                     name: sheetContentDTO.name,
                     newValue: newValue,
@@ -65,11 +64,7 @@ extension Coordinator: CustomEditableCellDelegate {
                     rowId: rowId,
                     columnId: columnId
                 )
-            } catch {
-                print("❌ Error marking sheet as pending to update. Sheet ID: \(sheetContentDTO.id)")
-            }
-            print("✅ Text changed: NewValue: \(newValue) OldValue: \(oldValue) RowId: \(rowId) ColumnId: \(columnId)")
-        }
+        )
     }
 }
 
@@ -163,9 +158,13 @@ extension Coordinator: SpreadsheetViewDataSource {
         case .abstractDateTime, .contactList, .multiContactList, .checkbox, .duration, .predecessor, .textNumber:
             cell.text = value
         case .date:
-            cell.text = value.asFormattedDate()
+            if let value = cellData?.value {
+                cell.text = value.asFormattedDate(inputFormat: "yyyy-MM-dd", outputFormat: "MM/dd/yy")
+            }
         case .dateTime:
-            cell.text = value.asFormattedDate(inputFormat: "yyyy-MM-dd'T'HH:mm:ssZ", outputFormat: "MM/dd/yy h:mm a")
+            if let value = cellData?.value {
+                cell.text = value.asFormattedDate(inputFormat: "yyyy-MM-dd'T'HH:mm:ssZ", outputFormat: "MM/dd/yy h:mm a")
+            }            
         case .multiPicklist, .picklist:
             cell.pickListValues = column.options
             cell.text = value

@@ -44,9 +44,8 @@ final class SheetListViewModel: ObservableObject {
            .assign(to: \.isInternetAvailable, on: self)
            .store(in: &cancellables)
                 
-        sheetService.resultSheetHasUpdatesToPublishDTO
+        sheetService.sheetWithUpdatesToPublishStorageRepo
             .receive(on: DispatchQueue.main)
-            .removeDuplicates()
             .sink(receiveValue: { [weak self] result in
                 self?.sheetsListHasUpdatesToPublish = result
             })

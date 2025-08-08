@@ -4,28 +4,29 @@
 //
 //  Created by Jeann Luiz Chuab on 06/08/25.
 //
-import SwiftData
 
+import Foundation
 import SwiftData
 
 public struct CachedSheetHasUpdatesToPublishDTO: Identifiable, Hashable, Sendable {
-    public var id: Int
-    public var name: String
+    public var id: Int = UUID().hashValue
+    public var sheetId: Int
+    public var sheetName: String
     public var newValue: String
     public var oldValue: String
     public var rowId: Int
     public var columnId: Int
 
     public init(
-        id: Int,
+        sheetId: Int,
         name: String,
         newValue: String,
         oldValue: String,
         rowId: Int,
         columnId: Int
     ) {
-        self.id = id
-        self.name = name
+        self.sheetId = sheetId
+        self.sheetName = name
         self.newValue = newValue
         self.oldValue = oldValue
         self.rowId = rowId
@@ -33,8 +34,8 @@ public struct CachedSheetHasUpdatesToPublishDTO: Identifiable, Hashable, Sendabl
     }
 
     public init(from model: CachedSheetHasUpdatesToPublish) {
-        self.id = model.id
-        self.name = model.name
+        self.sheetId = model.sheetId
+        self.sheetName = model.name
         self.newValue = model.newValue
         self.oldValue = model.oldValue
         self.rowId = model.rowId
@@ -44,7 +45,7 @@ public struct CachedSheetHasUpdatesToPublishDTO: Identifiable, Hashable, Sendabl
 
 @Model
 public final class CachedSheetHasUpdatesToPublish {
-    public var id: Int
+    public var sheetId: Int
     public var name: String
     public var newValue: String
     public var oldValue: String
@@ -52,14 +53,14 @@ public final class CachedSheetHasUpdatesToPublish {
     public var columnId: Int
 
     public init(
-        id: Int,
+        sheetId: Int,
         name: String,
         newValue: String,
         oldValue: String,
         rowId: Int,
         columnId: Int
     ) {
-        self.id = id
+        self.sheetId = sheetId
         self.name = name
         self.newValue = newValue
         self.oldValue = oldValue

@@ -147,12 +147,12 @@ struct SheetListView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(sheet.name)
                     .font(.headline)
-
-                Text("Modified: \(sheet.modifiedAt)")
+                                                
+                Text("Modified: \(sheet.modifiedAt.asFormattedDate(inputFormat: "yyyy-MM-dd'T'HH:mm:ssZ", outputFormat: "MM/dd/yy h:mm a"))")
                     .font(.footnote)
                     .foregroundColor(.secondary)
                 
-                if viewModel.sheetsListHasUpdatesToPublish.first(where: { $0.id == sheet.id }) != nil {
+                if viewModel.sheetsListHasUpdatesToPublish.first(where: { $0.sheetId == sheet.id }) != nil {
                     Text("Sheet has content to be sent to server.")
                         .foregroundStyle(.red)
                         .font(.footnote)

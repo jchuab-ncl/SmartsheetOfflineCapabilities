@@ -38,11 +38,11 @@ final class SheetContentViewModel: ObservableObject {
         
         self.sheetService = sheetService
         
-        sheetService.resultSheetHasUpdatesToPublishDTO
+        sheetService.sheetWithUpdatesToPublishMemoryRepo
             .receive(on: DispatchQueue.main)
             .removeDuplicates()
             .sink(receiveValue: { [weak self] result in
-                self?.showSaveButton = result.first(where: { $0.id == self?.sheetContentDTO.id }) != nil
+                self?.showSaveButton = result.first(where: { $0.sheetId == self?.sheetContentDTO.id }) != nil
             })
             .store(in: &cancellables)
     }
@@ -64,7 +64,32 @@ final class SheetContentViewModel: ObservableObject {
         }
     }
     
-    func saveSheetContent() {
-        
+    func saveSheetContent(sheetId: Int, completion: @escaping () -> Void) {
+        Task {
+            status = .loading
+            do {
+                try await sheetService.commitMemoryToStorage(sheetId: sheetId)
+                //TODO: Dismiss the screen
+                status = .success
+                completion()
+            } catch {
+                status = .error
+            }
+        }
+    }
+    
+    func removeSheetContentChanges(sheetId: Int) {
+        Task {
+            status = .loading
+            
+            do {
+                try await sheetService.removeSheetHasUpdatesToPublish(sheetId: sheetId)
+                try await sheetService.getSheetListHasUpdatesToPublish()
+                
+                status = .success
+            } catch {
+                status = .error
+            }
+        }
     }
 }

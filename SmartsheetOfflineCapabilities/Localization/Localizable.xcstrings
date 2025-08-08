@@ -10,7 +10,10 @@
     "Clear date" : {
 
     },
-    "Close" : {
+    "Discard changes?" : {
+
+    },
+    "Done" : {
 
     },
     "Edit Content" : {
@@ -27,6 +30,9 @@
       }
     },
     "Modified: %@" : {
+
+    },
+    "No" : {
 
     },
     "No files to display" : {
@@ -85,6 +91,12 @@
           }
         }
       }
+    },
+    "Yes" : {
+
+    },
+    "You have unsaved changes. Are you sure you want to leave without saving?" : {
+
     }
   },
   "version" : "1.0"
