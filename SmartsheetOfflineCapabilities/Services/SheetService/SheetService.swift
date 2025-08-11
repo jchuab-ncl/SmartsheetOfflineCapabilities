@@ -19,6 +19,7 @@ public protocol SheetServiceProtocol {
     func addSheetWithUpdatesToPublishInMemoryRepo(sheet: CachedSheetHasUpdatesToPublishDTO)
     func removeSheetHasUpdatesToPublish(sheetId: Int) async throws
     func commitMemoryToStorage(sheetId: Int) async throws
+    func pushChangesToApi(sheetId: Int) async throws
 }
 
 public final class SheetService: SheetServiceProtocol {
@@ -242,6 +243,75 @@ public final class SheetService: SheetServiceProtocol {
         }
                         
         print("✅ Commit complete. Cleared in-memory repo.")
+    }
+    
+    public func pushChangesToApi(sheetId: Int) async throws {
+        // 1) Build payload from stored items for this sheet
+        let items = protectedSheetHasUpdatesToPublishStorageRepo.filter { $0.sheetId == sheetId }
+        guard !items.isEmpty else {
+            print("ℹ️ No in-memory changes to push for sheet \(sheetId).")
+            return
+        }
+
+        // Group by rowId -> array of cells to update
+        let groupedByRow = Dictionary(grouping: items, by: { $0.rowId })
+
+        // Minimal payload to match API (value-only cells). Extend if you need image/objectValue later.
+        struct CellUpdate: Codable {
+            let columnId: Int
+            let value: String
+        }
+        struct RowUpdate: Codable {
+            // Smartsheet accepts numeric; sample shows string. We'll encode as String to match the sample.
+            let id: String
+            let cells: [CellUpdate]
+        }
+
+        let rowsPayload: [RowUpdate] = groupedByRow.map { (rowId, cells) in
+            RowUpdate(
+                id: String(rowId),
+                cells: cells.map { CellUpdate(columnId: $0.columnId, value: $0.newValue) }
+            )
+        }.sorted { $0.id < $1.id } // deterministic
+
+        let encoder = JSONEncoder()
+        // Keep the JSON compact like the curl; for debugging pretty print is handy:
+        // encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+        let body = try encoder.encode(rowsPayload)
+
+        // 2) Make request
+        var headers = makeHeaders()
+        headers["Content-Type"] = "application/json"
+
+        let url = try baseSheetsURL(path: "/sheets/\(sheetId)/rows")
+
+        let result = await httpApiClient.request(
+            url: url,
+            method: .PUT,
+            headers: headers,
+            queryParameters: nil,
+            body: body,
+            encoding: .json
+        )
+
+        // 3) Handle response
+        switch result {
+        case .success(let data):
+            // Optionally log the response for debugging
+            if let str = String(data: data, encoding: .utf8) {
+                print("✅ Pushed \(items.count) update(s) to sheet \(sheetId). Response: \(str)")
+            } else {
+                print("✅ Pushed \(items.count) update(s) to sheet \(sheetId).")
+            }
+            
+            // Remove only the items for this sheet from storage
+            try await removePendingSheetContentFromStorage(sheetId: sheetId)
+        case .failure(let error):
+            print("❌ Failed to push updates for sheet \(sheetId): \(error)")
+            throw NSError(domain: "PushChangesError", code: 0, userInfo: [
+                NSLocalizedDescriptionKey: "Failed to push changes to API: \(error)"
+            ])
+        }
     }
     
     // MARK: Private methods
@@ -498,6 +568,36 @@ public final class SheetService: SheetServiceProtocol {
                 throw error
             }
         }
+    }
+    
+    private func removePendingSheetContentFromStorage(sheetId: Int) async throws {
+        try await MainActor.run {
+            let context = modelContext
+            // Fetch all pending update records for this sheet from storage
+            let descriptor = FetchDescriptor<CachedSheetHasUpdatesToPublish>(
+                predicate: #Predicate { $0.sheetId == sheetId }
+            )
+            do {
+                let toDelete = try context.fetch(descriptor)
+                guard !toDelete.isEmpty else {
+                    print("ℹ️ No pending sheet content found in storage for sheetId \(sheetId). Nothing to remove.")
+                    return
+                }
+
+                toDelete.forEach { context.delete($0) }
+                try context.save()
+                print("✅ Removed \(toDelete.count) pending update record(s) from storage for sheetId \(sheetId).")
+            } catch {
+                print("❌ Failed to remove pending sheet content from storage for sheetId \(sheetId): \(error)")
+                throw error
+            }
+
+            // Also clear the in-memory mirror for this sheet (if any)
+            protectedSheetHasUpdatesToPublishStorageRepo.removeAll { $0.sheetId == sheetId }
+        }
+
+        // Refresh published storage repo after mutation
+        try? await getSheetListHasUpdatesToPublish()
     }
     
     private func storeSheetContent(sheetListResponse: SheetContent) async throws {

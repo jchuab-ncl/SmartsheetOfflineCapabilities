@@ -37,13 +37,13 @@
          contextName = "Coordinator.makeDataCell(for:in:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
-               value = "cellData?.value.asFormattedDate(inputFormat: &quot;yyyy-mm-dd&quot;, outputFormat: &quot;MM/dd/yy&quot;)">
+               value = "cellData?.displayValue">
             </PersistentString>
             <PersistentString
                value = "cellData?.value">
             </PersistentString>
             <PersistentString
-               value = "cellData?.displayValue">
+               value = "cellData?.value.asFormattedDate(inputFormat: &quot;yyyy-mm-dd&quot;, outputFormat: &quot;MM/dd/yy&quot;)">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -75,14 +75,6 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "SheetServiceTests.testGetSheetsFailure():SheetServiceTests.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "(error as NSError).domain">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
          contextName = "closure #1 in LoginView.makeScreenContent():LoginView.swift">
          <PersistentStrings>
             <PersistentString
@@ -91,16 +83,24 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
+         contextName = "SheetServiceTests.testGetSheetsFailure():SheetServiceTests.swift">
          <PersistentStrings>
             <PersistentString
-               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })?">
+               value = "(error as NSError).domain">
             </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
             <PersistentString
                value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells">
             </PersistentString>
             <PersistentString
                value = "self.sheetContentDTO?.columns[indexPath.column - 1]">
+            </PersistentString>
+            <PersistentString
+               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })?">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -112,6 +112,14 @@
             </PersistentString>
             <PersistentString
                value = "sheetContentDTO">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #1 in closure #2 in closure #1 in SheetListView.makeCardSyncView(sheet:):SheetListView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "viewModel.statusSync">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -165,18 +173,18 @@
          contextName = "closure #1 in SheetService.getSheetContentOnline(sheetId:):SheetService.swift">
       </ContextState>
       <ContextState
-         contextName = "closure #2 in EditableCellView.body.getter:EditableCellView.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "isEditing &amp;&amp; isEditable">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
          contextName = "SheetService.updateSheetContentOnStorage(sheetId:):SheetService.swift">
          <PersistentStrings>
             <PersistentString
                value = "protectedSheetHasUpdatesToPublishStorageRepo">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in EditableCellView.body.getter:EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "isEditing &amp;&amp; isEditable">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -217,10 +225,10 @@
          contextName = "SpreadsheetViewWrapper.Coordinator.numberOfColumns(in:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
-               value = "self.cachedSheetContentDTO">
+               value = "self.cachedSheetContentDTO?.columns.count">
             </PersistentString>
             <PersistentString
-               value = "self.cachedSheetContentDTO?.columns.count">
+               value = "self.cachedSheetContentDTO">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

@@ -224,8 +224,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "84"
             endingLineNumber = "84"
-            landmarkName = "testGetSheetsFailure()"
-            landmarkType = "7">
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -302,8 +302,8 @@
             filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "313"
-            endingLineNumber = "313"
+            startingLineNumber = "383"
+            endingLineNumber = "383"
             landmarkName = "makeHeaders()"
             landmarkType = "7">
          </BreakpointContent>
@@ -318,8 +318,8 @@
             filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "554"
-            endingLineNumber = "554">
+            startingLineNumber = "654"
+            endingLineNumber = "654">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -365,22 +365,6 @@
             startingLineNumber = "155"
             endingLineNumber = "155"
             landmarkName = "makeCard(sheet:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "FABDC165-C7AA-460C-8602-D7C82BC099B6"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "391"
-            endingLineNumber = "391"
-            landmarkName = "getSheetListFromStorage()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -442,13 +426,13 @@
             filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "194"
-            endingLineNumber = "194"
+            startingLineNumber = "195"
+            endingLineNumber = "195"
             landmarkName = "removeSheetHasUpdatesToPublish(sheetId:)"
             landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "DF9B40F2-57BE-4793-8143-EB16C5E38C77 - 3eadc0bc6165665a"
+                  uuid = "DF9B40F2-57BE-4793-8143-EB16C5E38C77 - 3eadc0bc61656679"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -458,11 +442,11 @@
                   urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "194"
-                  endingLineNumber = "194">
+                  startingLineNumber = "195"
+                  endingLineNumber = "195">
                </Location>
                <Location
-                  uuid = "DF9B40F2-57BE-4793-8143-EB16C5E38C77 - 8f20944b56ab785d"
+                  uuid = "DF9B40F2-57BE-4793-8143-EB16C5E38C77 - 8f20944b56ab787e"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -472,8 +456,8 @@
                   urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "194"
-                  endingLineNumber = "194">
+                  startingLineNumber = "195"
+                  endingLineNumber = "195">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -488,13 +472,13 @@
             filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "162"
-            endingLineNumber = "162"
+            startingLineNumber = "163"
+            endingLineNumber = "163"
             landmarkName = "addSheetWithUpdatesToPublishInMemoryRepo(sheet:)"
             landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "0A51033A-5CDD-4B45-B0CE-7961E0AAF711 - d8897710f0a9ee4c"
+                  uuid = "0A51033A-5CDD-4B45-B0CE-7961E0AAF711 - d8897710f0a9efaf"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -504,11 +488,11 @@
                   urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "162"
-                  endingLineNumber = "162">
+                  startingLineNumber = "163"
+                  endingLineNumber = "163">
                </Location>
                <Location
-                  uuid = "0A51033A-5CDD-4B45-B0CE-7961E0AAF711 - 56f1df63d0089bf5"
+                  uuid = "0A51033A-5CDD-4B45-B0CE-7961E0AAF711 - 56f1df63d0089bd4"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -518,8 +502,8 @@
                   urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "163"
-                  endingLineNumber = "163">
+                  startingLineNumber = "164"
+                  endingLineNumber = "164">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -534,13 +518,13 @@
             filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "205"
-            endingLineNumber = "205"
+            startingLineNumber = "206"
+            endingLineNumber = "206"
             landmarkName = "commitMemoryToStorage(sheetId:)"
             landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "C73ACAFE-2A64-4122-BEB0-D9CF1495598C - 5e60e70abd2892d3"
+                  uuid = "C73ACAFE-2A64-4122-BEB0-D9CF1495598C - 5e60e70abd289232"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -550,11 +534,11 @@
                   urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "205"
-                  endingLineNumber = "205">
+                  startingLineNumber = "206"
+                  endingLineNumber = "206">
                </Location>
                <Location
-                  uuid = "C73ACAFE-2A64-4122-BEB0-D9CF1495598C - f59d8dc1754156cd"
+                  uuid = "C73ACAFE-2A64-4122-BEB0-D9CF1495598C - f59d8dc17541562c"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -564,11 +548,11 @@
                   urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "205"
-                  endingLineNumber = "205">
+                  startingLineNumber = "206"
+                  endingLineNumber = "206">
                </Location>
                <Location
-                  uuid = "C73ACAFE-2A64-4122-BEB0-D9CF1495598C - 33e58587976541b3"
+                  uuid = "C73ACAFE-2A64-4122-BEB0-D9CF1495598C - 33e5858797654152"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -578,8 +562,8 @@
                   urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "205"
-                  endingLineNumber = "205">
+                  startingLineNumber = "206"
+                  endingLineNumber = "206">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -594,40 +578,10 @@
             filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "457"
-            endingLineNumber = "457"
+            startingLineNumber = "527"
+            endingLineNumber = "527"
             landmarkName = "updateSheetContentOnStorage(sheetId:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "2B9B09FA-CED3-4CD6-A692-569A5579A7EB - 2a5e71ecad5cf1a9"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for SmartsheetOfflineCapabilities.SheetService.updateSheetContentOnStorage(sheetId: Swift.Int) async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "457"
-                  endingLineNumber = "457">
-               </Location>
-               <Location
-                  uuid = "2B9B09FA-CED3-4CD6-A692-569A5579A7EB - 127d292b7bda641c"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (SmartsheetOfflineCapabilities.CachedSheetHasUpdatesToPublishDTO) -&gt; Swift.Bool in SmartsheetOfflineCapabilities.SheetService.updateSheetContentOnStorage(sheetId: Swift.Int) async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "457"
-                  endingLineNumber = "457">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -640,13 +594,13 @@
             filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "150"
-            endingLineNumber = "150"
+            startingLineNumber = "151"
+            endingLineNumber = "151"
             landmarkName = "addSheetWithUpdatesToPublish_Storage(sheetId:name:newValue:oldValue:rowId:columnId:)"
             landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "35B096A2-0394-464D-9FE2-335074A7A073 - f4d66ece98574df1"
+                  uuid = "35B096A2-0394-464D-9FE2-335074A7A073 - f4d66ece98574dd2"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -656,11 +610,11 @@
                   urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "150"
-                  endingLineNumber = "150">
+                  startingLineNumber = "151"
+                  endingLineNumber = "151">
                </Location>
                <Location
-                  uuid = "35B096A2-0394-464D-9FE2-335074A7A073 - 1b7872921ca96dfc"
+                  uuid = "35B096A2-0394-464D-9FE2-335074A7A073 - 1b7872921ca96ddf"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -670,8 +624,8 @@
                   urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "150"
-                  endingLineNumber = "150">
+                  startingLineNumber = "151"
+                  endingLineNumber = "151">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -686,8 +640,8 @@
             filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "101"
-            endingLineNumber = "101"
+            startingLineNumber = "102"
+            endingLineNumber = "102"
             landmarkName = "getSheetListHasUpdatesToPublish()"
             landmarkType = "7">
          </BreakpointContent>
@@ -718,8 +672,8 @@
             filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "92"
-            endingLineNumber = "92"
+            startingLineNumber = "93"
+            endingLineNumber = "93"
             landmarkName = "getSheetListHasUpdatesToPublish()"
             landmarkType = "7">
          </BreakpointContent>
@@ -727,32 +681,48 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "9C868053-9DA3-41ED-93EE-04646D100D59"
+            uuid = "0B3839E3-7A0F-4BFA-B2CF-E8D83746A255"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Views/SpreadsheetView/SpreadsheetViewWrapper.swift"
+            filePath = "SmartsheetOfflineCapabilities/Views/SheetList/SheetListView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "147"
-            endingLineNumber = "147"
-            landmarkName = "makeDataCell(for:in:)"
+            startingLineNumber = "193"
+            endingLineNumber = "193"
+            landmarkName = "makeCardSyncView(sheet:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "1B4ABD63-82CA-4409-A373-4E544361D699"
+            uuid = "782E047F-0E2E-489B-84E2-B609191E7E6D"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SmartsheetOfflineCapabilities/Views/SheetList/SheetListView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "200"
+            endingLineNumber = "200"
+            landmarkName = "makeCardSyncView(sheet:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "AFF1F6D8-2A8D-4001-A43D-67606AB7CC14"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SmartsheetOfflineCapabilities/Views/SpreadsheetView/SpreadsheetViewWrapper.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "161"
-            endingLineNumber = "161"
-            landmarkName = "makeDataCell(for:in:)"
+            startingLineNumber = "58"
+            endingLineNumber = "58"
+            landmarkName = "didChangeText(newValue:oldValue:rowId:columnId:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

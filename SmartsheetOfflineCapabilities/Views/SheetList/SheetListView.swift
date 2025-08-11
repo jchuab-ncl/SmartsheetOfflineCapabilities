@@ -46,14 +46,14 @@ struct SheetListView: View {
                         List(filteredFiles) { file in
                             makeCard(sheet: file)
                         }
-                        
-                        Spacer()
-                        
-                        if !viewModel.isInternetAvailable {
-                            Text("Offline mode. No connection available at the moment.")
-                                .font(.footnote)
-                                .foregroundColor(.secondary)
-                        }
+                    }
+                    
+                    Spacer()
+                    
+                    if !viewModel.isInternetAvailable {
+                        Text("Offline mode. No connection available at the moment.")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
                     }
                 }
                 .refreshable {
@@ -139,32 +139,82 @@ struct SheetListView: View {
             }
         }
     }
-
+    
     private func makeCard(sheet: CachedSheetDTO) -> some View {
-        Button(action: {
-            selectedFile = sheet
-        }) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(sheet.name)
-                    .font(.headline)
-                                                
-                Text("Modified: \(sheet.modifiedAt.asFormattedDate(inputFormat: "yyyy-MM-dd'T'HH:mm:ssZ", outputFormat: "MM/dd/yy h:mm a"))")
+        // Card container is now a plain view with onTapGesture,
+        // so the inner button can receive taps normally.
+        VStack(alignment: .leading, spacing: 6) {
+            Text(sheet.name)
+                .font(.headline)
+
+            Text("Modified: \(sheet.modifiedAt.asFormattedDate(inputFormat: "yyyy-MM-dd'T'HH:mm:ssZ", outputFormat: "MM/dd/yy h:mm a"))")
+                .font(.footnote)
+                .foregroundColor(.secondary)
+
+            if viewModel.sheetsContentList.first(where: { $0.id == sheet.id }) != nil {
+                Text("Available offline  ✅")
+                    .foregroundStyle(.green)
                     .font(.footnote)
-                    .foregroundColor(.secondary)
-                
-                if viewModel.sheetsListHasUpdatesToPublish.first(where: { $0.sheetId == sheet.id }) != nil {
-                    Text("Sheet has content to be sent to server.")
-                        .foregroundStyle(.red)
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                }
             }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
+
+            if viewModel.isInternetAvailable && viewModel.sheetsListHasUpdatesToPublish.first(where: { $0.sheetId == sheet.id }) != nil {
+                makeCardSyncView(sheet: sheet)
+            }
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(.vertical, 8)
+        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+        )
+        .contentShape(Rectangle()) // full-card tap target
+        .onTapGesture {
+            selectedFile = sheet
+        }
+        .accessibilityAddTraits(.isButton)
+    }
+    
+    private func makeCardSyncView(sheet: CachedSheetDTO) -> some View {
+        VStack(alignment: .leading) {
+            Text("Sheet has content to be sent to server.")
+                .foregroundStyle(.red)
+                .font(.footnote)
+
+            Button(action: {
+                print(">>> Sync now button tapped for sheet: \(sheet.id)")
+                viewModel.syncData(sheetId: sheet.id)
+            }, label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Colors.blueNCL)
+                        .frame(height: 44)
+                    HStack {
+                        if viewModel.statusSync[sheet.id] == nil || viewModel.statusSync[sheet.id] == .success {
+                            Text("Sync now")
+                                .foregroundStyle(.white)
+                                .fontWeight(.medium)
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .foregroundStyle(.white)
+                        } else if viewModel.statusSync[sheet.id] == .loading {
+                            Text("Sync in progress")
+                                .foregroundStyle(.white)
+                                .fontWeight(.medium)
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else if viewModel.statusSync[sheet.id] == .error {
+                            Text("An error has occurred. Try again later.")
+                                .foregroundStyle(.white)
+                                .fontWeight(.medium)
+                            Image(systemName: "exclamationmark.icloud")
+                                .foregroundStyle(.white)
+                        }
+                    }
+                }
+            })
+            .buttonStyle(.plain)
+        }
+        .padding(.top, 8)
     }
 
     private func formattedDate(_ date: Date) -> String {

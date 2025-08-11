@@ -15,8 +15,10 @@ final class SheetListViewModel: ObservableObject {
 
     @Published var isInternetAvailable: Bool = true
     @Published var sheetsList: [CachedSheetDTO] = []
+    @Published var sheetsContentList: [SheetContentDTO] = []
     @Published var sheetsListHasUpdatesToPublish: [CachedSheetHasUpdatesToPublishDTO] = []
     @Published var status: ProgressStatus = .initial
+    @Published var statusSync: [Int: ProgressStatus] = [:]
     
     // MARK: Private Properties
     
@@ -61,11 +63,36 @@ final class SheetListViewModel: ObservableObject {
             do {
                 self.sheetsList.removeAll()
                 self.sheetsList = try await sheetService.getSheetList()
+                
+                for sheet in self.sheetsList {
+                    let result = try await sheetService.getSheetContent(sheetId: sheet.id)
+                    sheetsContentList.append(result)
+                }
+                
                 try await sheetService.getSheetListHasUpdatesToPublish()
                 
                 status = .success
             } catch {
                 status = .error
+            }
+        }
+    }
+    
+    func syncData(sheetId: Int) {
+        Task {
+            statusSync[sheetId] = .loading
+            
+            do {
+    //            // TODO: Remove
+    //            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+    //                self.sheetsListHasUpdatesToPublish = []
+    //                self.statusSync[sheetId] = .success
+    //            }
+                try await sheetService.pushChangesToApi(sheetId: sheetId)
+                self.statusSync[sheetId] = .success
+//                self.sheetsList = try await sheetService.getSheetList()
+            } catch {
+                statusSync[sheetId] = .error
             }
         }
     }

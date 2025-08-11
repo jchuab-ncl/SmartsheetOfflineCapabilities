@@ -4,6 +4,12 @@
     "" : {
 
     },
+    "An error has occurred. Try again later." : {
+
+    },
+    "Available offline  ✅" : {
+
+    },
     "Back" : {
 
     },
@@ -68,6 +74,12 @@
 
     },
     "Something went wrong." : {
+
+    },
+    "Sync in progress" : {
+
+    },
+    "Sync now" : {
 
     },
     "Username" : {
