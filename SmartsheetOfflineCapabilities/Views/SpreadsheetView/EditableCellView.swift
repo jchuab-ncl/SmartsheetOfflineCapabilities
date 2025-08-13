@@ -9,14 +9,13 @@ import SwiftUI
 
 struct EditableCellView: View {
     @Binding var text: String
+    @State var selectedContact: Set<ContactDTO> = []
+    
     @FocusState private var isFocused: Bool
     @State private var isEditing: Bool = false
 
     // Stage edits here; commit to `text` on Done
-    @State private var draftText: String = ""
-
-    // State for contact selection
-    @State private var selectedNames: Set<String> = []
+    @State private var draftText: String = ""        
 
     // MARK: Private properties
     var isEditable: Bool = false
@@ -45,12 +44,8 @@ struct EditableCellView: View {
                 makeSheet()
             }
             .onAppear {
-                // Keep existing contact preselect when rendering cells (non-blocking)
-                if !contactOptions.isEmpty {
-                    selectedNames = Set(
-                        text.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                    )
-                }
+                guard !contactOptions.isEmpty else { return }
+                selectedContact = mapDraftTextToSelectedContacts(text)
             }
     }
 
@@ -92,9 +87,7 @@ struct EditableCellView: View {
             // Re-seed draft (and contact selection) each time the sheet shows
             draftText = text
             if !contactOptions.isEmpty {
-                selectedNames = Set(
-                    draftText.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                )
+                selectedContact = mapDraftTextToSelectedContacts(draftText)
             }
         }
         .presentationDetents([.medium, .large])
@@ -134,11 +127,12 @@ struct EditableCellView: View {
     private func buildContactSheet() -> some View {
         // Multi-select list of contacts with checkmarks
         List {
-            ForEach(contactOptions.sorted(by: { $0.name < $1.name }).map({ $0.name }), id: \.self) { value in
-                let isSelected = selectedNames.contains(value)
+            ForEach(contactOptions.sorted(by: { $0.name < $1.name }), id: \.self) { contact in
+                
                 HStack {
-                    Text(value)
+                    Text(contact.name)
                     Spacer()
+                    let isSelected = selectedContact.contains(contact)
                     if isSelected {
                         Image(systemName: "checkmark")
                             .foregroundColor(.blue)
@@ -146,16 +140,32 @@ struct EditableCellView: View {
                 }
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    if isSelected {
-                        selectedNames.remove(value)
-                    } else {
-                        selectedNames.insert(value)
-                    }
-                    // Stage the concatenated selection
-                    draftText = selectedNames.sorted().joined(separator: ", ")
+                    tapGestureAction(contact: contact)
                 }
             }
         }
         .listStyle(.insetGrouped)
+    }
+    
+    private func tapGestureAction(contact: ContactDTO) {
+        let isSelected = selectedContact.contains(contact)
+        if isSelected {
+            selectedContact.remove(contact)
+        } else {
+            selectedContact.insert(contact)
+        }
+        
+        // Stage the concatenated selection
+        draftText = selectedContact.sorted(by: { $0.name < $1.name }).map { $0.name }.joined(separator: ", ")
+    }
+    
+    private func mapDraftTextToSelectedContacts(_ text: String) -> Set<ContactDTO> {
+        return Set(
+            text.split(separator: ",").map { substring in
+                let name = substring.trimmingCharacters(in: .whitespaces)
+                let contact = contactOptions.first { $0.name == name }
+                return contact ?? .init(email: "", name: "")
+            }
+        )
     }
 }

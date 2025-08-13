@@ -18,6 +18,22 @@
          contextName = "closure #1 in closure #1 in SheetService.getSheetListHasUpdatesToPublish():SheetService.swift">
       </ContextState>
       <ContextState
+         contextName = "closure #3 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.selectedContact">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "EditableCellView.tapGestureAction(contact:):EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedContact">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in SelectFileViewModel.init(sheetService:):SelectFileViewModel.swift">
          <PersistentStrings>
             <PersistentString
@@ -37,13 +53,10 @@
          contextName = "Coordinator.makeDataCell(for:in:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
-               value = "cellData?.displayValue">
+               value = "value">
             </PersistentString>
             <PersistentString
-               value = "cellData?.value">
-            </PersistentString>
-            <PersistentString
-               value = "cellData?.value.asFormattedDate(inputFormat: &quot;yyyy-mm-dd&quot;, outputFormat: &quot;MM/dd/yy&quot;)">
+               value = "column.type">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -132,6 +145,25 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #4 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in closure #1 in EditableCellView.buildContactSheet():EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedContact">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #5 in EditableCellView.body.getter:EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "contactOptions">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "KeychainService.save&lt;SmartsheetOfflineCapabilities.SmartsheetTokenResponse&gt;(_:for:):KeychainService.swift">
          <PersistentStrings>
             <PersistentString
@@ -185,6 +217,14 @@
          <PersistentStrings>
             <PersistentString
                value = "isEditing &amp;&amp; isEditable">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in closure #2 in closure #1 in EditableCellView.buildContactSheet():EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedContact">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

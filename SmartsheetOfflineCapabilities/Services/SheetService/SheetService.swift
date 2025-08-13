@@ -15,7 +15,8 @@ public protocol SheetServiceProtocol {
     func getSheetList() async throws -> [CachedSheetDTO]
     func getSheetListHasUpdatesToPublish() async throws
     func getSheetContent(sheetId: Int) async throws -> SheetContentDTO
-    func addSheetWithUpdatesToPublish_Storage(sheetId: Int, name: String, newValue: String, oldValue: String, rowId: Int, columnId: Int) async throws
+    func getSheetContentOnline(sheetId: Int) async throws -> SheetContentDTO
+    func addSheetWithUpdatesToPublish_Storage(columnType: String, sheetId: Int, name: String, newValue: String, oldValue: String, rowId: Int, columnId: Int) async throws
     func addSheetWithUpdatesToPublishInMemoryRepo(sheet: CachedSheetHasUpdatesToPublishDTO)
     func removeSheetHasUpdatesToPublish(sheetId: Int) async throws
     func commitMemoryToStorage(sheetId: Int) async throws
@@ -111,11 +112,16 @@ public final class SheetService: SheetServiceProtocol {
     /// - Throws: An error if the sheet cannot be fetched from either source.
     public func getSheetContent(sheetId: Int) async throws -> SheetContentDTO {
         var sheet: SheetContentDTO = .empty
+        let isInternetAvailable = await httpApiClient.isInternetAvailable()
         do {
-            sheet = try await getSheetContentFromStorage(sheetId: sheetId)
+            /// If there's internet connection and there's no updates to publish, download last sheet content
+            if isInternetAvailable && protectedSheetHasUpdatesToPublishStorageRepo.isEmpty {
+                sheet = try await getSheetContentOnline(sheetId: sheetId)
+            } else {
+                sheet = try await getSheetContentFromStorage(sheetId: sheetId)
+            }
         } catch {
             // If there's no sheet stored offline we try to download the sheet
-            let isInternetAvailable = await httpApiClient.isInternetAvailable()
             if isInternetAvailable {
                 sheet = try await getSheetContentOnline(sheetId: sheetId)
             } else {
@@ -127,6 +133,7 @@ public final class SheetService: SheetServiceProtocol {
     }
     
     public func addSheetWithUpdatesToPublish_Storage(
+        columnType: String,
         sheetId: Int,
         name: String,
         newValue: String,
@@ -136,6 +143,7 @@ public final class SheetService: SheetServiceProtocol {
     ) async throws {
         do {
             let newItem = CachedSheetHasUpdatesToPublish(
+                columnType: columnType,
                 sheetId: sheetId,
                 name: name,
                 newValue: newValue,
@@ -218,6 +226,7 @@ public final class SheetService: SheetServiceProtocol {
                 currentItem = item
                 
                 try await addSheetWithUpdatesToPublish_Storage(
+                    columnType: item.columnType,
                     sheetId: item.sheetId,
                     name: item.sheetName,
                     newValue: item.newValue,
@@ -305,7 +314,7 @@ public final class SheetService: SheetServiceProtocol {
             }
             
             // Remove only the items for this sheet from storage
-            try await removePendingSheetContentFromStorage(sheetId: sheetId)
+            try await removePendingSheetContentFromStorage(sheetId: sheetId)                        
         case .failure(let error):
             print("❌ Failed to push updates for sheet \(sheetId): \(error)")
             throw NSError(domain: "PushChangesError", code: 0, userInfo: [
@@ -314,13 +323,11 @@ public final class SheetService: SheetServiceProtocol {
         }
     }
     
-    // MARK: Private methods
-    
     /// Fetches detailed information for a specific sheet from the Smartsheet API.
     /// - Parameter sheetId: The unique identifier of the sheet to retrieve.
     /// - Returns: A `CachedSheetContentDTO` object containing detailed information about the requested sheet.
     /// - Throws: An error if the network request fails or the data cannot be decoded.
-    private func getSheetContentOnline(sheetId: Int) async throws -> SheetContentDTO {
+    public func getSheetContentOnline(sheetId: Int) async throws -> SheetContentDTO {
         let result = await httpApiClient.request(
             url: try baseSheetsURL(path: "/sheets/\(sheetId)"),
             method: .GET,

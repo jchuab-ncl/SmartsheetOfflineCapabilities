@@ -83,14 +83,12 @@ final class SheetListViewModel: ObservableObject {
             statusSync[sheetId] = .loading
             
             do {
-    //            // TODO: Remove
-    //            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-    //                self.sheetsListHasUpdatesToPublish = []
-    //                self.statusSync[sheetId] = .success
-    //            }
                 try await sheetService.pushChangesToApi(sheetId: sheetId)
+                
+                // After pushing the changes we can download the last changes from the API
+                // TODO: This will change once we implement the conflict solving feature
+                _ = try await sheetService.getSheetContentOnline(sheetId: sheetId)
                 self.statusSync[sheetId] = .success
-//                self.sheetsList = try await sheetService.getSheetList()
             } catch {
                 statusSync[sheetId] = .error
             }

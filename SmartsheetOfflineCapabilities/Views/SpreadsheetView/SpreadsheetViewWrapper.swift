@@ -52,17 +52,52 @@ class Coordinator: NSObject, SpreadsheetViewDelegate {
     }
 }
 
-extension Coordinator: CustomEditableCellDelegate {
-    func didChangeText(newValue: String, oldValue: String, rowId: Int, columnId: Int) {
+extension Coordinator: CustomEditableCellDelegate {    
+    func didChangeText(
+        columnType: ColumnType,
+        newValue: String,
+        oldValue: String,
+        selectedContacts: Set<ContactDTO>,
+        rowId: Int,
+        columnId: Int
+    ) {
         /// Saving the changes that the user mades in memory so this could be saved if the user clicks on Save button
+        var value = ""
+        var selectedContactsArray: [CachedSheetContactUpdatesToPublishDTO] = []
+        
+        switch columnType {
+        case .abstractDateTime, .contactList, .multiContactList, .checkbox, .duration, .predecessor, .textNumber:
+            value = newValue
+            
+            if !selectedContacts.isEmpty {
+                selectedContactsArray = selectedContacts.map({
+                    .init(
+                        sheetId: sheetContentDTO.id,
+                        rowId: rowId,
+                        columnId: columnId,
+                        name: $0.name,
+                        email: $0.email
+                    ) })
+            }
+            
+        case .date:
+            value = newValue.asFormattedDate(inputFormat: "MM/dd/yy", outputFormat: "yyyy-MM-dd")
+        case .dateTime:
+            value = newValue.asFormattedDate(inputFormat: "MM/dd/yy h:mm a", outputFormat: "yyyy-MM-dd'T'HH:mm:ssZ")
+        case .multiPicklist, .picklist:
+            value = newValue
+        }
+        
         sheetService.addSheetWithUpdatesToPublishInMemoryRepo(sheet:
                 .init(
+                    columnType: columnType.rawValue,
                     sheetId: sheetContentDTO.id,
                     name: sheetContentDTO.name,
-                    newValue: newValue,
+                    newValue: value,
                     oldValue: oldValue,
                     rowId: rowId,
-                    columnId: columnId
+                    columnId: columnId,
+                    contacts: selectedContactsArray
                 )
         )
     }
@@ -156,6 +191,22 @@ extension Coordinator: SpreadsheetViewDataSource {
 
         switch column.type {
         case .abstractDateTime, .contactList, .multiContactList, .checkbox, .duration, .predecessor, .textNumber:
+            
+            if column.contactOptions.isEmpty {
+                cell.selectedContact = []
+            } else {
+                cell.pickListValues = column.options
+                
+                let names: [String] = cellData?.displayValue?.split(separator: ",").map {
+                    $0.trimmingCharacters(in: .whitespaces)
+                } ?? []
+                
+                let contacts: [ContactDTO] = column.contactOptions.filter { names.contains($0.name) }
+                
+                cell.selectedContact = Set(contacts)
+                cell.text = value
+            }
+            
             cell.text = value
         case .date:
             if let value = cellData?.value {
@@ -167,6 +218,7 @@ extension Coordinator: SpreadsheetViewDataSource {
             }            
         case .multiPicklist, .picklist:
             cell.pickListValues = column.options
+            cell.selectedContact = []
             cell.text = value
         }
 

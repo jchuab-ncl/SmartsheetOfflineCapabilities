@@ -10,13 +10,27 @@ import SpreadsheetView
 import SwiftUI
 
 protocol CustomEditableCellDelegate: AnyObject {
-    func didChangeText(newValue: String, oldValue: String, rowId: Int, columnId: Int)
+    func didChangeText(
+        columnType: ColumnType,
+        newValue: String,
+        oldValue: String,
+        selectedContacts: Set<ContactDTO>,
+        rowId: Int,
+        columnId: Int
+    )
 }
 
 class CustomEditableCell: Cell {
     private var hostingController: UIHostingController<EditableCellView>?
     
     var text: String = ""
+    {
+        didSet {
+            updateContent()
+        }
+    }
+    
+    var selectedContact: Set<ContactDTO> = []
     {
         didSet {
             updateContent()
@@ -65,7 +79,14 @@ class CustomEditableCell: Cell {
                 set: { newValue in
                     let oldValue = self.text
                     self.text = newValue
-                    self.delegate?.didChangeText(newValue: newValue, oldValue: oldValue, rowId: self.rowId, columnId: self.columnId)
+                    self.delegate?.didChangeText(
+                        columnType: self.columnType,
+                        newValue: newValue,
+                        oldValue: oldValue,
+                        selectedContacts: self.selectedContact,
+                        rowId: self.rowId,
+                        columnId: self.columnId
+                    )
                 }
             ),
             isEditable: isEditable,
