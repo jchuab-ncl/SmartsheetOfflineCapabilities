@@ -88,6 +88,24 @@ extension Coordinator: CustomEditableCellDelegate {
             value = newValue
         }
         
+        //TODO: Update the value and diplayValue fields for the sheetContentDTO.rows.cell filtering by rowId and columnID
+
+        // Update the local DTO so UI reflects changes immediately
+        if let rowIndex = sheetContentDTO.rows.firstIndex(where: { $0.id == rowId }) {
+            // Find existing cell
+            if let cellIndex = sheetContentDTO.rows[rowIndex].cells.firstIndex(where: { $0.columnId == columnId }) {
+                sheetContentDTO.rows[rowIndex].cells[cellIndex].value = value
+                sheetContentDTO.rows[rowIndex].cells[cellIndex].displayValue = value
+            } else {
+                // If this cell doesn't exist yet in the row, append it
+                let newCell = CellDTO(columnId: columnId, value: value, displayValue: value)
+                sheetContentDTO.rows[rowIndex].cells.append(newCell)
+            }
+        } else {
+            // You could log if the row isn't found
+            print("⚠️ didChangeText: Row with id \(rowId) not found in sheetContentDTO.")
+        }
+        
         sheetService.addSheetWithUpdatesToPublishInMemoryRepo(sheet:
                 .init(
                     columnType: columnType.rawValue,

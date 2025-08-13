@@ -61,6 +61,14 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #1 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.text">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "KeychainService.delete(for:):KeychainService.swift">
       </ContextState>
       <ContextState
@@ -146,6 +154,9 @@
       </ContextState>
       <ContextState
          contextName = "closure #4 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.addSheetWithUpdatesToPublish_Storage(columnType:sheetId:name:newValue:oldValue:rowId:columnId:contacts:):SheetService.swift">
       </ContextState>
       <ContextState
          contextName = "closure #2 in closure #1 in EditableCellView.buildContactSheet():EditableCellView.swift">
@@ -262,6 +273,14 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #2 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.selectedContact">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "SpreadsheetViewWrapper.Coordinator.numberOfColumns(in:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
@@ -311,6 +330,9 @@
                value = "sheetListResponse.id">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.pushChangesToApi(sheetId:):SheetService.swift">
       </ContextState>
       <ContextState
          contextName = "AuthenticationService.login():AuthenticationService.swift">

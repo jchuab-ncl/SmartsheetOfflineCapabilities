@@ -8,6 +8,59 @@
 import Foundation
 import SwiftData
 
+// Payload structs supporting both value and contact updates
+struct ContactObject: Codable {
+    var objectType: String = "CONTACT"
+    let email: String
+    let name: String
+}
+
+struct MultiContactObjectValue: Codable {
+    var objectType: String = "MULTI_CONTACT"
+    let values: [ContactObject]
+}
+
+struct CellUpdate: Codable {
+    let columnId: Int
+    let value: String?
+    let objectValue: MultiContactObjectValue?
+    // For regular value updates: only "value" should be present
+    init(columnId: Int, value: String) {
+        self.columnId = columnId
+        self.value = value
+        self.objectValue = nil
+    }
+    // For contact updates: only "objectValue" should be present
+    init(columnId: Int, contacts: [CachedSheetContactUpdatesToPublishDTO]) {
+        self.columnId = columnId
+        self.value = nil
+        self.objectValue = MultiContactObjectValue(values: contacts.map { ContactObject(email: $0.email, name: $0.name) })
+    }
+    // Custom encoding to ensure only the correct key is sent
+    enum CodingKeys: String, CodingKey {
+        case columnId
+        case value
+        case objectValue
+    }
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(columnId, forKey: .columnId)
+        // Only encode "value" if it's non-nil and objectValue is nil (regular update)
+        if let value = value, objectValue == nil {
+            try container.encode(value, forKey: .value)
+        }
+        // Only encode "objectValue" if it's non-nil and value is nil (contacts)
+        if let objectValue = objectValue, value == nil {
+            try container.encode(objectValue, forKey: .objectValue)
+        }
+    }
+}
+
+struct RowUpdate: Codable {
+    let id: String
+    let cells: [CellUpdate]
+}
+
 public protocol SheetServiceProtocol {
     var sheetWithUpdatesToPublishStorageRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> { get }
     var sheetWithUpdatesToPublishMemoryRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> { get }
@@ -16,7 +69,7 @@ public protocol SheetServiceProtocol {
     func getSheetListHasUpdatesToPublish() async throws
     func getSheetContent(sheetId: Int) async throws -> SheetContentDTO
     func getSheetContentOnline(sheetId: Int) async throws -> SheetContentDTO
-    func addSheetWithUpdatesToPublish_Storage(columnType: String, sheetId: Int, name: String, newValue: String, oldValue: String, rowId: Int, columnId: Int) async throws
+    func addSheetWithUpdatesToPublish_Storage(columnType: String, sheetId: Int, name: String, newValue: String, oldValue: String, rowId: Int, columnId: Int, contacts: [CachedSheetContactUpdatesToPublishDTO]) async throws
     func addSheetWithUpdatesToPublishInMemoryRepo(sheet: CachedSheetHasUpdatesToPublishDTO)
     func removeSheetHasUpdatesToPublish(sheetId: Int) async throws
     func commitMemoryToStorage(sheetId: Int) async throws
@@ -33,21 +86,27 @@ public final class SheetService: SheetServiceProtocol {
         
     /// Used to set the value locally
     @Protected private(set) var protectedSheetHasUpdatesToPublishStorageRepo: [CachedSheetHasUpdatesToPublishDTO] = []
-    
+    @Protected private(set) var protectedSheetContactToPublishStorageRepo: [CachedSheetContactUpdatesToPublishDTO] = []
     @Protected private(set) var protectedSheetHasUpdatesToPublishMemoryRepo: [CachedSheetHasUpdatesToPublishDTO] = []
     
     // MARK: Public properties
-    
-    /// The memory instance of updates to publish
+
+    /// The stored instance of contact fields to publish
     /// Used to observe changes externally
-    public var sheetWithUpdatesToPublishMemoryRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> {
-        $protectedSheetHasUpdatesToPublishMemoryRepo
+    public var sheetContactToPublishStorageRepo: Protected<[CachedSheetContactUpdatesToPublishDTO]> {
+        $protectedSheetContactToPublishStorageRepo
     }
     
     /// The stored instance of updates to publish
     /// Used to observe changes externally
     public var sheetWithUpdatesToPublishStorageRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> {
         $protectedSheetHasUpdatesToPublishStorageRepo
+    }
+    
+    /// The memory instance of updates to publish
+    /// Used to observe changes externally
+    public var sheetWithUpdatesToPublishMemoryRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> {
+        $protectedSheetHasUpdatesToPublishMemoryRepo
     }
     
     // MARK: Initializers
@@ -88,21 +147,42 @@ public final class SheetService: SheetServiceProtocol {
     public func getSheetListHasUpdatesToPublish() async throws {
         try await MainActor.run {
             let context = modelContext
-            let descriptor = FetchDescriptor<CachedSheetHasUpdatesToPublish>(sortBy: [SortDescriptor(\.name)])
-            let results = try context.fetch(descriptor)
 
-            guard !results.isEmpty else {
-                print("No sheets with updates to publish found")
-                protectedSheetHasUpdatesToPublishStorageRepo = []
-                return
+            // Fetch sheet cell updates
+            let sheetDescriptor = FetchDescriptor<CachedSheetHasUpdatesToPublish>(sortBy: [SortDescriptor(\.name)])
+            let sheetResults = try context.fetch(sheetDescriptor)
+
+            // Fetch contact updates
+            let contactDescriptor = FetchDescriptor<CachedSheetContactUpdatesToPublish>(sortBy: [SortDescriptor(\.name)])
+            let contactResults = try context.fetch(contactDescriptor)
+            
+            // Map & assign sheet updates            
+            let contactResultsDTOs = contactResults.map { CachedSheetContactUpdatesToPublishDTO(from: $0) }
+            
+            var sheetDTOs: [CachedSheetHasUpdatesToPublishDTO] = []
+            for sheetResult in sheetResults {
+                let contactFiltered = contactResultsDTOs.filter { $0.columnId == sheetResult.columnId && $0.rowId == sheetResult.rowId }
+                sheetDTOs.append(CachedSheetHasUpdatesToPublishDTO(from: sheetResult, contacts: contactFiltered ))
             }
 
-            print("📦 Loaded sheets with updates to publish (\(results.count))")
-            protectedSheetHasUpdatesToPublishStorageRepo = results
-                .map {
-                    CachedSheetHasUpdatesToPublishDTO(from: $0)
-                }
-                .sorted { $0.sheetName < $1.sheetName }
+            if sheetDTOs.isEmpty {
+                print("ℹ️ No sheets with updates to publish found")
+            } else {
+                print("📦 Loaded sheets with updates to publish (\(sheetDTOs.count))")
+            }
+            protectedSheetHasUpdatesToPublishStorageRepo = sheetDTOs
+
+            // Map & assign contact updates
+            let contactDTOs = contactResults
+                .map { CachedSheetContactUpdatesToPublishDTO(from: $0) }
+                .sorted { $0.name < $1.name }
+
+            if contactDTOs.isEmpty {
+                print("ℹ️ No contact updates to publish found")
+            } else {
+                print("📦 Loaded contact updates to publish (\(contactDTOs.count))")
+            }
+            protectedSheetContactToPublishStorageRepo = contactDTOs
         }
     }
     
@@ -139,7 +219,8 @@ public final class SheetService: SheetServiceProtocol {
         newValue: String,
         oldValue: String,
         rowId: Int,
-        columnId: Int
+        columnId: Int,
+        contacts: [CachedSheetContactUpdatesToPublishDTO]
     ) async throws {
         do {
             let newItem = CachedSheetHasUpdatesToPublish(
@@ -153,8 +234,26 @@ public final class SheetService: SheetServiceProtocol {
             )
             modelContext.insert(newItem)
 
+            // Upsert contacts: remove existing entries for this (sheetId,rowId,columnId), then insert the new ones
+            let existingContactsDescriptor = FetchDescriptor<CachedSheetContactUpdatesToPublish>(
+                predicate: #Predicate { $0.sheetId == sheetId && $0.rowId == rowId && $0.columnId == columnId }
+            )
+            let existingContacts = try modelContext.fetch(existingContactsDescriptor)
+            existingContacts.forEach { modelContext.delete($0) }
+
+            let contactList: [CachedSheetContactUpdatesToPublish] = contacts.map { dto in
+                CachedSheetContactUpdatesToPublish(
+                    sheetId: dto.sheetId,
+                    rowId: dto.rowId,
+                    columnId: dto.columnId,
+                    name: dto.name,
+                    email: dto.email
+                )
+            }
+            contactList.forEach { modelContext.insert($0) }
+
             try modelContext.save()
-            
+
             /// Calling this method to publish the changes
             try await getSheetListHasUpdatesToPublish()
             print("✅ Added sheet with pending updates: Name: \(name) SheetID: \(sheetId)")
@@ -232,7 +331,8 @@ public final class SheetService: SheetServiceProtocol {
                     newValue: item.newValue,
                     oldValue: item.oldValue,
                     rowId: item.rowId,
-                    columnId: item.columnId
+                    columnId: item.columnId,
+                    contacts: item.contacts
                 )
                 
                 // Clear memory repo after attempting to store
@@ -243,7 +343,7 @@ public final class SheetService: SheetServiceProtocol {
                 })
             }
             
-            //TODO: WIP
+            
             try await updateSheetContentOnStorage(sheetId: sheetId)
         } catch {
             if let currentItem = currentItem {
@@ -257,35 +357,35 @@ public final class SheetService: SheetServiceProtocol {
     public func pushChangesToApi(sheetId: Int) async throws {
         // 1) Build payload from stored items for this sheet
         let items = protectedSheetHasUpdatesToPublishStorageRepo.filter { $0.sheetId == sheetId }
-        guard !items.isEmpty else {
+        let contactItems = protectedSheetContactToPublishStorageRepo.filter { $0.sheetId == sheetId }
+        guard !items.isEmpty || !contactItems.isEmpty else {
             print("ℹ️ No in-memory changes to push for sheet \(sheetId).")
             return
         }
 
-        // Group by rowId -> array of cells to update
-        let groupedByRow = Dictionary(grouping: items, by: { $0.rowId })
-
-        // Minimal payload to match API (value-only cells). Extend if you need image/objectValue later.
-        struct CellUpdate: Codable {
-            let columnId: Int
-            let value: String
+        // Build rows dictionary: rowId -> [CellUpdate]
+        var rows: [Int: [CellUpdate]] = [:]
+        
+        // Regular value updates
+        for item in items where item.contacts.isEmpty {
+            rows[item.rowId, default: []].append(CellUpdate(columnId: item.columnId, value: item.newValue))
         }
-        struct RowUpdate: Codable {
-            // Smartsheet accepts numeric; sample shows string. We'll encode as String to match the sample.
-            let id: String
-            let cells: [CellUpdate]
+        
+        // Contact updates, grouped by (rowId, columnId)
+        struct RowColumnKey: Hashable { let rowId: Int; let columnId: Int }
+        let contactsByRowAndColumn = Dictionary(grouping: contactItems, by: { RowColumnKey(rowId: $0.rowId, columnId: $0.columnId) })
+        for (key, contacts) in contactsByRowAndColumn {
+            rows[key.rowId, default: []].append(CellUpdate(columnId: key.columnId, contacts: contacts))
         }
 
-        let rowsPayload: [RowUpdate] = groupedByRow.map { (rowId, cells) in
-            RowUpdate(
-                id: String(rowId),
-                cells: cells.map { CellUpdate(columnId: $0.columnId, value: $0.newValue) }
-            )
-        }.sorted { $0.id < $1.id } // deterministic
+        // Prepare final payload, sorted by row id
+        let rowsPayload: [RowUpdate] = rows
+            .sorted { $0.key < $1.key }
+            .map { (rowId, cells) in
+                RowUpdate(id: String(rowId), cells: cells)
+            }
 
         let encoder = JSONEncoder()
-        // Keep the JSON compact like the curl; for debugging pretty print is handy:
-        // encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
         let body = try encoder.encode(rowsPayload)
 
         // 2) Make request
@@ -308,19 +408,21 @@ public final class SheetService: SheetServiceProtocol {
         case .success(let data):
             // Optionally log the response for debugging
             if let str = String(data: data, encoding: .utf8) {
-                print("✅ Pushed \(items.count) update(s) to sheet \(sheetId). Response: \(str)")
+                print("✅ Pushed \(items.count) value update(s) and \(contactItems.count) contact update(s) to sheet \(sheetId). Response: \(str)")
             } else {
-                print("✅ Pushed \(items.count) update(s) to sheet \(sheetId).")
+                print("✅ Pushed \(items.count) value update(s) and \(contactItems.count) contact update(s) to sheet \(sheetId).")
             }
             
             // Remove only the items for this sheet from storage
-            try await removePendingSheetContentFromStorage(sheetId: sheetId)                        
+            try await removePendingSheetContentFromStorage(sheetId: sheetId)
         case .failure(let error):
             print("❌ Failed to push updates for sheet \(sheetId): \(error)")
             throw NSError(domain: "PushChangesError", code: 0, userInfo: [
                 NSLocalizedDescriptionKey: "Failed to push changes to API: \(error)"
             ])
         }
+        // Optionally refresh the update lists after success
+        // try await getSheetListHasUpdatesToPublish()
     }
     
     /// Fetches detailed information for a specific sheet from the Smartsheet API.

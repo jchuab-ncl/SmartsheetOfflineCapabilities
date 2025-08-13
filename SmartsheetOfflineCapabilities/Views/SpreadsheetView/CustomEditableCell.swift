@@ -77,13 +77,14 @@ class CustomEditableCell: Cell {
                     self.text
                 },
                 set: { newValue in
+                    let newContact = self.contactOptions.filter({ newValue.contains($0.name) })
                     let oldValue = self.text
                     self.text = newValue
                     self.delegate?.didChangeText(
                         columnType: self.columnType,
                         newValue: newValue,
                         oldValue: oldValue,
-                        selectedContacts: self.selectedContact,
+                        selectedContacts: Set(newContact),
                         rowId: self.rowId,
                         columnId: self.columnId
                     )

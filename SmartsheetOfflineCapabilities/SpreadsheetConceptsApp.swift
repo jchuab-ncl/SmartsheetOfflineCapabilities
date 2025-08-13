@@ -22,7 +22,8 @@ struct SmartsheetOfflineCapabilitiesApp: App {
             CachedCell.self,
             CachedContact.self,
             CachedOption.self,
-            CachedSheetHasUpdatesToPublish.self
+            CachedSheetHasUpdatesToPublish.self,
+            CachedSheetContactUpdatesToPublish.self
         ])
         
         let config = ModelConfiguration("SmartsheetOffline", schema: schema)

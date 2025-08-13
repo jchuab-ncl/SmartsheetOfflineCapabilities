@@ -39,7 +39,7 @@ public struct CachedSheetHasUpdatesToPublishDTO: Identifiable, Hashable, Sendabl
         self.contacts = contacts
     }
 
-    public init(from model: CachedSheetHasUpdatesToPublish) {
+    public init(from model: CachedSheetHasUpdatesToPublish, contacts: [CachedSheetContactUpdatesToPublishDTO]) {
         self.columnType = model.columnType
         self.sheetId = model.sheetId
         self.sheetName = model.name
@@ -47,7 +47,9 @@ public struct CachedSheetHasUpdatesToPublishDTO: Identifiable, Hashable, Sendabl
         self.oldValue = model.oldValue
         self.rowId = model.rowId
         self.columnId = model.columnId
-        self.contacts = []
+        
+        //TODO: 
+        self.contacts = contacts
     }
 }
 
