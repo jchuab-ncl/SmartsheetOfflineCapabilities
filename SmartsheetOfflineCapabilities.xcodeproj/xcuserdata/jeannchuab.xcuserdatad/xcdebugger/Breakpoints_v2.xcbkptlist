@@ -357,154 +357,32 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "05DABF3A-1ADC-42D6-B426-0219A78E1074"
+            uuid = "961B832A-8F2D-4275-9291-0E4B703BA4D4"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
+            filePath = "SmartsheetOfflineCapabilities/Services/SheetService/CachedDiscussionDTO.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "375"
-            endingLineNumber = "375"
-            landmarkName = "pushChangesToApi(sheetId:)"
+            startingLineNumber = "312"
+            endingLineNumber = "312"
+            landmarkName = "init(from:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "05DABF3A-1ADC-42D6-B426-0219A78E1074 - fb7982c8eac67445"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for SmartsheetOfflineCapabilities.SheetService.pushChangesToApi(sheetId: Swift.Int) async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "380"
-                  endingLineNumber = "380">
-               </Location>
-               <Location
-                  uuid = "05DABF3A-1ADC-42D6-B426-0219A78E1074 - b48f0e90fd86146e"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #3 (SmartsheetOfflineCapabilities.CachedSheetContactUpdatesToPublishDTO) -&gt; RowColumnKey in SmartsheetOfflineCapabilities.SheetService.pushChangesToApi(sheetId: Swift.Int) async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "380"
-                  endingLineNumber = "380">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "E02919BA-A3C6-4E56-961D-2135412F232D"
+            uuid = "C76F058D-D1D4-4585-BF59-C4D5D5F786FA"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
+            filePath = "SmartsheetOfflineCapabilities/Views/SpreadsheetView/SpreadsheetViewWrapper.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "370"
-            endingLineNumber = "370"
-            landmarkName = "pushChangesToApi(sheetId:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "E02919BA-A3C6-4E56-961D-2135412F232D - fb7982c8eac67483"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for SmartsheetOfflineCapabilities.SheetService.pushChangesToApi(sheetId: Swift.Int) async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "374"
-                  endingLineNumber = "374">
-               </Location>
-               <Location
-                  uuid = "E02919BA-A3C6-4E56-961D-2135412F232D - fb7982c8eac67483"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for SmartsheetOfflineCapabilities.SheetService.pushChangesToApi(sheetId: Swift.Int) async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "374"
-                  endingLineNumber = "374">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "B58DA92D-11D4-46E2-86D5-36C063C1F214"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "324"
-            endingLineNumber = "324"
-            landmarkName = "commitMemoryToStorage(sheetId:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "B58DA92D-11D4-46E2-86D5-36C063C1F214 - 5e60e70abd2882e8"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for SmartsheetOfflineCapabilities.SheetService.commitMemoryToStorage(sheetId: Swift.Int) async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "328"
-                  endingLineNumber = "328">
-               </Location>
-               <Location
-                  uuid = "B58DA92D-11D4-46E2-86D5-36C063C1F214 - f59d8dc1754146f6"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(3) suspend resume partial function for SmartsheetOfflineCapabilities.SheetService.commitMemoryToStorage(sheetId: Swift.Int) async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities/SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "328"
-                  endingLineNumber = "328">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "FB194CCD-E5C3-4CC7-80AE-4B7BDEB58BCF"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Services/SheetService/SheetService.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "173"
-            endingLineNumber = "173"
-            landmarkName = "getSheetListHasUpdatesToPublish()"
+            startingLineNumber = "20"
+            endingLineNumber = "20"
+            landmarkName = "init(sheetContentDTO:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

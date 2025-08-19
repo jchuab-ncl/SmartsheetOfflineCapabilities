@@ -8,6 +8,8 @@
 import Foundation
 import SwiftData
 
+// MARK: Helpers
+
 // Payload structs supporting both value and contact updates
 struct ContactObject: Codable {
     var objectType: String = "CONTACT"
@@ -61,6 +63,17 @@ struct RowUpdate: Codable {
     let cells: [CellUpdate]
 }
 
+// Wrapper for discussion list responses
+struct DiscussionListResponse: Codable {
+    let pageNumber: Int
+    let pageSize: Int
+    let totalPages: Int
+    let totalCount: Int
+    let data: [DiscussionDTO]
+}
+
+// MARK: Protocol
+
 public protocol SheetServiceProtocol {
     var sheetWithUpdatesToPublishStorageRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> { get }
     var sheetWithUpdatesToPublishMemoryRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> { get }
@@ -69,12 +82,15 @@ public protocol SheetServiceProtocol {
     func getSheetListHasUpdatesToPublish() async throws
     func getSheetContent(sheetId: Int) async throws -> SheetContentDTO
     func getSheetContentOnline(sheetId: Int) async throws -> SheetContentDTO
+    func getDiscussionForSheet(sheetId: Int) async throws -> [DiscussionDTO]
     func addSheetWithUpdatesToPublish_Storage(columnType: String, sheetId: Int, name: String, newValue: String, oldValue: String, rowId: Int, columnId: Int, contacts: [CachedSheetContactUpdatesToPublishDTO]) async throws
     func addSheetWithUpdatesToPublishInMemoryRepo(sheet: CachedSheetHasUpdatesToPublishDTO)
     func removeSheetHasUpdatesToPublish(sheetId: Int) async throws
     func commitMemoryToStorage(sheetId: Int) async throws
     func pushChangesToApi(sheetId: Int) async throws
 }
+
+// MARK: Implementation
 
 public final class SheetService: SheetServiceProtocol {
     // MARK: Private properties
@@ -156,7 +172,7 @@ public final class SheetService: SheetServiceProtocol {
             let contactDescriptor = FetchDescriptor<CachedSheetContactUpdatesToPublish>(sortBy: [SortDescriptor(\.name)])
             let contactResults = try context.fetch(contactDescriptor)
             
-            // Map & assign sheet updates            
+            // Map & assign sheet updates
             let contactResultsDTOs = contactResults.map { CachedSheetContactUpdatesToPublishDTO(from: $0) }
             
             var sheetDTOs: [CachedSheetHasUpdatesToPublishDTO] = []
@@ -441,7 +457,7 @@ public final class SheetService: SheetServiceProtocol {
         case .success(let data):
             do {
                 let sheetContent = try JSONDecoder().decode(SheetContent.self, from: data)
-                
+                                
                 try await storeSheetContent(sheetListResponse: sheetContent)
                 
                 // Convert stored sheet content to DTO to return
@@ -469,19 +485,54 @@ public final class SheetService: SheetServiceProtocol {
                     )
                 }
                 
+                let discussions = try await getDiscussionForSheet(sheetId: sheetId)
+                
                 return SheetContentDTO(
                     id: sheetContent.id,
                     name: sheetContent.name,
                     columns: columns,
-                    rows: rows
+                    rows: rows,
+                    discussions: discussions
                 )
             } catch {
-                print("⚠️ Decoding error: \(error)")
-                throw NSError(domain: error.localizedDescription, code: 0)
+                if let raw = String(data: data, encoding: .utf8) {
+                    print("❌ Decoding error: \(error)\nRaw: \(raw)")
+                } else {
+                    print("❌ Decoding error: \(error)")
+                }
+                throw error
             }
         case .failure(let error):
             print("❌ Failed to get sheet: \(error)")
             throw NSError(domain: error.localizedDescription, code: 0)
+        }
+    }
+    
+    public func getDiscussionForSheet(sheetId: Int) async throws -> [DiscussionDTO] {
+        let result = await httpApiClient.request(
+            url: try baseSheetsURL(path: "/sheets/\(sheetId)/discussions?include=comments,attachments"),
+            method: .GET,
+            headers: makeHeaders(),
+            queryParameters: nil
+        )
+
+        switch result {
+        case .success(let data):
+            do {
+                let decoded = try JSONDecoder().decode(DiscussionListResponse.self, from: data)
+                return decoded.data
+            } catch {
+                print("⚠️ Decoding discussions failed: \(error)")
+                throw NSError(domain: "DecodingError", code: 0, userInfo: [
+                    NSLocalizedDescriptionKey: "Failed to decode discussions: \(error.localizedDescription)"
+                ])
+            }
+
+        case .failure(let error):
+            print("❌ Failed to fetch discussions for sheet \(sheetId): \(error)")
+            throw NSError(domain: "NetworkError", code: 0, userInfo: [
+                NSLocalizedDescriptionKey: "Failed to fetch discussions: \(error)"
+            ])
         }
     }
     
@@ -618,7 +669,17 @@ public final class SheetService: SheetServiceProtocol {
                 )
             }.sorted { $0.rowNumber < $1.rowNumber }
             
-            return SheetContentDTO(id: cachedSheet.id, name: cachedSheet.name, columns: columnsDTO, rows: rowsDTO)
+            let discussionsDTO: [DiscussionDTO] = cachedSheet.discussions.map { discussion in
+                DiscussionDTO(from: discussion)
+            }
+            
+            return SheetContentDTO(
+                id: cachedSheet.id,
+                name: cachedSheet.name,
+                columns: columnsDTO,
+                rows: rowsDTO,
+                discussions: discussionsDTO
+            )
         }
         
         return sheetContentDTO
@@ -741,13 +802,16 @@ public final class SheetService: SheetServiceProtocol {
                 }
                 return CachedRow(id: row.id, rowNumber: row.rowNumber, cells: cachedCells)
             }
+            
+            let cachedDiscussions: [CachedDiscussionDTO] = (sheetListResponse.discussions ?? []).map { CachedDiscussionDTO(from: $0) }
 
             // Create CachedSheetContent model
             let cachedSheet = CachedSheetContent(
                 id: sheetListResponse.id,
                 name: sheetListResponse.name,
                 columns: cachedColumns,
-                rows: cachedRows
+                rows: cachedRows,
+                discussions: cachedDiscussions
             )
 
             context.insert(cachedSheet)

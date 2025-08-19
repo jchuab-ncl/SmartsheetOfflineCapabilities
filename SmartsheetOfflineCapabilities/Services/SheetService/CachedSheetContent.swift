@@ -15,12 +15,20 @@ public final class CachedSheetContent {
     public var name: String
     @Relationship(deleteRule: .cascade) public var columns: [CachedColumn]
     @Relationship(deleteRule: .cascade) public var rows: [CachedRow]
+    @Relationship(deleteRule: .cascade) public var discussions: [CachedDiscussionDTO]
 
-    public init(id: Int, name: String, columns: [CachedColumn], rows: [CachedRow]) {
+    public init(
+        id: Int,
+        name: String,
+        columns: [CachedColumn],
+        rows: [CachedRow],
+        discussions: [CachedDiscussionDTO]
+    ) {
         self.id = id
         self.name = name
         self.columns = columns
         self.rows = rows
+        self.discussions = discussions
     }
 }
 
@@ -138,16 +146,18 @@ public struct SheetContentDTO: Identifiable, Hashable, Sendable {
     public var name: String
     public var columns: [ColumnDTO]
     public var rows: [RowDTO]
+    public var discussions: [DiscussionDTO] = []
 
-    public init(id: Int, name: String, columns: [ColumnDTO], rows: [RowDTO]) {
+    public init(id: Int, name: String, columns: [ColumnDTO], rows: [RowDTO], discussions: [DiscussionDTO] ) {
         self.id = id
         self.name = name
         self.columns = columns
         self.rows = rows
+        self.discussions = discussions
     }
     
     static var empty: SheetContentDTO {
-        return .init(id: 0, name: "", columns: [], rows: [])
+        return .init(id: 0, name: "", columns: [], rows: [], discussions: [])
     }
 }
 

@@ -36,4 +36,11 @@ extension String {
             return self
         }
     }
+    
+    func asDate(inputFormat: String = "yyyy-MM-dd'T'HH:mm:ss'Z'") -> Date {
+        let formatter = DateFormatter()
+        formatter.dateFormat = inputFormat
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.date(from: self) ?? Date.distantPast
+    }
 }

@@ -16,6 +16,7 @@ final class SheetListViewModel: ObservableObject {
     @Published var isInternetAvailable: Bool = true
     @Published var sheetsList: [CachedSheetDTO] = []
     @Published var sheetsContentList: [SheetContentDTO] = []
+//    @Published var discussionList: [DiscussionDTO] = []
     @Published var sheetsListHasUpdatesToPublish: [CachedSheetHasUpdatesToPublishDTO] = []
     @Published var status: ProgressStatus = .initial
     @Published var statusSync: [Int: ProgressStatus] = [:]
@@ -65,8 +66,11 @@ final class SheetListViewModel: ObservableObject {
                 self.sheetsList = try await sheetService.getSheetList()
                 
                 for sheet in self.sheetsList {
-                    let result = try await sheetService.getSheetContent(sheetId: sheet.id)
-                    sheetsContentList.append(result)
+                    let sheetContentResult = try await sheetService.getSheetContent(sheetId: sheet.id)
+                    sheetsContentList.append(sheetContentResult)
+                    
+//                    let discussionResult = try await sheetService.getDiscussionForSheet(sheetId: sheet.id)
+//                    discussionList.append(contentsOf: discussionResult)
                 }
                 
                 try await sheetService.getSheetListHasUpdatesToPublish()

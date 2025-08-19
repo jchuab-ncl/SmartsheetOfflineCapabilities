@@ -219,7 +219,7 @@ public struct Discussion: Codable, Equatable {
 
 public struct Comment: Codable, Equatable {
     public let id: Int
-    public let discussionId: Int
+    public let discussionId: Int?
     public let text: String
     public let createdAt: String
     public let modifiedAt: String
