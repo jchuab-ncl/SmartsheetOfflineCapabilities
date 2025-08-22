@@ -209,7 +209,7 @@ public struct Discussion: Codable, Equatable {
     public let commentAttachments: [Attachment]?
     public let commentCount: Int?
     public let createdBy: CreatedBy?
-    public let lastCommentedAt: String?
+    public let lastCommentedAt: String
     public let lastCommentedUser: CreatedBy?
     public let parentId: Int?
     public let parentType: String?

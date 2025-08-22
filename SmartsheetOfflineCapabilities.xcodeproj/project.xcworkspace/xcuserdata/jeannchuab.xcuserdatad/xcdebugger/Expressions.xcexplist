@@ -3,162 +3,6 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "closure #1 in SheetListViewModel.init(sheetService:):SheetListViewModel.swift">
-      </ContextState>
-      <ContextState
-         contextName = "closure #3 in closure #1 in SheetService.storeSheetContent(sheetListResponse:):SheetService.swift">
-      </ContextState>
-      <ContextState
-         contextName = "closure #3 in CustomEditableCell.updateContent():CustomEditableCell.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.selectedContact">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SpreadsheetViewWrapper.Coordinator.init(cachedSheetContentDTO:):SpreadsheetViewWrapper.swift">
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in closure #1 in SheetService.getSheetListHasUpdatesToPublish():SheetService.swift">
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in closure #2 in SelectFileView.makeFileCard(file:):SelectFileView.swift">
-      </ContextState>
-      <ContextState
-         contextName = "EditableCellView.tapGestureAction(contact:):EditableCellView.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "selectedContact">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in SelectFileViewModel.init(sheetService:):SelectFileViewModel.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self?.status">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SheetService.getSheets():SheetService.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "error.localizedDescription">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "Coordinator.makeDataCell(for:in:):SpreadsheetViewWrapper.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "value">
-            </PersistentString>
-            <PersistentString
-               value = "column.type">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in CustomEditableCell.updateContent():CustomEditableCell.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.text">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "KeychainService.delete(for:):KeychainService.swift">
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in closure #4 in EditableCellView.body.getter:EditableCellView.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "columnType">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SheetServiceTests.testGetSheetsFailure():SheetServiceTests.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "(error as NSError).domain">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in closure #3 in closure #1 in EditableCellView.buildContactSheet():EditableCellView.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "selectedNames">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in LoginView.makeScreenContent():LoginView.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "viewModel.message">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in closure #1 in closure #2 in closure #1 in SheetListView.makeCardSyncView(sheet:):SheetListView.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "viewModel.statusSync">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.sheetContentDTO?.columns[indexPath.column - 1]">
-            </PersistentString>
-            <PersistentString
-               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })?">
-            </PersistentString>
-            <PersistentString
-               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in SheetDetailViewModel.loadSheetContent(sheetId:):SheetDetailViewModel.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "cachedSheetContentDTO">
-            </PersistentString>
-            <PersistentString
-               value = "sheetContentDTO">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SheetService.addSheetWithUpdatesToPublish_Storage(columnType:sheetId:name:newValue:oldValue:rowId:columnId:contacts:):SheetService.swift">
-      </ContextState>
-      <ContextState
-         contextName = "SpreadsheetViewWrapper.Coordinator.numberOfRows(in:):SpreadsheetViewWrapper.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.cachedSheetContentDTO?.rows">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #4 in CustomEditableCell.updateContent():CustomEditableCell.swift">
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in SheetService.getSheetListHasUpdatesToPublish():SheetService.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "$0">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
          contextName = "closure #2 in closure #1 in EditableCellView.buildContactSheet():EditableCellView.swift">
          <PersistentStrings>
             <PersistentString
@@ -167,32 +11,18 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "closure #5 in EditableCellView.body.getter:EditableCellView.swift">
+         contextName = "closure #1 in SelectFileViewModel.loadSheets():SelectFileViewModel.swift">
          <PersistentStrings>
             <PersistentString
-               value = "contactOptions">
+               value = "self.sheetsList">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "KeychainService.save&lt;SmartsheetOfflineCapabilities.SmartsheetTokenResponse&gt;(_:for:):KeychainService.swift">
+         contextName = "closure #1 in SheetListViewModel.loadSheets():SheetListViewModel.swift">
          <PersistentStrings>
             <PersistentString
-               value = "SecItemAdd(query as CFDictionary, nil) == errSecSuccess">
-            </PersistentString>
-            <PersistentString
-               value = "SecItemAdd(query as CFDictionary, nil)">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in LoginViewModel.init(authenticationService:):LoginViewModel.swift">
-      </ContextState>
-      <ContextState
-         contextName = "closure #2 in closure #1 in SheetService.getSheetContentFromStorage(sheetId:):SheetService.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "$0.title">
+               value = "sheetsList">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -205,18 +35,123 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "closure #1 in closure #1 in closure #1 in SelectFileView.body.getter:SelectFileView.swift">
+         contextName = "closure #1 in closure #3 in closure #1 in EditableCellView.buildContactSheet():EditableCellView.swift">
          <PersistentStrings>
             <PersistentString
-               value = "viewModel.status">
+               value = "selectedNames">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "SheetService.hasUpdatesToPublish(sheetId:):SheetService.swift">
+         contextName = "closure #2 in closure #3 in closure #2 in EditableCellView.buildContactSheet():EditableCellView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.getSheetContentOnline(sheetId:):SheetService.swift">
          <PersistentStrings>
             <PersistentString
-               value = "cachedSheet.hasUpdatesToPublish">
+               value = "sheetContent.discussions">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "DiscussionView.filteredDiscussions():DiscussionView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "discussions">
+            </PersistentString>
+            <PersistentString
+               value = "discussions.filter { $0.parentType == target }">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in DiscussionView.commentsList(for:):DiscussionView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in closure #1 in SheetService.getSheetContentFromStorage(sheetId:):SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "$0.title">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in LoginViewModel.init(authenticationService:):LoginViewModel.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in SheetService.getSheetListHasUpdatesToPublish():SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "$0">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.init(sheetContentDTO:):SpreadsheetViewWrapper.swift">
+      </ContextState>
+      <ContextState
+         contextName = "EditableCellView.tapGestureAction(contact:):EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedContact">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #3 in closure #1 in SheetService.storeSheetContent(sheetListResponse:):SheetService.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #2 in closure #1 in DiscussionView.body.getter:DiscussionView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "EditableCellView.buildDiscussionSheet():EditableCellView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "Coordinator.makeLineNumberCell(for:in:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "sheetContentDTO.rows[indexPath.row - 1]">
+            </PersistentString>
+            <PersistentString
+               value = "sheetContentDTO">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+            <PersistentString
+               value = "cell.showCommentIcon">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in LoginView.makeScreenContent():LoginView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "viewModel.message">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.getSheets():SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "error.localizedDescription">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #3 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.selectedContact">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #1 in closure #1 in SelectFileView.body.getter:SelectFileView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "viewModel.status">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -229,15 +164,15 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "closure #1 in SheetService.getSheetContentOnline(sheetId:):SheetService.swift">
-      </ContextState>
-      <ContextState
          contextName = "SheetService.updateSheetContentOnStorage(sheetId:):SheetService.swift">
          <PersistentStrings>
             <PersistentString
                value = "protectedSheetHasUpdatesToPublishStorageRepo">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #1 in closure #2 in closure #1 in DiscussionView.body.getter:DiscussionView.swift">
       </ContextState>
       <ContextState
          contextName = "closure #2 in closure #2 in closure #1 in EditableCellView.buildContactSheet():EditableCellView.swift">
@@ -248,43 +183,19 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "closure #2 in closure #3 in closure #2 in EditableCellView.buildContactSheet():EditableCellView.swift">
+         contextName = "closure #1 in closure #1 in SheetService.getSheetListHasUpdatesToPublish():SheetService.swift">
       </ContextState>
       <ContextState
-         contextName = "SheetService.commitMemoryToStorage(sheetId:):SheetService.swift">
+         contextName = "closure #1 in EditableCellView.makeSheet():EditableCellView.swift">
          <PersistentStrings>
             <PersistentString
-               value = "protectedSheetHasUpdatesToPublishMemoryRepo">
+               value = "showCommentIcon">
             </PersistentString>
             <PersistentString
-               value = "protectedSheetHasUpdatesToPublishStorageRepo">
+               value = "discussions">
             </PersistentString>
             <PersistentString
-               value = "item">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SpreadsheetViewWrapper.makeCoordinator():SpreadsheetViewWrapper.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.sheetDetailResponse">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:widthForColumn:):SpreadsheetViewWrapper.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.sheetDetailResponse?.columns?[column]">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #2 in CustomEditableCell.updateContent():CustomEditableCell.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.selectedContact">
+               value = "isRowNumber">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -296,6 +207,89 @@
             </PersistentString>
             <PersistentString
                value = "self.cachedSheetContentDTO?.columns.count">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells">
+            </PersistentString>
+            <PersistentString
+               value = "self.sheetContentDTO?.columns[indexPath.column - 1]">
+            </PersistentString>
+            <PersistentString
+               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })?">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Coordinator.spreadsheetView(_:heightForRow:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "rowId">
+            </PersistentString>
+            <PersistentString
+               value = "textSize[rowId]">
+            </PersistentString>
+            <PersistentString
+               value = "textSize[rowId] ?? 0 / 4">
+            </PersistentString>
+            <PersistentString
+               value = "(textSize[rowId] ?? 0) / 4">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in DiscussionView.filterDiscussions():DiscussionView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "allDiscussions">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.text">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.addSheetWithUpdatesToPublish_Storage(columnType:sheetId:name:newValue:oldValue:rowId:columnId:contacts:):SheetService.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in SheetService.getSheetContentOnline(sheetId:):SheetService.swift">
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.makeCoordinator():SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.sheetDetailResponse">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in SheetService.storeSheetContent(sheetListResponse:):SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "sheetListResponse.id">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.pushChangesToApi(sheetId:):SheetService.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in SheetListViewModel.init(sheetService:):SheetListViewModel.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in SelectFileViewModel.init(sheetService:):SelectFileViewModel.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self?.status">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -316,45 +310,56 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "SheetService.addSheetWithUpdatesToPublishInMemoryRepo(sheet:):SheetService.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "protectedSheetHasUpdatesToPublishMemoryRepo">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in SelectFileViewModel.loadSheets():SelectFileViewModel.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.sheetsList">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in SheetService.storeSheetContent(sheetListResponse:):SheetService.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "sheetListResponse.id">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SheetService.getSheetContentOnline(sheetId:):SheetService.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "sheetContent.discussions">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SheetService.pushChangesToApi(sheetId:):SheetService.swift">
-      </ContextState>
-      <ContextState
          contextName = "AuthenticationService.login():AuthenticationService.swift">
          <PersistentStrings>
             <PersistentString
                value = "isInternetAvailable">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.Coordinator.init(cachedSheetContentDTO:):SpreadsheetViewWrapper.swift">
+      </ContextState>
+      <ContextState
+         contextName = "Coordinator.init(sheetContentDTO:sheetService:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "textSize">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "DiscussionView.commentsList(for:):DiscussionView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #4 in EditableCellView.body.getter:EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "columnType">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:widthForColumn:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.sheetDetailResponse?.columns?[column]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #5 in EditableCellView.body.getter:EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "contactOptions">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "CustomEditableCell.updateContent():CustomEditableCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "discussions">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -365,6 +370,126 @@
                value = "cachedSheet.rows">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Coordinator.makeDataCell(for:in:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "value">
+            </PersistentString>
+            <PersistentString
+               value = "column.type">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.commitMemoryToStorage(sheetId:):SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "protectedSheetHasUpdatesToPublishMemoryRepo">
+            </PersistentString>
+            <PersistentString
+               value = "protectedSheetHasUpdatesToPublishStorageRepo">
+            </PersistentString>
+            <PersistentString
+               value = "item">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "DiscussionView.filterDiscussions():DiscussionView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "allDiscussions">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #4 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+      </ContextState>
+      <ContextState
+         contextName = "SheetServiceTests.testGetSheetsFailure():SheetServiceTests.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "(error as NSError).domain">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "KeychainService.save&lt;SmartsheetOfflineCapabilities.SmartsheetTokenResponse&gt;(_:for:):KeychainService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "SecItemAdd(query as CFDictionary, nil) == errSecSuccess">
+            </PersistentString>
+            <PersistentString
+               value = "SecItemAdd(query as CFDictionary, nil)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.hasUpdatesToPublish(sheetId:):SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "cachedSheet.hasUpdatesToPublish">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.addSheetWithUpdatesToPublishInMemoryRepo(sheet:):SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "protectedSheetHasUpdatesToPublishMemoryRepo">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.Coordinator.numberOfRows(in:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.cachedSheetContentDTO?.rows">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in EditableCellView.body.getter:EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "showCommentIcon">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.selectedContact">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "KeychainService.delete(for:):KeychainService.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #1 in closure #2 in closure #1 in SheetListView.makeCardSyncView(sheet:):SheetListView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "viewModel.statusSync">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in SheetDetailViewModel.loadSheetContent(sheetId:):SheetDetailViewModel.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "cachedSheetContentDTO">
+            </PersistentString>
+            <PersistentString
+               value = "sheetContentDTO">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #2 in SelectFileView.makeFileCard(file:):SelectFileView.swift">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

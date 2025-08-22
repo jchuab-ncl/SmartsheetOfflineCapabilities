@@ -19,7 +19,7 @@ public final class CachedDiscussionDTO {
     public var parentId: Int?
     public var parentType: String?
     public var readOnly: Bool
-    public var lastCommentedAt: String?
+    public var lastCommentedAt: String
 
     // Flattened creator fields (simplify SwiftData graph)
     public var createdByName: String?
@@ -38,7 +38,7 @@ public final class CachedDiscussionDTO {
         parentId: Int?,
         parentType: String?,
         readOnly: Bool,
-        lastCommentedAt: String?,
+        lastCommentedAt: String,
         createdByName: String?,
         createdByEmail: String?,
         lastCommentedUserName: String?,
@@ -207,7 +207,7 @@ public struct DiscussionDTO: Codable, Identifiable, Hashable, Sendable {
     public let commentAttachments: [AttachmentDTO]?
     public let commentCount: Int?
     public let createdBy: UserRef?
-    public let lastCommentedAt: String?
+    public let lastCommentedAt: String
     public let lastCommentedUser: UserRef?
     public let parentId: Int?
     public let parentType: String?

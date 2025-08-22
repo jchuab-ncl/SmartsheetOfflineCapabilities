@@ -576,10 +576,15 @@ public final class SheetService: SheetServiceProtocol {
                 print("✅ Fetched \(sheetListResponse.data.count) sheets on page \(sheetListResponse.pageNumber)")
                 sheetListResponse.data.forEach { print("- \($0.name)") }
                 
-                try await storeSheetList(sheetListResponse: sheetListResponse)
+                /// The only sheet that should show on the App               
+                let sheetListFiltered = sheetListResponse.data.filter({
+                    $0.id == 4576181282099076
+                })
+                .sorted { $0.name < $1.name }
                 
-                let sortedData = sheetListResponse.data.sorted { $0.name < $1.name }
-                let result = sortedData.map {
+                try await storeSheetList(sheetList: sheetListFiltered)
+
+                let result = sheetListFiltered.map {
                     CachedSheetDTO(id: $0.id, modifiedAt: $0.modifiedAt, name: $0.name)
                 }
                 return result
@@ -593,7 +598,7 @@ public final class SheetService: SheetServiceProtocol {
         }
     }
     
-    private func storeSheetList(sheetListResponse: SheetList) async throws {
+    private func storeSheetList(sheetList: [Sheet]) async throws {
         try await MainActor.run {
             // Store response in SwiftData
             let context = modelContext
@@ -603,7 +608,7 @@ public final class SheetService: SheetServiceProtocol {
             existing.forEach { context.delete($0) }
 
             // Save new entries
-            for sheet in sheetListResponse.data {
+            for sheet in sheetList {
                 let cache = CachedSheet(id: sheet.id, modifiedAt: sheet.modifiedAt, name: sheet.name)
                 context.insert(cache)
             }

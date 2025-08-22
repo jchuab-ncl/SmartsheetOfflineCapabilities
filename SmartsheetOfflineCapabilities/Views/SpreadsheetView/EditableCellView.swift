@@ -15,51 +15,70 @@ struct EditableCellView: View {
     @State private var isEditing: Bool = false
 
     // Stage edits here; commit to `text` on Done
-    @State private var draftText: String = ""        
+    @State private var draftText: String = ""
 
-    // MARK: Private properties
     var isEditable: Bool = false
+    var isClickable: Bool = false
     var pickListValues: [String] = []
     var columnType: ColumnType = .textNumber
-    var isHeaderOrEnumerated: Bool = false
+    var isHeader: Bool = false /// Represents the header, with columns titles
+    var isRowNumber: Bool = false /// Represents the first column, showing line/row numbers
     var contactOptions: [ContactDTO] = []
+    var rowDiscussions: [DiscussionDTO] = []
+    var allDiscussions: [DiscussionDTO] = []
 
     var body: some View {
-        Text(text)
-            .frame(maxWidth: .infinity, minHeight: 44)
-            .bold(isHeaderOrEnumerated)
-            .multilineTextAlignment(.center)
-            .padding(6)
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(6)
-            .onTapGesture {
-                // Initialize the draft from current bound value
-                draftText = text
-                isEditing = true
+        VStack {
+            Text(text)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .bold(isHeader || isRowNumber)
+                .multilineTextAlignment(.center)
+                .padding(6)
+                .cornerRadius(6)
+                .sheet(isPresented: Binding(
+                    get: { isEditing && (isEditable || (rowDiscussions.isNotEmpty && isRowNumber)) },
+                    set: { newValue in isEditing = newValue }
+                )) {
+                    makeSheet()
+                }
+                .onAppear {
+                    guard !contactOptions.isEmpty else { return }
+                    selectedContact = mapDraftTextToSelectedContacts(text)
+                }
+            
+            if rowDiscussions.isNotEmpty && isRowNumber {
+                Image(systemName: "bubble")
+                    .padding(.bottom, 12)
             }
-            .sheet(isPresented: Binding(
-                get: { isEditing && isEditable },
-                set: { newValue in isEditing = newValue }
-            )) {
-                makeSheet()
-            }
-            .onAppear {
-                guard !contactOptions.isEmpty else { return }
-                selectedContact = mapDraftTextToSelectedContacts(text)
-            }
+        }
+        .onTapGesture {
+            // Initialize the draft from current bound value
+            draftText = text
+            isEditing = true
+        }
     }
 
     private func makeSheet() -> some View {
         VStack {
-            Text("Edit Content")
-                .font(.headline)
-                .padding()
-
             if columnType == .date {
+                Text("Edit Content")
+                    .font(.headline)
+                    .padding()
                 buildDateSheet()
+            } else if isRowNumber && rowDiscussions.isNotEmpty {
+                Text("Conversations")
+                    .font(.headline)
+                    .padding()
+                buildDiscussionSheet()
             } else if !pickListValues.isEmpty {
+                Text("Edit Content")
+                    .font(.headline)
+                    .padding()
                 buildPickerSheet()
             } else if !contactOptions.isEmpty {
+                Text("Edit Content")
+                    .font(.headline)
+                    .padding()
                 buildContactSheet()
             } else {
                 // Bind editor to the draft
@@ -145,6 +164,10 @@ struct EditableCellView: View {
             }
         }
         .listStyle(.insetGrouped)
+    }
+    
+    private func buildDiscussionSheet() -> some View {
+        DiscussionView(allDiscussions: allDiscussions, rowDiscussions: rowDiscussions)
     }
     
     private func tapGestureAction(contact: ContactDTO) {

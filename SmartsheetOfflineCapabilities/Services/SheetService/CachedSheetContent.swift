@@ -159,6 +159,12 @@ public struct SheetContentDTO: Identifiable, Hashable, Sendable {
     static var empty: SheetContentDTO {
         return .init(id: 0, name: "", columns: [], rows: [], discussions: [])
     }
+    
+    public func discussionsForRow(_ rowId: Int) -> [DiscussionDTO] {
+        return discussions.filter( {
+            $0.parentType == "ROW" && $0.parentId == rowId
+        })
+    }
 }
 
 public struct ContactDTO: Hashable, Sendable {

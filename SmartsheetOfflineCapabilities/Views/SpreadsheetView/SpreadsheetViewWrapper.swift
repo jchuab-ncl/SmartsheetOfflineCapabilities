@@ -26,22 +26,27 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
         spreadsheetView.delegate = context.coordinator
         
         // Setup grid size, layout, etc.
+        print("Log: SpreadsheetView initialized.")
+        
         return spreadsheetView
     }
 
     func updateUIView(_ uiView: SpreadsheetView, context: Context) {
         // Update logic if needed
+        print("Log: updateUIView")
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(sheetContentDTO: self.sheetContentDTO)
+        print("Log: makeCoordinator")
+        
+        return Coordinator(sheetContentDTO: self.sheetContentDTO)
     }
 }
 
 class Coordinator: NSObject, SpreadsheetViewDelegate {
-    
     private var sheetContentDTO: SheetContentDTO
     private var sheetService: SheetServiceProtocol
+    private var textSize: [Int: Int] = [:] //RowId / TextSize
     
     init(
         sheetContentDTO: SheetContentDTO,
@@ -49,6 +54,12 @@ class Coordinator: NSObject, SpreadsheetViewDelegate {
     ) {
         self.sheetContentDTO = sheetContentDTO
         self.sheetService = sheetService
+        
+        for row in sheetContentDTO.rows {
+            for cell in row.cells {
+                self.textSize[row.id] = (cell.value?.count ?? 0) > (self.textSize[row.id] ?? 0) ? cell.value?.count ?? 0 : self.textSize[row.id] ?? 0
+            }
+        }
     }
 }
 
@@ -139,13 +150,22 @@ extension Coordinator: SpreadsheetViewDataSource {
     
     @objc(spreadsheetView:heightForRow:)
     func spreadsheetView(_ spreadsheetView: SpreadsheetView, heightForRow column: Int) -> CGFloat {
-        return 50
+        
+        let defaultHeight: CGFloat = 80
+        
+        if self.sheetContentDTO.rows.count > 0 && column > 0 {
+            let rowId = self.sheetContentDTO.rows[column - 1].id
+            let value = CGFloat((textSize[rowId] ?? 0) / 2)
+            return (value > defaultHeight) ? value : defaultHeight
+        } else {
+            return defaultHeight
+        }
     }
     
     func spreadsheetView(_ spreadsheetView: SpreadsheetView, cellForItemAt indexPath: IndexPath) -> Cell? {
         spreadsheetView.bounces = false
         spreadsheetView.register(CustomEditableCell.self, forCellWithReuseIdentifier: "Cell")
-
+        
         if indexPath.column == 0 {
             return makeLineNumberCell(for: indexPath, in: spreadsheetView)
         } else if indexPath.row == 0 {
@@ -178,7 +198,12 @@ extension Coordinator: SpreadsheetViewDataSource {
         let cell = spreadsheetView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? CustomEditableCell ?? CustomEditableCell()
         cell.text = indexPath.row == 0 ? "" : "\(indexPath.row)"
         cell.isEditable = false
-        cell.isHeaderOrEnumerated = true
+        if indexPath.row > 0 {
+            let row = sheetContentDTO.rows[indexPath.row - 1]
+            cell.rowDiscussions = self.sheetContentDTO.discussionsForRow(row.id)
+            cell.allDiscussions = self.sheetContentDTO.discussions
+        }
+        cell.isRowNumber = true
         return cell
     }
 
@@ -186,7 +211,8 @@ extension Coordinator: SpreadsheetViewDataSource {
         let cell = spreadsheetView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? CustomEditableCell ?? CustomEditableCell()
         cell.text = sheetContentDTO.columns[indexPath.column - 1].title
         cell.isEditable = false
-        cell.isHeaderOrEnumerated = true
+//        cell.showCommentIcon = false
+        cell.isHeader = true
         return cell
     }
 
@@ -198,10 +224,12 @@ extension Coordinator: SpreadsheetViewDataSource {
         let row = sheetContentDTO.rows[indexPath.row - 1]
         let cellData = row.cells.first(where: { $0.columnId == column.id })
         let value = cellData?.displayValue ?? cellData?.value ?? ""
+        self.textSize[row.id] = value.count > (self.textSize[row.id] ?? 0) ? value.count : self.textSize[row.id] ?? 0
 
         cell.columnType = column.type
         cell.isEditable = column.systemColumnType.isEmpty
-        cell.isHeaderOrEnumerated = false
+//        cell.showCommentIcon = false
+        cell.isHeader = false
         cell.contactOptions = column.contactOptions
         cell.pickListValues = []
         cell.rowId = row.id

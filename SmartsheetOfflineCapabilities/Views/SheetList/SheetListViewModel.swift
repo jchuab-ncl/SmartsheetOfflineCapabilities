@@ -62,6 +62,9 @@ final class SheetListViewModel: ObservableObject {
             status = .loading
             
             do {
+                //TODO: Remove ???
+//                guard sheetsList.isEmpty else { return }
+                
                 self.sheetsList.removeAll()
                 self.sheetsList = try await sheetService.getSheetList()
                 

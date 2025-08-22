@@ -23,15 +23,25 @@ protocol CustomEditableCellDelegate: AnyObject {
 class CustomEditableCell: Cell {
     private var hostingController: UIHostingController<EditableCellView>?
     
-    var text: String = ""
-    {
+    var text: String = "" {
         didSet {
             updateContent()
         }
     }
     
-    var selectedContact: Set<ContactDTO> = []
-    {
+    var selectedContact: Set<ContactDTO> = [] {
+        didSet {
+            updateContent()
+        }
+    }
+    
+    var isRowNumber: Bool = false {
+        didSet {
+            updateContent()
+        }
+    }
+    
+    var isHeader: Bool = false {
         didSet {
             updateContent()
         }
@@ -43,8 +53,9 @@ class CustomEditableCell: Cell {
     var columnType: ColumnType = .textNumber
     var rowId: Int = 0
     var columnId: Int = 0
-    var isHeaderOrEnumerated: Bool = false
     var contactOptions: [ContactDTO] = []
+    var rowDiscussions: [DiscussionDTO] = []
+    var allDiscussions: [DiscussionDTO] = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -63,7 +74,8 @@ class CustomEditableCell: Cell {
         super.prepareForReuse()
         hostingController?.view.removeFromSuperview()
         hostingController = nil
-        isHeaderOrEnumerated = false
+        isHeader = false
+        isRowNumber = false
     }
 
     private func updateContent() {
@@ -93,8 +105,11 @@ class CustomEditableCell: Cell {
             isEditable: isEditable,
             pickListValues: pickListValues,
             columnType: columnType,
-            isHeaderOrEnumerated: isHeaderOrEnumerated,
-            contactOptions: contactOptions
+            isHeader: isHeader,
+            isRowNumber: isRowNumber,
+            contactOptions: contactOptions,
+            rowDiscussions: rowDiscussions,
+            allDiscussions: allDiscussions
         )
         
         // Create and assign new hosting controller

@@ -43,4 +43,23 @@ extension String {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter.date(from: self) ?? Date.distantPast
     }
+    
+    /// Converts a string to camelCase or PascalCase
+    func camelCased(firstLetterUppercased: Bool = false) -> String {
+        let parts = self
+            .components(separatedBy: CharacterSet.alphanumerics.inverted) // split on spaces, dashes, underscores, etc.
+            .filter { !$0.isEmpty }
+
+        guard let first = parts.first?.lowercased() else {
+            return ""
+        }
+
+        let rest = parts.dropFirst().map { $0.capitalized }
+        let result = ([first] + rest).joined()
+        if firstLetterUppercased, let firstChar = result.first {
+            return String(firstChar).uppercased() + result.dropFirst()
+        } else {
+            return result
+        }
+    }
 }
