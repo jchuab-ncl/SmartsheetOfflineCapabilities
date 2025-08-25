@@ -39,7 +39,9 @@ struct EditableCellView: View {
                     get: { isEditing && (isEditable || (rowDiscussions.isNotEmpty && isRowNumber)) },
                     set: { newValue in isEditing = newValue }
                 )) {
-                    makeSheet()
+                    NavigationStack {
+                        makeSheet()
+                    }                    
                 }
                 .onAppear {
                     guard !contactOptions.isEmpty else { return }

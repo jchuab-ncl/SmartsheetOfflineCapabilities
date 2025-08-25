@@ -83,10 +83,14 @@ enum ParentTypeFilter: String, CaseIterable {
 }
 
 struct CommentView: View {
+    @State private var isReplySheetPresented: Bool = false
+    @State private var draftReply: String = ""
+
     var comment: CommentDTO?
     var replyComments: [CommentDTO]?
     var title: String
     var isReply: Bool
+    var onSubmitReply: ((String) -> Void)? = nil
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -104,7 +108,7 @@ struct CommentView: View {
                     Spacer()
                     Text(comment?.createdAt?.asFormattedDate(
                         inputFormat: "yyyy-MM-dd'T'HH:mm:ssZ",
-                        outputFormat: "MM/dd/yy hh:mm:ss")
+                        outputFormat: "MM/dd/yy")
                     ?? "")
                         .font(.caption)
                         .foregroundColor(.gray)
@@ -119,14 +123,47 @@ struct CommentView: View {
                 }
                 
                 Button(action: {
-                    // Future reply action
+                    isReplySheetPresented = true
                 }) {
                     Text("↩︎ Reply")
                         .font(.caption)
                         .foregroundColor(.blue)
                 }
                 .padding(.top, 4)
+                .sheet(isPresented: $isReplySheetPresented) {
+                    NavigationStack {
+                        makeReplyView()
+                    }
+                }
             }
+        }
+    }
+    
+    private func makeReplyView() -> some View {
+        VStack {
+            Text("Reply to \(comment?.createdBy?.name ?? title)")
+                .font(.headline)
+                .padding()
+            
+            TextEditor(text: $draftReply)
+                .padding()
+            
+            HStack(spacing: 40) {
+                Button("Cancel") {
+                    isReplySheetPresented = false
+                    draftReply = ""
+                }
+                .foregroundColor(.red)
+
+                Button("Done") {
+                    // Commit the staged value and close
+                    let trimmed = draftReply.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !trimmed.isEmpty { onSubmitReply?(trimmed) }
+                    isReplySheetPresented = false
+                    draftReply = ""
+                }
+            }
+            .padding(.bottom, 16)
         }
     }
 
@@ -155,7 +192,7 @@ struct ReplyCommentView: View {
                     Spacer()
                     Text(comment.createdAt?.asFormattedDate(
                             inputFormat: "yyyy-MM-dd'T'HH:mm:ssZ",
-                            outputFormat: "MM/dd/yy hh:mm:ss") ?? ""
+                            outputFormat: "MM/dd/yy") ?? ""
                          )
                         .font(.caption)
                         .foregroundColor(.gray)

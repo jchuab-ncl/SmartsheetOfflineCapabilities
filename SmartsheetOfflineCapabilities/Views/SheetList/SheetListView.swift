@@ -30,7 +30,7 @@ struct SheetListView: View {
     var body: some View {
         NavigationStack {
             GeometryReader { geometry in
-                let isPad = geometry.size.width > 600
+//                let isPad = geometry.size.width > 600
                 Group {
                     if viewModel.status == .loading {
                         ProgressView()
@@ -40,9 +40,12 @@ struct SheetListView: View {
                         makeErrorView()
                     } else if filteredFiles.isEmpty {
                         makeEmptyView()
-                    } else if isPad {
-                        makeiPadView()
-                    } else {
+                    }
+//                    else
+//                    if isPad {
+//                        makeiPadView()
+//                    }
+                    else {
                         List(filteredFiles) { file in
                             makeCard(sheet: file)
                         }
@@ -73,19 +76,19 @@ struct SheetListView: View {
     
     // MARK: Private methods
     
-    private func makeiPadView() -> some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                ForEach(filteredFiles) { file in
-                    makeCard(sheet: file)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)).shadow(radius: 2))
-                        .padding(.horizontal)
-                }
-            }
-            .padding(.vertical)
-        }
-    }
+//    private func makeiPadView() -> some View {
+//        ScrollView {
+//            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+//                ForEach(filteredFiles) { file in
+//                    makeCard(sheet: file)
+//                        .frame(maxWidth: .infinity, alignment: .leading)
+//                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)).shadow(radius: 2))
+//                        .padding(.horizontal)
+//                }
+//            }
+//            .padding(.vertical)
+//        }
+//    }
         
     private func makeErrorView() -> some View {
         ZStack {
