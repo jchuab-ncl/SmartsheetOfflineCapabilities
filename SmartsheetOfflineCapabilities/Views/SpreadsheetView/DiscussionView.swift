@@ -9,9 +9,12 @@ import SwiftUI
 
 struct DiscussionView: View {
     @State private var selectedTab: ParentTypeFilter = .row
+    @State private var newConversationText: String = ""
     
     var allDiscussions: [DiscussionDTO]
     var rowDiscussions: [DiscussionDTO]
+    var rowIndex: Int = 0
+    var rowTextPreview: String = "Lorem ipsum lorem lorem lorem bla lor ip lor bra will"
 
     var body: some View {
         VStack(spacing: 0) {
@@ -41,6 +44,10 @@ struct DiscussionView: View {
                 }
                 .padding()
             }
+            
+            addDiscussionBottomView()
+                .padding()
+                .padding(.bottom, 40)
         }
     }
     
@@ -73,6 +80,89 @@ struct DiscussionView: View {
                 .filter { $0.parentType == ParentTypeFilter.sheet.rawValue }
                 .sorted { createdAtDate(from: $0) < createdAtDate(from: $1) }
         }
+    }
+    
+    @ViewBuilder
+    private func addDiscussionBottomView() -> some View {
+        VStack {
+            Divider()
+                .padding(.vertical, 12)
+            
+            HStack(alignment: .top, spacing: 12) {
+                // Avatar
+                Circle()
+                    .fill(Color.orange)
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Text("JC")
+                            .font(.caption.bold())
+                            .foregroundColor(.white)
+                    )
+
+                VStack(alignment: .leading, spacing: 8) {
+                    // Context pill (static for layout – wire later)
+                    HStack(spacing: 8) {
+                        Text("Row \(rowIndex)")
+                            .font(.caption.bold())
+                            .foregroundColor(.primary)
+                            .padding(.vertical, 4)
+                            .padding(.horizontal, 8)
+                            .background(
+                                Capsule().fill(Color.gray.opacity(0.15))
+                            )
+                        Text(rowTextPreview)
+                            .font(.caption)
+                            .lineLimit(1)
+                            .foregroundColor(.secondary)
+                    }
+
+                    // Editor box with placeholder and trailing icons
+                    ZStack(alignment: .topLeading) {
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.25))
+                            .background(RoundedRectangle(cornerRadius: 8).fill(Color.gray.opacity(0.06)))
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            ZStack(alignment: .topLeading) {
+                                if newConversationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                    Text("Add your comment here...")
+                                        .foregroundColor(.secondary)
+                                        .padding(.top, 8)
+                                        .padding(.leading, 4)
+                                        .font(.subheadline)
+                                }
+                                TextEditor(text: $newConversationText)
+                                    .padding(.horizontal, 2)
+                                    .scrollContentBackground(.hidden)
+                                    .font(.subheadline)
+                            }
+
+                            // Action row (icons only – no actions yet)
+                            HStack(spacing: 16) {
+
+                                Spacer()
+                                // Disabled post button for layout only
+                                Button(action: {}) {
+                                    Text("Post")
+                                        .font(.subheadline.bold())
+                                        .padding(.vertical, 6)
+                                        .padding(.horizontal, 12)
+                                        .background(Capsule().fill(Color.blue.opacity(0.15)))
+                                }
+                                .disabled(newConversationText.isEmpty)
+                            }
+                            .foregroundColor(.secondary)
+                        }
+                        .padding(8)
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+        .background(.white)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(minHeight: 44, maxHeight: 44)
     }
 }
 
