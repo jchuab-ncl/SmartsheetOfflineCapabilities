@@ -64,6 +64,7 @@ public final class CachedColumn {
     public var index: Int
     public var title: String
     public var type: String
+    public var primary: Bool?
     public var systemColumnType: String?
     public var hidden: Bool?
     public var width: Int
@@ -75,6 +76,7 @@ public final class CachedColumn {
         index: Int,
         title: String,
         type: String = "",
+        primary: Bool?,
         systemColumnType: String,
         hidden: Bool,
         width: Int = 0,
@@ -85,6 +87,7 @@ public final class CachedColumn {
         self.index = index
         self.title = title
         self.type = type
+        self.primary = primary
         self.systemColumnType = systemColumnType
         self.hidden = hidden
         self.width = width
@@ -182,6 +185,7 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
     public var index: Int
     public var title: String
     public var type: ColumnType
+    public let primary: Bool?
     public var systemColumnType: String
     public var hidden: Bool
     public var width: Int
@@ -193,6 +197,7 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         index: Int,
         title: String,
         type: ColumnType,
+        primary: Bool?,
         systemColumnType: String,
         hidden: Bool,
         width: Int,
@@ -203,6 +208,7 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         self.index = index
         self.title = title
         self.type = type
+        self.primary = primary
         self.systemColumnType = systemColumnType
         self.hidden = hidden
         self.width = width

@@ -10,11 +10,13 @@ import SwiftUI
 struct DiscussionView: View {
     @State private var selectedTab: ParentTypeFilter = .row
     @State private var newConversationText: String = ""
+    @State private var mode: AddDiscussionBottomViewMode = .addDiscussion
+    @State private var commentBeingRepliedTo: DiscussionDTO? = nil
     
     var allDiscussions: [DiscussionDTO]
     var rowDiscussions: [DiscussionDTO]
     var rowNumber: Int = 0
-    var rowTextPreview: String = "Lorem ipsum lorem lorem lorem bla lor ip lor bra will"
+    var columnPrimaryText: String = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -35,19 +37,27 @@ struct DiscussionView: View {
                     let filtered = filterDiscussions()
                     ForEach(filtered, id: \.id) { discussion in
                         CommentView(
-                            comment: discussion.comments?.first,
-                            replyComments: discussion.comments,
-                            title: discussion.title ?? "",
-                            isReply: false
+                            discussionDTO: discussion,
+                            isReply: false,
+                            onStartReply: {
+                                mode = .replyDiscussion
+                                commentBeingRepliedTo = discussion
+                            }
                         )
                     }
                 }
                 .padding()
             }
             
-            addDiscussionBottomView()
-                .padding()
-                .padding(.bottom, 40)
+            AddDiscussionBottomView(
+                newConversationText: $newConversationText,
+                mode: $mode,
+                commentBeingReplyTo: commentBeingRepliedTo,
+                rowNumber: rowNumber,
+                columnPrimaryText: columnPrimaryText
+            )
+            .padding()
+            .padding(.bottom, 40)
         }
     }
     
@@ -81,26 +91,37 @@ struct DiscussionView: View {
                 .sorted { createdAtDate(from: $0) < createdAtDate(from: $1) }
         }
     }
+}
+
+enum AddDiscussionBottomViewMode: String {
+    case replyDiscussion
+    case addDiscussion
+}
+
+struct AddDiscussionBottomView: View {
+    @Binding var newConversationText: String
+    @Binding var mode: AddDiscussionBottomViewMode
     
-    @ViewBuilder
-    private func addDiscussionBottomView() -> some View {
+    var commentBeingReplyTo: DiscussionDTO?
+    var rowNumber: Int
+    var columnPrimaryText: String
+    
+    var body: some View {
         VStack {
             Divider()
                 .padding(.vertical, 12)
-            
+
             HStack(alignment: .top, spacing: 12) {
                 // Avatar
                 Circle()
                     .fill(Color.orange)
                     .frame(width: 32, height: 32)
                     .overlay(
-                        Text("JC")
-                            .font(.caption.bold())
+                        Image(systemName: "person.fill")
                             .foregroundColor(.white)
                     )
 
                 VStack(alignment: .leading, spacing: 8) {
-                    // Context pill (static for layout – wire later)
                     HStack(spacing: 8) {
                         Text("Row \(rowNumber)")
                             .font(.caption.bold())
@@ -110,10 +131,25 @@ struct DiscussionView: View {
                             .background(
                                 Capsule().fill(Color.gray.opacity(0.15))
                             )
-                        Text(rowTextPreview)
-                            .font(.caption)
-                            .lineLimit(1)
-                            .foregroundColor(.secondary)
+                        
+                        if columnPrimaryText.isNotEmpty {
+                            Text(columnPrimaryText)
+                                .font(.caption)
+                                .lineLimit(1)
+                                .foregroundColor(.secondary)
+                        }                                                
+                    }
+                    
+                    if mode == .replyDiscussion, let title = commentBeingReplyTo?.title {
+                        (
+                            Text("Replying to: ")
+                                .font(.caption.bold())
+                                .foregroundColor(.primary)
+                            + Text(title)
+                                .font(.caption)
+                                .foregroundColor(.primary)
+                        )
+                        .padding(.horizontal, 8)
                     }
 
                     // Editor box with placeholder and trailing icons
@@ -125,7 +161,7 @@ struct DiscussionView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             ZStack(alignment: .topLeading) {
                                 if newConversationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    Text("Add your comment here...")
+                                    Text(mode == .addDiscussion ? "Add your comment here..." : "Add your reply here...")
                                         .foregroundColor(.secondary)
                                         .padding(.top, 8)
                                         .padding(.leading, 4)
@@ -137,8 +173,20 @@ struct DiscussionView: View {
                                     .font(.subheadline)
                             }
 
-                            // Action row (icons only – no actions yet)
                             HStack(spacing: 16) {
+                                if mode == .replyDiscussion {
+                                    Button(action: {
+                                        newConversationText = ""
+                                        mode = .addDiscussion
+                                    }) {
+                                        Text("Cancel")
+                                            .font(.subheadline.bold())
+                                            .padding(.vertical, 6)
+                                            .padding(.horizontal, 12)
+                                            .background(Capsule().fill(Color.red.opacity(0.15)))
+                                            .foregroundStyle(.red)
+                                    }
+                                }
 
                                 Spacer()
                                 // Disabled post button for layout only
@@ -148,16 +196,16 @@ struct DiscussionView: View {
                                         .padding(.vertical, 6)
                                         .padding(.horizontal, 12)
                                         .background(Capsule().fill(Color.blue.opacity(0.15)))
+                                        .foregroundColor(newConversationText.isEmpty ? .gray : .blue)
                                 }
                                 .disabled(newConversationText.isEmpty)
                             }
-                            .foregroundColor(.secondary)
                         }
                         .padding(8)
                     }
                 }
             }
-            
+
             Spacer()
         }
         .background(.white)
@@ -173,14 +221,21 @@ enum ParentTypeFilter: String, CaseIterable {
 }
 
 struct CommentView: View {
-    @State private var isReplySheetPresented: Bool = false
-    @State private var draftReply: String = ""
-
-    var comment: CommentDTO?
-    var replyComments: [CommentDTO]?
-    var title: String
+    var discussionDTO: DiscussionDTO
     var isReply: Bool
-    var onSubmitReply: ((String) -> Void)? = nil
+    var onStartReply: (() -> Void)? = nil
+        
+    private var comment: CommentDTO? {
+        discussionDTO.comments?.first
+    }
+    
+    private var title: String {
+        discussionDTO.title ?? ""
+    }
+    
+    private var replyComments: [CommentDTO]? {
+        discussionDTO.comments
+    }
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -213,50 +268,17 @@ struct CommentView: View {
                 }
                 
                 Button(action: {
-                    isReplySheetPresented = true
+                    onStartReply?()
                 }) {
                     Text("↩︎ Reply")
                         .font(.caption)
                         .foregroundColor(.blue)
                 }
                 .padding(.top, 4)
-                .sheet(isPresented: $isReplySheetPresented) {
-                    NavigationStack {
-                        makeReplyView()
-                    }
-                }
             }
         }
     }
     
-    private func makeReplyView() -> some View {
-        VStack {
-            Text("Reply to \(comment?.createdBy?.name ?? title)")
-                .font(.headline)
-                .padding()
-            
-            TextEditor(text: $draftReply)
-                .padding()
-            
-            HStack(spacing: 40) {
-                Button("Cancel") {
-                    isReplySheetPresented = false
-                    draftReply = ""
-                }
-                .foregroundColor(.red)
-
-                Button("Done") {
-                    // Commit the staged value and close
-                    let trimmed = draftReply.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !trimmed.isEmpty { onSubmitReply?(trimmed) }
-                    isReplySheetPresented = false
-                    draftReply = ""
-                }
-            }
-            .padding(.bottom, 16)
-        }
-    }
-
     private func initials(from name: String) -> String {
         name.split(separator: " ").compactMap { $0.first }.prefix(2).map { String($0) }.joined()
     }

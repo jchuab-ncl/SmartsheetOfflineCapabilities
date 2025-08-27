@@ -58,6 +58,7 @@ class CustomEditableCell: Cell {
     var isEditable: Bool = true
     var pickListValues: [String] = []
     var columnType: ColumnType = .textNumber
+    var columnPrimaryText: String = ""
     var rowId: Int = 0
     var columnId: Int = 0
     var contactOptions: [ContactDTO] = []
@@ -112,6 +113,7 @@ class CustomEditableCell: Cell {
             isEditable: isEditable,
             pickListValues: pickListValues,
             columnType: columnType,
+            columnPrimaryText: columnPrimaryText,
             isHeader: isHeader,
             isRowNumber: isRowNumber,
             rowNumber: rowNumber,

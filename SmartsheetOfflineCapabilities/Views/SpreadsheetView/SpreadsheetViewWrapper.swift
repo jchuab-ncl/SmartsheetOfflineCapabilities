@@ -196,14 +196,25 @@ extension Coordinator: SpreadsheetViewDataSource {
     
     private func makeLineNumberCell(for indexPath: IndexPath, in spreadsheetView: SpreadsheetView) -> CustomEditableCell {
         let cell = spreadsheetView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? CustomEditableCell ?? CustomEditableCell()
+        var row: RowDTO?
+        
         cell.rowNumber = indexPath.row == 0 ? 0 : indexPath.row
-//        cell.text = indexPath.row == 0 ? "" : "\(indexPath.row)"
         cell.isEditable = false
         if indexPath.row > 0 {
-            let row = sheetContentDTO.rows[indexPath.row - 1]
-            cell.rowDiscussions = self.sheetContentDTO.discussionsForRow(row.id)
+            row = sheetContentDTO.rows[indexPath.row - 1]
+            cell.rowDiscussions = self.sheetContentDTO.discussionsForRow(row?.id ?? 0)
             cell.allDiscussions = self.sheetContentDTO.discussions
         }
+        
+        /// Finding the primary column
+        let primaryColumn = sheetContentDTO.columns.first(where: {
+            guard let primary = $0.primary else {
+                return false
+            }
+            return primary
+        })
+        
+        cell.columnPrimaryText = row?.cells.first(where: { $0.columnId == primaryColumn?.id })?.value ?? ""
         cell.isRowNumber = true
         return cell
     }
@@ -212,7 +223,6 @@ extension Coordinator: SpreadsheetViewDataSource {
         let cell = spreadsheetView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? CustomEditableCell ?? CustomEditableCell()
         cell.text = sheetContentDTO.columns[indexPath.column - 1].title
         cell.isEditable = false
-//        cell.showCommentIcon = false
         cell.isHeader = true
         return cell
     }
@@ -229,7 +239,6 @@ extension Coordinator: SpreadsheetViewDataSource {
 
         cell.columnType = column.type
         cell.isEditable = column.systemColumnType.isEmpty
-//        cell.showCommentIcon = false
         cell.isHeader = false
         cell.contactOptions = column.contactOptions
         cell.pickListValues = []

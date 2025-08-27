@@ -10,6 +10,9 @@
     "Add your comment here..." : {
 
     },
+    "Add your reply here..." : {
+
+    },
     "An error has occurred. Try again later." : {
 
     },
@@ -35,9 +38,6 @@
 
     },
     "Edit Content" : {
-
-    },
-    "JC" : {
 
     },
     "Login" : {
@@ -79,7 +79,7 @@
     "Post" : {
 
     },
-    "Reply to %@" : {
+    "Replying to: " : {
 
     },
     "Row %lld" : {

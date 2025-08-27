@@ -21,6 +21,7 @@ struct EditableCellView: View {
     var isClickable: Bool = false
     var pickListValues: [String] = []
     var columnType: ColumnType = .textNumber
+    var columnPrimaryText: String = ""
     var isHeader: Bool = false /// Represents the header, with columns titles
     var isRowNumber: Bool = false /// Represents the first column, showing line/row numbers
     var rowNumber: Int = 0
@@ -54,9 +55,9 @@ struct EditableCellView: View {
                     get: { isEditing && (isEditable || (rowDiscussions.isNotEmpty && isRowNumber)) },
                     set: { newValue in isEditing = newValue }
                 )) {
-                    NavigationStack {
+//                    NavigationStack {
                         makeSheet()
-                    }                    
+//                    }                    
                 }
                 .onAppear {
                     guard !contactOptions.isEmpty else { return }
@@ -190,7 +191,12 @@ struct EditableCellView: View {
     }
     
     private func buildDiscussionSheet() -> some View {
-        DiscussionView(allDiscussions: allDiscussions, rowDiscussions: rowDiscussions, rowNumber: rowNumber)
+        DiscussionView(
+            allDiscussions: allDiscussions,
+            rowDiscussions: rowDiscussions,
+            rowNumber: rowNumber,
+            columnPrimaryText: columnPrimaryText
+        )
     }
     
     private func tapGestureAction(contact: ContactDTO) {
