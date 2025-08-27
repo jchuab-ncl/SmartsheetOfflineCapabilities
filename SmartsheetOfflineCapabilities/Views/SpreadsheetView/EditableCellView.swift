@@ -23,13 +23,28 @@ struct EditableCellView: View {
     var columnType: ColumnType = .textNumber
     var isHeader: Bool = false /// Represents the header, with columns titles
     var isRowNumber: Bool = false /// Represents the first column, showing line/row numbers
+    var rowNumber: Int = 0
     var contactOptions: [ContactDTO] = []
     var rowDiscussions: [DiscussionDTO] = []
     var allDiscussions: [DiscussionDTO] = []
+    
+    var displayText: String {
+        if isRowNumber {
+            if rowNumber == 0 {
+                return ""
+            } else if rowNumber > 0 {
+                return "\(rowNumber)"
+            } else {
+                return ""
+            }
+        } else {
+            return text
+        }
+    }
 
     var body: some View {
         VStack {
-            Text(text)
+            Text(displayText)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .bold(isHeader || isRowNumber)
                 .multilineTextAlignment(.center)
@@ -48,9 +63,15 @@ struct EditableCellView: View {
                     selectedContact = mapDraftTextToSelectedContacts(text)
                 }
             
-            if rowDiscussions.isNotEmpty && isRowNumber {
-                Image(systemName: "bubble")
-                    .padding(.bottom, 12)
+            if isRowNumber && rowNumber > 0 {
+                if rowDiscussions.isEmpty {
+                    Image(systemName: "bubble")
+                        .padding(.bottom, 12)
+                } else {
+                    Image(systemName: "bubble.fill")
+                        .foregroundStyle(Colors.blueNCL)
+                        .padding(.bottom, 12)
+                }
             }
         }
         .onTapGesture {
@@ -67,7 +88,7 @@ struct EditableCellView: View {
                     .font(.headline)
                     .padding()
                 buildDateSheet()
-            } else if isRowNumber && rowDiscussions.isNotEmpty {
+            } else if isRowNumber {
                 Text("Conversations")
                     .font(.headline)
                     .padding()
@@ -169,7 +190,7 @@ struct EditableCellView: View {
     }
     
     private func buildDiscussionSheet() -> some View {
-        DiscussionView(allDiscussions: allDiscussions, rowDiscussions: rowDiscussions)
+        DiscussionView(allDiscussions: allDiscussions, rowDiscussions: rowDiscussions, rowNumber: rowNumber)
     }
     
     private func tapGestureAction(contact: ContactDTO) {

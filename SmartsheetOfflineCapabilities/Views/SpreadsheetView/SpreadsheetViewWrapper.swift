@@ -196,7 +196,8 @@ extension Coordinator: SpreadsheetViewDataSource {
     
     private func makeLineNumberCell(for indexPath: IndexPath, in spreadsheetView: SpreadsheetView) -> CustomEditableCell {
         let cell = spreadsheetView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? CustomEditableCell ?? CustomEditableCell()
-        cell.text = indexPath.row == 0 ? "" : "\(indexPath.row)"
+        cell.rowNumber = indexPath.row == 0 ? 0 : indexPath.row
+//        cell.text = indexPath.row == 0 ? "" : "\(indexPath.row)"
         cell.isEditable = false
         if indexPath.row > 0 {
             let row = sheetContentDTO.rows[indexPath.row - 1]

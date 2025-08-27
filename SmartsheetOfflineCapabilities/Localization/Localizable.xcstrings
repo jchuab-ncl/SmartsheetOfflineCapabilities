@@ -7,6 +7,9 @@
     "↩︎ Reply" : {
 
     },
+    "Add your comment here..." : {
+
+    },
     "An error has occurred. Try again later." : {
 
     },
@@ -32,6 +35,9 @@
 
     },
     "Edit Content" : {
+
+    },
+    "JC" : {
 
     },
     "Login" : {
@@ -70,7 +76,13 @@
     "Please try again." : {
 
     },
+    "Post" : {
+
+    },
     "Reply to %@" : {
+
+    },
+    "Row %lld" : {
 
     },
     "Save" : {

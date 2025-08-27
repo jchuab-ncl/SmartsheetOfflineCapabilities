@@ -29,6 +29,13 @@ class CustomEditableCell: Cell {
         }
     }
     
+    /// The row number showing to the user, starts at 1
+    var rowNumber: Int = 0 {
+        didSet {
+            updateContent()
+        }
+    }
+    
     var selectedContact: Set<ContactDTO> = [] {
         didSet {
             updateContent()
@@ -107,6 +114,7 @@ class CustomEditableCell: Cell {
             columnType: columnType,
             isHeader: isHeader,
             isRowNumber: isRowNumber,
+            rowNumber: rowNumber,
             contactOptions: contactOptions,
             rowDiscussions: rowDiscussions,
             allDiscussions: allDiscussions

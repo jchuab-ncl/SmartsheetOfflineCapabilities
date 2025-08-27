@@ -13,7 +13,7 @@ struct DiscussionView: View {
     
     var allDiscussions: [DiscussionDTO]
     var rowDiscussions: [DiscussionDTO]
-    var rowIndex: Int = 0
+    var rowNumber: Int = 0
     var rowTextPreview: String = "Lorem ipsum lorem lorem lorem bla lor ip lor bra will"
 
     var body: some View {
@@ -102,7 +102,7 @@ struct DiscussionView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Context pill (static for layout – wire later)
                     HStack(spacing: 8) {
-                        Text("Row \(rowIndex)")
+                        Text("Row \(rowNumber)")
                             .font(.caption.bold())
                             .foregroundColor(.primary)
                             .padding(.vertical, 4)
