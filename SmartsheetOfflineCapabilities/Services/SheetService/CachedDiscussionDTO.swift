@@ -62,7 +62,28 @@ public final class CachedDiscussionDTO {
         self.commentAttachments = commentAttachments
     }
     
-    public convenience init(from discussion: Discussion) {
+//    public convenience init(from discussion: DiscussionDTO) {
+//        let cachedComments: [CachedCommentDTO] = (discussion.comments ?? []).map { CachedCommentDTO(from: $0) }
+//        let cachedTopLevelAttachments: [CachedAttachmentDTO] = (discussion.commentAttachments ?? []).map { CachedAttachmentDTO(from: $0) }
+//        self.init(
+//            id: discussion.id,
+//            accessLevel: discussion.accessLevel,
+//            title: discussion.title,
+//            commentCount: discussion.commentCount ?? 0,
+//            parentId: discussion.parentId,
+//            parentType: discussion.parentType,
+//            readOnly: discussion.readOnly ?? false,
+//            lastCommentedAt: discussion.lastCommentedAt,
+//            createdByName: discussion.createdBy?.name,
+//            createdByEmail: discussion.createdBy?.email,
+//            lastCommentedUserName: discussion.lastCommentedUser?.name,
+//            lastCommentedUserEmail: discussion.lastCommentedUser?.email,
+//            comments: cachedComments,
+//            commentAttachments: cachedTopLevelAttachments
+//        )
+//    }
+    
+    public convenience init(from discussion: DiscussionDTO) {
         let cachedComments: [CachedCommentDTO] = (discussion.comments ?? []).map { CachedCommentDTO(from: $0) }
         let cachedTopLevelAttachments: [CachedAttachmentDTO] = (discussion.commentAttachments ?? []).map { CachedAttachmentDTO(from: $0) }
         self.init(
@@ -118,7 +139,7 @@ public final class CachedCommentDTO {
         self.attachments = attachments
     }
     
-    convenience init(from comment: Comment) {
+    convenience init(from comment: CommentDTO) {
         let cachedAttachments: [CachedAttachmentDTO] = (comment.attachments ?? []).map { CachedAttachmentDTO(from: $0) }
         self.init(
             id: comment.id,
@@ -179,7 +200,7 @@ public final class CachedAttachmentDTO {
         self.urlExpiresInMillis = urlExpiresInMillis
     }
     
-    convenience init(from attachment: Attachment) {
+    convenience init(from attachment: AttachmentDTO) {
         self.init(
             id: attachment.id,
             parentId: attachment.parentId,

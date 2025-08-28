@@ -456,10 +456,8 @@ public final class SheetService: SheetServiceProtocol {
         switch result {
         case .success(let data):
             do {
-                let sheetContent = try JSONDecoder().decode(SheetContent.self, from: data)
-                                
-                try await storeSheetContent(sheetListResponse: sheetContent)
-                
+                var sheetContent = try JSONDecoder().decode(SheetContent.self, from: data)
+                                                                
                 // Convert stored sheet content to DTO to return
                 
                 let columns: [ColumnDTO] = (sheetContent.columns ?? []).map {
@@ -487,6 +485,7 @@ public final class SheetService: SheetServiceProtocol {
                 }
                 
                 let discussions = try await getDiscussionForSheet(sheetId: sheetId)
+                try await storeSheetContent(sheetListResponse: sheetContent, discussions: discussions)
                 
                 return SheetContentDTO(
                     id: sheetContent.id,
@@ -777,7 +776,7 @@ public final class SheetService: SheetServiceProtocol {
         try? await getSheetListHasUpdatesToPublish()
     }
     
-    private func storeSheetContent(sheetListResponse: SheetContent) async throws {
+    private func storeSheetContent(sheetListResponse: SheetContent, discussions: [DiscussionDTO]) async throws {
         try await MainActor.run {
             let context = modelContext
 
@@ -811,7 +810,7 @@ public final class SheetService: SheetServiceProtocol {
                 return CachedRow(id: row.id, rowNumber: row.rowNumber, cells: cachedCells)
             }
             
-            let cachedDiscussions: [CachedDiscussionDTO] = (sheetListResponse.discussions ?? []).map { CachedDiscussionDTO(from: $0) }
+            let cachedDiscussions: [CachedDiscussionDTO] = (discussions).map { CachedDiscussionDTO(from: $0) }
 
             // Create CachedSheetContent model
             let cachedSheet = CachedSheetContent(
@@ -829,6 +828,7 @@ public final class SheetService: SheetServiceProtocol {
                 print("✅ Error storing sheet content: \(sheetListResponse.name) in SwiftData. Error: \(error)")
             }
             print("✅ Sheet content: \(sheetListResponse.name) stored in SwiftData")
+            print("✅ Sheet discussions for: \(sheetListResponse.name) stored in SwiftData")
         }
     }
 }
