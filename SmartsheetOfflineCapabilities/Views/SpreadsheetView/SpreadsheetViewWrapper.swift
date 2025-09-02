@@ -199,9 +199,14 @@ extension Coordinator: SpreadsheetViewDataSource {
         var row: RowDTO?
         
         cell.rowNumber = indexPath.row == 0 ? 0 : indexPath.row
-        cell.isEditable = false
+        cell.isEditable = true
         if indexPath.row > 0 {
             row = sheetContentDTO.rows[indexPath.row - 1]
+            
+            if let rowId = row?.id {
+                cell.rowId = rowId
+            }
+            
             cell.rowDiscussions = self.sheetContentDTO.discussionsForRow(row?.id ?? 0)
             cell.allDiscussions = self.sheetContentDTO.discussions
         }
@@ -214,6 +219,7 @@ extension Coordinator: SpreadsheetViewDataSource {
             return primary
         })
         
+        cell.sheetId = sheetContentDTO.id
         cell.columnPrimaryText = row?.cells.first(where: { $0.columnId == primaryColumn?.id })?.value ?? ""
         cell.isRowNumber = true
         return cell

@@ -24,7 +24,9 @@ struct SmartsheetOfflineCapabilitiesApp: App {
             CachedOption.self,
             CachedSheetHasUpdatesToPublish.self,
             CachedSheetContactUpdatesToPublish.self,
-            CachedDiscussionDTO.self
+            CachedDiscussionDTO.self,
+            CachedSheetDiscussionText.self,
+            CachedUser.self
         ])
         
         let config = ModelConfiguration("SmartsheetOffline", schema: schema)
@@ -42,8 +44,10 @@ struct SmartsheetOfflineCapabilitiesApp: App {
                     }
                 }
                 .preferredColorScheme(.light)
-                .onAppear {
+                .onAppear {                   
+                    // The order should be as is, do not change
                     Dependencies.shared.sheetService = SheetService(modelContext: sharedModelContainer.mainContext)
+                    Dependencies.shared.authenticationService.setupModelContext(modelContext: sharedModelContainer.mainContext)
                 }
         }
         .modelContainer(sharedModelContainer)

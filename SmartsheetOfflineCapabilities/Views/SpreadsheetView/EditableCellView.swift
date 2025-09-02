@@ -24,6 +24,8 @@ struct EditableCellView: View {
     var columnPrimaryText: String = ""
     var isHeader: Bool = false /// Represents the header, with columns titles
     var isRowNumber: Bool = false /// Represents the first column, showing line/row numbers
+    var rowId: Int = 0
+    var sheetId: Int
     var rowNumber: Int = 0
     var contactOptions: [ContactDTO] = []
     var rowDiscussions: [DiscussionDTO] = []
@@ -52,7 +54,9 @@ struct EditableCellView: View {
                 .padding(6)
                 .cornerRadius(6)
                 .sheet(isPresented: Binding(
-                    get: { isEditing && (isEditable || (rowDiscussions.isNotEmpty && isRowNumber)) },
+                    get: {
+                        isEditing && isEditable
+                    },
                     set: { newValue in isEditing = newValue }
                 )) {
 //                    NavigationStack {
@@ -193,8 +197,10 @@ struct EditableCellView: View {
     private func buildDiscussionSheet() -> some View {
         DiscussionView(
             allDiscussions: allDiscussions,
+            sheetId: sheetId,
             rowDiscussions: rowDiscussions,
             rowNumber: rowNumber,
+            rowId: rowId,
             columnPrimaryText: columnPrimaryText
         )
     }

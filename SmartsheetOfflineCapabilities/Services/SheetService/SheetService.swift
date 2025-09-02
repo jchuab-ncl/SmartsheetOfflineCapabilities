@@ -77,14 +77,26 @@ struct DiscussionListResponse: Codable {
 public protocol SheetServiceProtocol {
     var sheetWithUpdatesToPublishStorageRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> { get }
     var sheetWithUpdatesToPublishMemoryRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> { get }
+    var sheetDiscussionToPublishDTOMemoryRepo: Protected<[CachedSheetDiscussionToPublishDTO]> { get }
+    var sheetContactToPublishStorageRepo: Protected<[CachedSheetDiscussionToPublishDTO]> { get }
     
+    /// Sheet List
     func getSheetList() async throws -> [CachedSheetDTO]
     func getSheetListHasUpdatesToPublish() async throws
+    
+    /// Sheet Content
     func getSheetContent(sheetId: Int) async throws -> SheetContentDTO
     func getSheetContentOnline(sheetId: Int) async throws -> SheetContentDTO
-    func getDiscussionForSheet(sheetId: Int) async throws -> [DiscussionDTO]
+    
+    /// Discussions to publish
+    func getDiscussionToPublishForSheet(sheetId: Int) async throws -> [DiscussionDTO]
+    func commitSheetDiscussionToStorage(parentId: Int) async
+        
     func addSheetWithUpdatesToPublish_Storage(columnType: String, sheetId: Int, name: String, newValue: String, oldValue: String, rowId: Int, columnId: Int, contacts: [CachedSheetContactUpdatesToPublishDTO]) async throws
+        
     func addSheetWithUpdatesToPublishInMemoryRepo(sheet: CachedSheetHasUpdatesToPublishDTO)
+    func addDiscussionToPublishInMemoryRepo(sheet: CachedSheetDiscussionToPublishDTO)
+    
     func removeSheetHasUpdatesToPublish(sheetId: Int) async throws
     func commitMemoryToStorage(sheetId: Int) async throws
     func pushChangesToApi(sheetId: Int) async throws
@@ -103,13 +115,20 @@ public final class SheetService: SheetServiceProtocol {
     /// Used to set the value locally
     @Protected private(set) var protectedSheetHasUpdatesToPublishStorageRepo: [CachedSheetHasUpdatesToPublishDTO] = []
     @Protected private(set) var protectedSheetContactToPublishStorageRepo: [CachedSheetContactUpdatesToPublishDTO] = []
+    @Protected private(set) var protectedDiscussionToPublishStorageRepo: [CachedSheetDiscussionToPublishDTO] = []
+    
     @Protected private(set) var protectedSheetHasUpdatesToPublishMemoryRepo: [CachedSheetHasUpdatesToPublishDTO] = []
+    @Protected private(set) var protectedDiscussionToPublishDTOMemoryRepo: [CachedSheetDiscussionToPublishDTO] = []
     
     // MARK: Public properties
 
-    /// The stored instance of contact fields to publish
+    /// The stored instance of discussions to publish
     /// Used to observe changes externally
-    public var sheetContactToPublishStorageRepo: Protected<[CachedSheetContactUpdatesToPublishDTO]> {
+    public var sheetContactToPublishStorageRepo: Protected<[CachedSheetDiscussionToPublishDTO]> {
+        $protectedDiscussionToPublishStorageRepo
+    }
+    
+    public var discussionsToPublishStorageRepo: Protected<[CachedSheetContactUpdatesToPublishDTO]> {
         $protectedSheetContactToPublishStorageRepo
     }
     
@@ -123,6 +142,12 @@ public final class SheetService: SheetServiceProtocol {
     /// Used to observe changes externally
     public var sheetWithUpdatesToPublishMemoryRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> {
         $protectedSheetHasUpdatesToPublishMemoryRepo
+    }
+    
+    /// The memory instance of discussions/comments to publish
+    /// Used to observe changes externally
+    public var sheetDiscussionToPublishDTOMemoryRepo: Protected<[CachedSheetDiscussionToPublishDTO]> {
+        $protectedDiscussionToPublishDTOMemoryRepo
     }
     
     // MARK: Initializers
@@ -168,6 +193,12 @@ public final class SheetService: SheetServiceProtocol {
             let sheetDescriptor = FetchDescriptor<CachedSheetHasUpdatesToPublish>(sortBy: [SortDescriptor(\.name)])
             let sheetResults = try context.fetch(sheetDescriptor)
 
+            // Fetch discussions to publish
+            let discussionDescriptor = FetchDescriptor<CachedSheetDiscussionsToPublish>(sortBy: [SortDescriptor(\.dateTime)])
+            let discussionResults = try context.fetch(discussionDescriptor)
+            
+            protectedDiscussionToPublishStorageRepo = discussionResults.map { .init(from: $0) }
+            
             // Fetch contact updates
             let contactDescriptor = FetchDescriptor<CachedSheetContactUpdatesToPublish>(sortBy: [SortDescriptor(\.name)])
             let contactResults = try context.fetch(contactDescriptor)
@@ -279,6 +310,29 @@ public final class SheetService: SheetServiceProtocol {
         }
     }
     
+    public func addSheetDiscussionToPublishInStorage(item: CachedSheetDiscussionToPublishDTO) async throws {
+        do {
+            let newItem = CachedSheetDiscussionsToPublish(
+                dateTime: item.dateTime,
+                parentId: item.parentId,
+                parentType: item.parentType.rawValue,
+                firstNameUser: item.firstNameUser,
+                lastNameUser: item.lastNameUser,
+                comment: .init(text: item.comment.text)
+            )
+            
+            modelContext.insert(newItem)
+            try modelContext.save()
+            
+            /// Calling this method to publish the changes
+            try await getSheetListHasUpdatesToPublish()
+            print("✅ Added discussion(s) with pending updates: SheetID: \(item.parentId)")
+        } catch {
+            print("❌ Failed to add sheet discussions with pending updates: Name: \(error) SheetID: \(item.parentId)")
+            throw error
+        }
+    }
+    
     public func addSheetWithUpdatesToPublishInMemoryRepo(sheet: CachedSheetHasUpdatesToPublishDTO) {
         //TODO: Do not update if the oldValue == newValue
         
@@ -296,6 +350,12 @@ public final class SheetService: SheetServiceProtocol {
             protectedSheetHasUpdatesToPublishMemoryRepo.append(sheet)
             print("ℹ️ Added new in-memory record for SheetID: \(sheet.sheetId), RowID: \(sheet.rowId), ColumnID: \(sheet.columnId), OldValue: \(sheet.oldValue) with value: \(sheet.newValue)")
         }
+    }
+    
+    public func addDiscussionToPublishInMemoryRepo(sheet: CachedSheetDiscussionToPublishDTO) {
+        // Append new record
+        protectedDiscussionToPublishDTOMemoryRepo.append(sheet)
+        print("ℹ️ Added new in-memory discussion record for SheetID: \(sheet.parentId), Value: \(sheet.comment)")
     }
     
     public func removeSheetHasUpdatesToPublish(sheetId: Int) async throws {
@@ -325,49 +385,8 @@ public final class SheetService: SheetServiceProtocol {
     }
     
     public func commitMemoryToStorage(sheetId: Int) async throws {
-        // Snapshot current in-memory items
-        let pending = protectedSheetHasUpdatesToPublishMemoryRepo.filter({ $0.sheetId == sheetId })
-        guard !pending.isEmpty else {
-            print("ℹ️ No in-memory updates to commit.")
-            return
-        }
-
-        print("➡️ Committing \(pending.count) in-memory update(s) to storage…")
-        
-        var currentItem: CachedSheetHasUpdatesToPublishDTO?
-        
-        do {
-            for item in pending {
-                currentItem = item
-                
-                try await addSheetWithUpdatesToPublish_Storage(
-                    columnType: item.columnType,
-                    sheetId: item.sheetId,
-                    name: item.sheetName,
-                    newValue: item.newValue,
-                    oldValue: item.oldValue,
-                    rowId: item.rowId,
-                    columnId: item.columnId,
-                    contacts: item.contacts
-                )
-                
-                // Clear memory repo after attempting to store
-                protectedSheetHasUpdatesToPublishMemoryRepo.removeAll(where: {
-                    $0.sheetId == item.sheetId &&
-                    $0.rowId == item.rowId &&
-                    $0.columnId == item.columnId
-                })
-            }
-            
-            
-            try await updateSheetContentOnStorage(sheetId: sheetId)
-        } catch {
-            if let currentItem = currentItem {
-                print("❌ Failed to persist in-memory update — SheetID: \(currentItem.sheetId), RowID: \(currentItem.rowId), ColumnID: \(currentItem.columnId). Error: \(error)")
-            }
-        }
-                        
-        print("✅ Commit complete. Cleared in-memory repo.")
+        await commitSheetContentToStorage(sheetId: sheetId)
+        await commitSheetDiscussionToStorage(parentId: sheetId)
     }
     
     public func pushChangesToApi(sheetId: Int) async throws {
@@ -456,7 +475,7 @@ public final class SheetService: SheetServiceProtocol {
         switch result {
         case .success(let data):
             do {
-                var sheetContent = try JSONDecoder().decode(SheetContent.self, from: data)
+                let sheetContent = try JSONDecoder().decode(SheetContent.self, from: data)
                                                                 
                 // Convert stored sheet content to DTO to return
                 
@@ -483,8 +502,8 @@ public final class SheetService: SheetServiceProtocol {
                         }
                     )
                 }
-                
-                let discussions = try await getDiscussionForSheet(sheetId: sheetId)
+                                
+                let discussions = try await getDiscussionForSheetOnline(sheetId: sheetId)
                 try await storeSheetContent(sheetListResponse: sheetContent, discussions: discussions)
                 
                 return SheetContentDTO(
@@ -508,7 +527,54 @@ public final class SheetService: SheetServiceProtocol {
         }
     }
     
-    public func getDiscussionForSheet(sheetId: Int) async throws -> [DiscussionDTO] {
+    public func getDiscussionToPublishForSheet(sheetId: Int) async throws -> [DiscussionDTO] {
+
+        var result: [DiscussionDTO] = []
+
+        let resultOffline = try await getDiscussionToPublishFromStorage(sheetId: sheetId)
+
+        //TODO: WIP
+
+        result.append(contentsOf: resultOffline.map{
+            DiscussionDTO(from: $0)
+        })
+
+        return result
+    }
+    
+    public func commitSheetDiscussionToStorage(parentId: Int) async {
+        let discussionToPublish = protectedDiscussionToPublishDTOMemoryRepo.filter({ $0.parentId == parentId })
+        
+        guard discussionToPublish.isNotEmpty else {
+            print("ℹ️ No in-memory sheet discussions updates to commit.")
+            return
+        }
+        
+        var currentItem: CachedSheetDiscussionToPublishDTO?
+        
+        do {
+            for item in discussionToPublish {
+                
+                currentItem = item
+                
+                try await addSheetDiscussionToPublishInStorage(item: item)
+                
+                // Clear memory repo after attempting to store
+                protectedDiscussionToPublishDTOMemoryRepo.removeAll(where: {
+                    $0.parentId == item.parentId &&
+                    $0.comment.id == item.comment.id
+                })
+            }
+        } catch {
+            if let currentItem = currentItem {
+                print("❌ Failed to persist in-memory DISCUSSION update — SheetID: \(currentItem.parentId), Value: \(currentItem.comment.text). Error: \(error)")
+            }
+        }
+    }
+            
+    // MARK: Private methods
+    
+    private func getDiscussionForSheetOnline(sheetId: Int) async throws -> [DiscussionDTO] {
         let result = await httpApiClient.request(
             url: try baseSheetsURL(path: "/sheets/\(sheetId)/discussions?include=comments,attachments"),
             method: .GET,
@@ -536,7 +602,81 @@ public final class SheetService: SheetServiceProtocol {
         }
     }
     
-    // MARK: Private methods
+    private func getDiscussionToPublishFromStorage(sheetId: Int) async throws -> [CachedSheetDiscussionToPublishDTO] {
+        let result: [CachedSheetDiscussionToPublishDTO] = try await MainActor.run {
+            let context = modelContext
+            let descriptor = FetchDescriptor<CachedSheetDiscussionsToPublish>(sortBy: [SortDescriptor(\.dateTime)])
+            
+            let results = try context.fetch(descriptor)
+
+            guard !results.isEmpty else {
+                print("❌ No discussions to publish found for SheetId \(sheetId)")
+                return []
+            }
+
+            print("📦 Loaded cached sheets (\(results.count))")
+                                    
+            let resultMap: [CachedSheetDiscussionToPublishDTO] = results
+                .map { CachedSheetDiscussionToPublishDTO(
+                    dateTime: $0.dateTime,
+                    parentId: $0.parentId,
+                    parentType: .init(rawValue: $0.parentType) ?? .sheet,
+                    comment: .init(text: $0.comment?.text ?? ""),
+                    firstNameUser: $0.firstNameUser,
+                    lastNameUser: $0.lastNameUser)
+                }
+                .sorted { $0.dateTime < $1.dateTime }
+           
+            return resultMap
+        }
+        
+        return result
+    }
+    
+    private func commitSheetContentToStorage(sheetId: Int) async {
+        // Snapshot current in-memory items
+        let sheetToPublish = protectedSheetHasUpdatesToPublishMemoryRepo.filter({ $0.sheetId == sheetId })
+        guard sheetToPublish.isNotEmpty else {
+            print("ℹ️ No in-memory sheet content updates to commit.")
+            return
+        }
+
+        print("➡️ Committing \(sheetToPublish.count) in-memory update(s) to storage…")
+        
+        var currentItem: CachedSheetHasUpdatesToPublishDTO?
+                
+        do {
+            for item in sheetToPublish {
+                currentItem = item
+                
+                try await addSheetWithUpdatesToPublish_Storage(
+                    columnType: item.columnType,
+                    sheetId: item.sheetId,
+                    name: item.sheetName,
+                    newValue: item.newValue,
+                    oldValue: item.oldValue,
+                    rowId: item.rowId,
+                    columnId: item.columnId,
+                    contacts: item.contacts
+                )
+                
+                // Clear memory repo after attempting to store
+                protectedSheetHasUpdatesToPublishMemoryRepo.removeAll(where: {
+                    $0.sheetId == item.sheetId &&
+                    $0.rowId == item.rowId &&
+                    $0.columnId == item.columnId
+                })
+            }
+                        
+            try await updateSheetContentOnStorage(sheetId: sheetId)
+        } catch {
+            if let currentItem = currentItem {
+                print("❌ Failed to persist in-memory update — SheetID: \(currentItem.sheetId), RowID: \(currentItem.rowId), ColumnID: \(currentItem.columnId). Error: \(error)")
+            }
+        }
+                        
+        print("✅ Commit complete. Cleared in-memory repo.")
+    }
     
     private func makeHeaders() -> [String: String] {
         let token = keychainService.load(for: .smartsheetAccessToken) ?? ""
@@ -576,7 +716,7 @@ public final class SheetService: SheetServiceProtocol {
                 print("✅ Fetched \(sheetListResponse.data.count) sheets on page \(sheetListResponse.pageNumber)")
                 sheetListResponse.data.forEach { print("- \($0.name)") }
                 
-                /// The only sheet that should show on the App               
+                /// The only sheet that should show on the App
                 let sheetListFiltered = sheetListResponse.data.filter({
                     $0.id == 4576181282099076
                 })
@@ -638,32 +778,34 @@ public final class SheetService: SheetServiceProtocol {
         let sheetContentDTO = try await MainActor.run {
             let context = modelContext
             
-            // Testing
-            let test = FetchDescriptor<CachedSheetContent>()
-            let data = try context.fetch(test)
-            print("LOG: ", data)
-            
             let descriptor = FetchDescriptor<CachedSheetContent>(predicate: #Predicate { $0.id == sheetId })
             guard let cachedSheet = try context.fetch(descriptor).first else {
                 print("❌ No cached sheet content found for id \(sheetId)")
                 throw NSError(domain: "No cached sheet content found for id \(sheetId)", code: 0)
             }
             
-            let columnsDTO = cachedSheet.columns.map {
-                ColumnDTO(
-                    id: $0.id,
-                    index: $0.index,
-                    title: $0.title,
-                    type: ColumnType(rawValue: $0.type) ?? .textNumber,
-                    primary: $0.primary,
-                    systemColumnType: $0.systemColumnType ?? "",
-                    hidden: $0.hidden ?? true,
-                    width: $0.width,
-                    options: $0.options.map { $0.value },
-                    contactOptions: $0.contactOptions.asDTOs
-                ) }
-                .filter { !($0.hidden) }
-                .sorted { $0.index < $1.index }
+            let columnsDTO: [ColumnDTO] = cachedSheet.columns.map {
+                ColumnDTO(from: $0)
+            }
+            .filter { !($0.hidden) }
+            .sorted { $0.index < $1.index }
+            
+//            let columnsDTO: [ColumnDTO] = cachedSheet.columns.map { .init(value: $0)
+//                ColumnDTO(
+//                    id: $0.id,
+//                    index: $0.index,
+//                    title: $0.title,
+//                    type: ColumnType(rawValue: $0.type) ?? .textNumber,
+//                    primary: $0.primary,
+//                    systemColumnType: $0.systemColumnType ?? "",
+//                    hidden: $0.hidden ?? true,
+//                    width: $0.width,
+//                    options: $0.options.map { $0.value },
+//                    contactOptions: $0.contactOptions.asDTOs
+//                )
+//            }
+//                .filter { !($0.hidden) }
+//                .sorted { $0.index < $1.index }
             
             let rowsDTO: [RowDTO] = cachedSheet.rows.map { row in
                 RowDTO(
@@ -691,7 +833,6 @@ public final class SheetService: SheetServiceProtocol {
         return sheetContentDTO
     }
     
-    //TODO: WIP
     private func updateSheetContentOnStorage(sheetId: Int) async throws {
         // For every item on sheetWithUpdatesToPublishStorageRepo where item.sheetId == sheetId
         // Obtain the CachedSheetContent where sheetId == CachedSheetContent.id

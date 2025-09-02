@@ -215,6 +215,19 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         self.options = options
         self.contactOptions = contactOptions
     }
+    
+    public init(from value: CachedColumn) {
+        self.id = value.id
+        self.index = value.index
+        self.title = value.title
+        self.type = .init(rawValue: value.type) ?? .textNumber
+        self.primary = value.primary
+        self.systemColumnType = value.systemColumnType ?? ""
+        self.hidden = value.hidden ?? false
+        self.width = value.width
+        self.options = value.options.map { $0.value }
+        self.contactOptions = value.contactOptions.asDTOs
+    }
 }
 
 public struct RowDTO: Identifiable, Hashable, Sendable {

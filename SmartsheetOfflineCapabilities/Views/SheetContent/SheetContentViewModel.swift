@@ -45,6 +45,14 @@ final class SheetContentViewModel: ObservableObject {
                 self?.showSaveButton = result.first(where: { $0.sheetId == self?.sheetContentDTO.id }) != nil
             })
             .store(in: &cancellables)
+        
+        sheetService.sheetDiscussionToPublishDTOMemoryRepo
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink(receiveValue: { [weak self] result in
+                self?.showSaveButton = result.first(where: { $0.parentId == self?.sheetContentDTO.id }) != nil
+            })
+            .store(in: &cancellables)
     }
     
     // MARK: - Public Methods
@@ -55,6 +63,9 @@ final class SheetContentViewModel: ObservableObject {
             
             do {
                 sheetContentDTO = try await sheetService.getSheetContent(sheetId: sheetId)
+                
+                //TODO: Load discussions
+                
                 try await sheetService.getSheetListHasUpdatesToPublish()
                 
                 status = .success

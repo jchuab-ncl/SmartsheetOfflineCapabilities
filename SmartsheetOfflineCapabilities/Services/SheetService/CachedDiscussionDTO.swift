@@ -61,28 +61,7 @@ public final class CachedDiscussionDTO {
         self.comments = comments
         self.commentAttachments = commentAttachments
     }
-    
-//    public convenience init(from discussion: DiscussionDTO) {
-//        let cachedComments: [CachedCommentDTO] = (discussion.comments ?? []).map { CachedCommentDTO(from: $0) }
-//        let cachedTopLevelAttachments: [CachedAttachmentDTO] = (discussion.commentAttachments ?? []).map { CachedAttachmentDTO(from: $0) }
-//        self.init(
-//            id: discussion.id,
-//            accessLevel: discussion.accessLevel,
-//            title: discussion.title,
-//            commentCount: discussion.commentCount ?? 0,
-//            parentId: discussion.parentId,
-//            parentType: discussion.parentType,
-//            readOnly: discussion.readOnly ?? false,
-//            lastCommentedAt: discussion.lastCommentedAt,
-//            createdByName: discussion.createdBy?.name,
-//            createdByEmail: discussion.createdBy?.email,
-//            lastCommentedUserName: discussion.lastCommentedUser?.name,
-//            lastCommentedUserEmail: discussion.lastCommentedUser?.email,
-//            comments: cachedComments,
-//            commentAttachments: cachedTopLevelAttachments
-//        )
-//    }
-    
+        
     public convenience init(from discussion: DiscussionDTO) {
         let cachedComments: [CachedCommentDTO] = (discussion.comments ?? []).map { CachedCommentDTO(from: $0) }
         let cachedTopLevelAttachments: [CachedAttachmentDTO] = (discussion.commentAttachments ?? []).map { CachedAttachmentDTO(from: $0) }
@@ -235,6 +214,9 @@ public struct DiscussionDTO: Codable, Identifiable, Hashable, Sendable {
     public let readOnly: Bool?
     public let title: String?
     
+    /// This fields when true means that the value is not synchronised yet
+    public var publishPending: Bool? = false
+    
     public init(from cached: CachedDiscussionDTO) {
         self.accessLevel = cached.accessLevel
         self.id = cached.id
@@ -272,6 +254,25 @@ public struct DiscussionDTO: Codable, Identifiable, Hashable, Sendable {
         self.comments = value.comments?.map { CommentDTO(from: $0) }
         self.commentAttachments = value.commentAttachments?.map { AttachmentDTO(from: $0) }
     }
+        
+    public init(from value: CachedSheetDiscussionToPublishDTO) {
+        
+        let comment: CommentDTO = CommentDTO(from: value)
+        
+        self.accessLevel = ""
+        self.id = comment.id
+        self.comments = [comment]
+        self.commentAttachments = []
+        self.commentCount = nil
+        self.createdBy = .init(email: nil, name: value.userName)
+        self.lastCommentedAt = comment.createdAt ?? ""
+        self.lastCommentedUser = nil
+        self.parentId = value.parentId
+        self.parentType = value.parentType.rawValue
+        self.readOnly = nil
+        self.title = comment.text
+        self.publishPending = true
+    }
 }
 
 // MARK: - CommentDTO
@@ -304,6 +305,14 @@ public struct CommentDTO: Codable, Identifiable, Hashable, Sendable {
         self.modifiedAt = cached.modifiedAt
         self.createdBy = UserRef(email: cached.createdByEmail, name: cached.createdByName)
         self.attachments = cached.attachments.map { AttachmentDTO(from: $0) }
+    }
+    
+    // From locally created model
+    public init(from cached: CachedSheetDiscussionToPublishDTO) {
+        self.id = UUID().hashValue
+        self.text = cached.comment.text
+        self.createdAt = cached.dateTime.ISO8601Format()
+        self.createdBy = .init(email: nil, name: cached.userName)
     }
 }
 

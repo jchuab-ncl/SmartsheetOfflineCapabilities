@@ -30,26 +30,27 @@ struct SheetListView: View {
     var body: some View {
         NavigationStack {
             GeometryReader { geometry in
-//                let isPad = geometry.size.width > 600
-                Group {
-                    if viewModel.status == .loading {
-                        ProgressView()
-                            .frame(width: geometry.size.width)
-                            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
-                    } else if viewModel.status == .error {
-                        makeErrorView()
-                    } else if filteredFiles.isEmpty {
-                        makeEmptyView()
-                    }
-//                    else
-//                    if isPad {
-//                        makeiPadView()
-//                    }
-                    else {
-                        List(filteredFiles) { file in
-                            makeCard(sheet: file)
+                VStack {
+//                    Group {
+                        if viewModel.status == .loading {
+                            ProgressView()
+                                .frame(width: geometry.size.width)
+                                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                        } else if viewModel.status == .error {
+                            makeErrorView()
+                        } else if filteredFiles.isEmpty {
+                            makeEmptyView()
+                        } else {
+                            List(filteredFiles) { file in
+                                makeCard(sheet: file)
+                            }
+                            .refreshable {
+                                viewModel.loadSheets()
+                            }
+//                            .searchable(text: $searchText)
+                            .navigationTitle("Select a Sheet")
                         }
-                    }
+//                    }
                     
                     Spacer()
                     
@@ -57,13 +58,10 @@ struct SheetListView: View {
                         Text("Offline mode. No connection available at the moment.")
                             .font(.footnote)
                             .foregroundColor(.secondary)
+                            .padding(.bottom, 12) // small padding from bottom
                     }
                 }
-                .refreshable {
-                    viewModel.loadSheets()
-                }
-                .searchable(text: $searchText)
-                .navigationTitle("Select a Sheet")
+                .frame(width: geometry.size.width, height: geometry.size.height)
             }
             .onAppear {
                 viewModel.loadSheets()

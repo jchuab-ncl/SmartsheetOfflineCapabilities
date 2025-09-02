@@ -5,11 +5,14 @@
 //  Created by Jeann Luiz Chuab on 17/06/25.
 //
 
+import SwiftData
 import SwiftUI
 
 public protocol AuthenticationServiceProtocol {
     var resultType: Protected<AuthenticationServiceResultType> { get }
+    var cachedUserDTO: CachedUserDTO? { get }
     
+    func setupModelContext(modelContext: ModelContext)
     func login() async throws
     func autoLogin()
     func handleOAuthCallback(url: URL) throws
@@ -32,6 +35,7 @@ class AuthenticationService: AuthenticationServiceProtocol {
    
     // MARK: Private properties
     
+    private var modelContext: ModelContext?
     private let httpApiClient: HTTPApiClientProtocol
     private let infoPListLoader: InfoPlistLoaderProtocol
     private let keychainService: KeychainServiceProtocol
@@ -41,6 +45,8 @@ class AuthenticationService: AuthenticationServiceProtocol {
     @Protected private(set) var currentResult: AuthenticationServiceResultType = .init(message: .empty, status: .initial)
     
     // MARK: Public properties
+    
+    public var cachedUserDTO: CachedUserDTO?
     
     /// Used to observe changes externally
     public var resultType: Protected<AuthenticationServiceResultType> {
@@ -66,6 +72,10 @@ class AuthenticationService: AuthenticationServiceProtocol {
     }
     
     //MARK: Public methods
+            
+    func setupModelContext(modelContext: ModelContext) {
+        self.modelContext = modelContext
+    }
     
     /// Initiates the OAuth 2.0 login flow by constructing and opening the authorization URL.
     /// The user is redirected to Smartsheet's login/authorization page in a browser.
@@ -130,8 +140,10 @@ class AuthenticationService: AuthenticationServiceProtocol {
                 let isInternetAvailable = await httpApiClient.isInternetAvailable()
                 if isInternetAvailable {
                     try await refreshToken()
+                    await getCurrentLoggedUserOnline()
                     publish(.storedCredentialsFound, .loading)
                 } else {
+                    await getCurrentUserFromStorage()
                     publish(.storedCredentialsFound, .loading)
                 }
             } else {
@@ -156,7 +168,108 @@ class AuthenticationService: AuthenticationServiceProtocol {
         try exchangeCodeForToken(code: code)
     }
     
+    private func getCurrentLoggedUserOnline() async {
+        guard let accessToken = keychainService.load(for: .smartsheetAccessToken) else {
+            print("❌ AuthenticationService: Access token not found")
+            return
+        }
+        
+        let url = "https://api.smartsheet.com/2.0/users/me"
+        let headers = ["Authorization": "Bearer \(accessToken)"]
+        
+        let result = await httpApiClient.request(url: url, method: .GET, headers: headers, queryParameters: nil)
+        
+        switch result {
+        case .success(let data):
+            do {
+                let user = try JSONDecoder().decode(CachedUserDTO.self, from: data)
+                self.cachedUserDTO = user
+                
+                /// Store the current user
+                storeCurrentLoggedUser(user)
+                
+                print("✅ AuthenticationService: Successfully fetched current logged user")
+            } catch {
+                print("❌ AuthenticationService: Failed to decode user data - \(error.localizedDescription)")
+            }
+        case .failure(let error):
+            print("❌ AuthenticationService: Failed to fetch current logged user - \(error.localizedDescription)")
+        }
+    }
+    
+    public func getCurrentUserFromStorage() async {
+        do {
+            return try await MainActor.run {
+                let descriptor = FetchDescriptor<CachedUser>()
+                let results = try modelContext?.fetch(descriptor)
+
+                guard let cachedUser = results?.first else {
+                    print("⚠️ No CachedUser found in storage.")
+                    return
+                }
+
+                self.cachedUserDTO = CachedUserDTO(
+                    id: cachedUser.id,
+                    account: cachedUser.account.map {
+                        AccountDTO(id: $0.id, name: $0.name)
+                    } ?? AccountDTO(id: 0, name: ""),
+                    admin: cachedUser.admin,
+                    alternateEmails: [], //TODO: Update
+                    company: cachedUser.company,
+                    customWelcomeScreenViewed: cachedUser.customWelcomeScreenViewed,
+                    department: cachedUser.department,
+                    email: cachedUser.email,
+                    firstName: cachedUser.firstName,
+                    groupAdmin: cachedUser.groupAdmin,
+                    jiraAdmin: cachedUser.jiraAdmin,
+                    lastLogin: cachedUser.lastLogin,
+                    lastName: cachedUser.lastName,
+                    licensedSheetCreator: cachedUser.licensedSheetCreator,
+                    locale: cachedUser.locale,
+                    mobilePhone: cachedUser.mobilePhone,
+                    profileImage: nil, //TODO: Update
+                    resourceViewer: cachedUser.resourceViewer,
+                    role: cachedUser.role,
+                    salesforceAdmin: cachedUser.salesforceAdmin,
+                    salesforceUser: cachedUser.salesforceUser,
+                    sheetCount: cachedUser.sheetCount,
+                    timeZone: cachedUser.timeZone,
+                    title: cachedUser.title,
+                    workPhone: cachedUser.workPhone,
+                    data: nil // TODO: Update
+                )
+            }
+        } catch {
+            print("❌ Error fetching current user from storage: \(error)")
+            return
+        }
+    }
+    
+    
     // MARK: Private methods
+    
+    private func storeCurrentLoggedUser(_ user: CachedUserDTO) {
+        Task { @MainActor in
+            do {
+                // Fetch all CachedUser entities
+                let existing = try modelContext?.fetch(FetchDescriptor<CachedUser>())
+                // Delete all existing
+                existing?.forEach { modelContext?.delete($0) }
+                // Create new CachedUser from DTO
+                let cachedUser = CachedUser(
+                    id: user.id,
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName
+                )
+                modelContext?.insert(cachedUser)
+                try modelContext?.save()
+                print("✅ Stored current logged user in SwiftData")
+            } catch {
+                print("❌ Failed to store current logged user in SwiftData: \(error)")
+            }
+        }
+    }
     
     private func tokensAreStored() -> Bool {
         let smartsheetAccessToken = keychainService.load(for: .smartsheetAccessToken)
@@ -217,6 +330,8 @@ class AuthenticationService: AuthenticationServiceProtocol {
                         return
                     }
                     
+                    await getCurrentLoggedUserOnline()
+                    
                     publish(.credentialsSuccessfullyValidated, .success)
                 }
             case .failure(_):
@@ -226,7 +341,7 @@ class AuthenticationService: AuthenticationServiceProtocol {
         }
     }
     
-    func refreshToken() async throws {
+    private func refreshToken() async throws {
         guard let refreshTokenSaved = keychainService.load(for: .smartsheetRefreshToken) else {
             try publishError(.failedToLoadRefreshToken)
             return

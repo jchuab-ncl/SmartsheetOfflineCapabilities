@@ -62,6 +62,7 @@ class CustomEditableCell: Cell {
     var rowId: Int = 0
     var columnId: Int = 0
     var contactOptions: [ContactDTO] = []
+    var sheetId: Int = 0
     var rowDiscussions: [DiscussionDTO] = []
     var allDiscussions: [DiscussionDTO] = []
 
@@ -116,6 +117,8 @@ class CustomEditableCell: Cell {
             columnPrimaryText: columnPrimaryText,
             isHeader: isHeader,
             isRowNumber: isRowNumber,
+            rowId: rowId,
+            sheetId: sheetId,
             rowNumber: rowNumber,
             contactOptions: contactOptions,
             rowDiscussions: rowDiscussions,

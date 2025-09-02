@@ -8,15 +8,21 @@
 import SwiftUI
 
 struct DiscussionView: View {
-    @State private var selectedTab: ParentTypeFilter = .row
     @State private var newConversationText: String = ""
     @State private var mode: AddDiscussionBottomViewMode = .addDiscussion
     @State private var commentBeingRepliedTo: DiscussionDTO? = nil
+    @FocusState private var isEditorFocused: Bool
+  
+    @StateObject private var viewModel: DiscussionViewModel
     
-    var allDiscussions: [DiscussionDTO]
-    var rowDiscussions: [DiscussionDTO]
-    var rowNumber: Int = 0
-    var columnPrimaryText: String = ""
+    //TODO: WIP Get the discussions here, inside viewModel. This will avoid a bunch of parameters being sent
+    
+    private var allDiscussions: [DiscussionDTO]
+    private var sheetId: Int
+    private var rowDiscussions: [DiscussionDTO]
+    private var rowNumber: Int = 0
+    private var rowId: Int = 0
+    private var columnPrimaryText: String = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,82 +37,89 @@ struct DiscussionView: View {
             
             Divider()
             
-            // Comments
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    let filtered = filterDiscussions()
-                    ForEach(filtered, id: \.id) { discussion in
-                        CommentView(
-                            discussionDTO: discussion,
-                            isReply: false,
-                            onStartReply: {
-                                mode = .replyDiscussion
-                                commentBeingRepliedTo = discussion
-                            }
-                        )
+            if viewModel.status == .loading {
+                Spacer()
+                ProgressView()
+                Spacer()
+            } else {
+                // Comments
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 16) {
+                        let filtered = viewModel.filterDiscussions()
+                        ForEach(filtered, id: \.id) { discussion in
+                            CommentView(
+                                discussionDTO: discussion,
+                                isReply: false,
+                                onStartReply: {
+                                    mode = .replyDiscussion
+                                    commentBeingRepliedTo = discussion
+                                }
+                            )
+                        }
+                        Spacer()
+                            .frame(height: 20)
                     }
+                    .padding()
                 }
-                .padding()
             }
-            
-            AddDiscussionBottomView(
-                newConversationText: $newConversationText,
-                mode: $mode,
-                commentBeingReplyTo: commentBeingRepliedTo,
-                rowNumber: rowNumber,
-                columnPrimaryText: columnPrimaryText
-            )
+                                    
+            makeDiscussionBottomView()
             .padding()
             .padding(.bottom, 40)
         }
+        .onTapGesture {
+            isEditorFocused = false
+        }
+        .onAppear {
+            viewModel.onAppear(sheetId: sheetId)
+        }
     }
+    
+    // MARK: Initializer
+    
+    /// Initializes a new instance of `DiscussionView`.
+    ///
+    /// - Parameters:
+    ///   - allDiscussions: An array of all discussion data transfer objects.
+    ///   - sheetId: The identifier for the sheet.
+    ///   - rowDiscussions: An array of discussion DTOs specific to the row.
+    ///   - rowNumber: The number of the row.
+    ///   - rowId: The identifier for the row.
+    ///   - columnPrimaryText: The primary text for the column.
+    init(
+        allDiscussions: [DiscussionDTO],
+        sheetId: Int,
+        rowDiscussions: [DiscussionDTO],
+        rowNumber: Int,
+        rowId: Int,
+        columnPrimaryText: String,
+    ) {
+        self._viewModel = .init(wrappedValue: DiscussionViewModel(rowId: rowId, sheetId: sheetId))
+        self.allDiscussions = allDiscussions
+        self.sheetId = sheetId
+        self.rowDiscussions = rowDiscussions
+        self.rowNumber = rowNumber
+        self.rowId = rowId
+        self.columnPrimaryText = columnPrimaryText
+    }
+    
+    // MARK: Private methods
     
     private func tabButton(for type: ParentTypeFilter) -> some View {
         Button(action: {
-            selectedTab = type
+            viewModel.selectedTab = type
         }) {
             Text(type.rawValue.camelCased(firstLetterUppercased: true))
                 .font(.subheadline.bold())
-                .foregroundColor(selectedTab == type ? .blue : .gray)
+                .foregroundColor(viewModel.selectedTab == type ? .blue : .gray)
                 .padding(.vertical, 8)
                 .padding(.horizontal)
-                .background(selectedTab == type ? Color.blue.opacity(0.1) : .clear)
+                .background(viewModel.selectedTab == type ? Color.blue.opacity(0.1) : .clear)
                 .cornerRadius(8)
         }
     }
     
-    private func filterDiscussions() -> [DiscussionDTO] {
-        func createdAtDate(from discussion: DiscussionDTO) -> Date {
-            discussion.comments?.first?.createdAt?.asDate(inputFormat: "yyyy-MM-dd'T'HH:mm:ssZ") ?? .distantPast
-        }
-        
-        switch selectedTab {
-        case .all:
-            return allDiscussions.sorted { createdAtDate(from: $0) < createdAtDate(from: $1) }
-        case .row:
-            return rowDiscussions.sorted { createdAtDate(from: $0) < createdAtDate(from: $1) }
-        case .sheet:
-            return allDiscussions
-                .filter { $0.parentType == ParentTypeFilter.sheet.rawValue }
-                .sorted { createdAtDate(from: $0) < createdAtDate(from: $1) }
-        }
-    }
-}
-
-enum AddDiscussionBottomViewMode: String {
-    case replyDiscussion
-    case addDiscussion
-}
-
-struct AddDiscussionBottomView: View {
-    @Binding var newConversationText: String
-    @Binding var mode: AddDiscussionBottomViewMode
-    
-    var commentBeingReplyTo: DiscussionDTO?
-    var rowNumber: Int
-    var columnPrimaryText: String
-    
-    var body: some View {
+    private func makeDiscussionBottomView() -> some View {
         VStack {
             Divider()
                 .padding(.vertical, 12)
@@ -137,10 +150,10 @@ struct AddDiscussionBottomView: View {
                                 .font(.caption)
                                 .lineLimit(1)
                                 .foregroundColor(.secondary)
-                        }                                                
+                        }
                     }
                     
-                    if mode == .replyDiscussion, let title = commentBeingReplyTo?.title {
+                    if mode == .replyDiscussion, let title = commentBeingRepliedTo?.title {
                         (
                             Text("Replying to: ")
                                 .font(.caption.bold())
@@ -168,6 +181,7 @@ struct AddDiscussionBottomView: View {
                                         .font(.subheadline)
                                 }
                                 TextEditor(text: $newConversationText)
+                                    .focused($isEditorFocused)
                                     .padding(.horizontal, 2)
                                     .scrollContentBackground(.hidden)
                                     .font(.subheadline)
@@ -189,8 +203,16 @@ struct AddDiscussionBottomView: View {
                                 }
 
                                 Spacer()
-                                // Disabled post button for layout only
-                                Button(action: {}) {
+
+                                Button(action: {
+                                    if mode == .addDiscussion {
+                                        //TODO: WIP get the rowId or sheetID
+                                        viewModel.post(parentId: sheetId, value: newConversationText)
+                                        newConversationText = ""
+                                    } else if mode == .replyDiscussion {
+                                        
+                                    }
+                                }) {
                                     Text("Post")
                                         .font(.subheadline.bold())
                                         .padding(.vertical, 6)
@@ -214,6 +236,11 @@ struct AddDiscussionBottomView: View {
     }
 }
 
+enum AddDiscussionBottomViewMode: String {
+    case replyDiscussion
+    case addDiscussion
+}
+
 enum ParentTypeFilter: String, CaseIterable {
     case row = "ROW"
     case sheet = "SHEET"
@@ -221,20 +248,21 @@ enum ParentTypeFilter: String, CaseIterable {
 }
 
 struct CommentView: View {
-    var discussionDTO: DiscussionDTO
+    var cachedSheetDiscussionToPublishDTO: CachedSheetDiscussionToPublishDTO?
+    var discussionDTO: DiscussionDTO?
     var isReply: Bool
     var onStartReply: (() -> Void)? = nil
         
     private var comment: CommentDTO? {
-        discussionDTO.comments?.first
+        discussionDTO?.comments?.first
     }
     
     private var title: String {
-        discussionDTO.title ?? ""
+        discussionDTO?.title ?? cachedSheetDiscussionToPublishDTO?.comment.text ?? ""
     }
     
     private var replyComments: [CommentDTO]? {
-        discussionDTO.comments
+        discussionDTO?.comments
     }
     
     var body: some View {
@@ -242,13 +270,13 @@ struct CommentView: View {
             Circle()
                 .fill(Color.orange)
                 .frame(width: 32, height: 32)
-                .overlay(Text(initials(from: comment?.createdBy?.name ?? ""))
+                .overlay(Text(initials())
                             .font(.caption.bold())
                             .foregroundColor(.white))
             
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text(comment?.createdBy?.name ?? "NOT FOUND")
+                    Text(comment?.createdBy?.name ?? cachedSheetDiscussionToPublishDTO?.userName ?? "NOT FOUND")
                         .font(.subheadline.bold())
                     Spacer()
                     Text(comment?.createdAt?.asFormattedDate(
@@ -279,8 +307,14 @@ struct CommentView: View {
         }
     }
     
-    private func initials(from name: String) -> String {
-        name.split(separator: " ").compactMap { $0.first }.prefix(2).map { String($0) }.joined()
+    private func initials() -> String {
+        var name = comment?.createdBy?.name ?? ""
+        
+        if name.isEmpty {
+            name = "\(cachedSheetDiscussionToPublishDTO?.firstNameUser ?? "") \(cachedSheetDiscussionToPublishDTO?.lastNameUser ?? "")"
+        }
+        
+        return name.split(separator: " ").compactMap { $0.first }.prefix(2).map { String($0) }.joined()
     }
 }
 

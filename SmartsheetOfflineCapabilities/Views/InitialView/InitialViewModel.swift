@@ -50,11 +50,7 @@ final class InitialViewModel: ObservableObject {
     func tryAutoLogin() {
         Task {
             status = .loading
-            do {
-                try authenticationService.autoLogin()
-            } catch let error as AuthenticationServiceMessage {
-                print(error)
-            }
+            authenticationService.autoLogin()
         }
     }
 }
