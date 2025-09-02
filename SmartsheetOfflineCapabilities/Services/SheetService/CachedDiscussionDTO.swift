@@ -215,7 +215,7 @@ public struct DiscussionDTO: Codable, Identifiable, Hashable, Sendable {
     public let title: String?
     
     /// This fields when true means that the value is not synchronised yet
-    public var publishPending: Bool? = false
+    public var publishPending: Bool?
     
     public init(from cached: CachedDiscussionDTO) {
         self.accessLevel = cached.accessLevel
@@ -237,6 +237,7 @@ public struct DiscussionDTO: Codable, Identifiable, Hashable, Sendable {
 
         self.comments = cached.comments.map { CommentDTO(from: $0) }
         self.commentAttachments = cached.commentAttachments.map { AttachmentDTO(from: $0) }
+        self.publishPending = false
     }
     
     public init(from value: Discussion) {
@@ -253,6 +254,7 @@ public struct DiscussionDTO: Codable, Identifiable, Hashable, Sendable {
         self.lastCommentedUser = value.lastCommentedUser.map { UserRef(email: $0.email, name: $0.name) }
         self.comments = value.comments?.map { CommentDTO(from: $0) }
         self.commentAttachments = value.commentAttachments?.map { AttachmentDTO(from: $0) }
+        self.publishPending = false
     }
         
     public init(from value: CachedSheetDiscussionToPublishDTO) {
@@ -260,7 +262,7 @@ public struct DiscussionDTO: Codable, Identifiable, Hashable, Sendable {
         let comment: CommentDTO = CommentDTO(from: value)
         
         self.accessLevel = ""
-        self.id = comment.id
+        self.id = value.id
         self.comments = [comment]
         self.commentAttachments = []
         self.commentCount = nil

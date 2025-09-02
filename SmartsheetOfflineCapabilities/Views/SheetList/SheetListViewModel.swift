@@ -16,10 +16,10 @@ final class SheetListViewModel: ObservableObject {
     @Published var isInternetAvailable: Bool = true
     @Published var sheetsList: [CachedSheetDTO] = []
     @Published var sheetsContentList: [SheetContentDTO] = []
-//    @Published var discussionList: [DiscussionDTO] = []
     @Published var sheetsListHasUpdatesToPublish: [CachedSheetHasUpdatesToPublishDTO] = []
+    @Published var sheetsDiscussionsToPublish: [CachedSheetDiscussionToPublishDTO] = []
     @Published var status: ProgressStatus = .initial
-    @Published var statusSync: [Int: ProgressStatus] = [:]
+    @Published var statusSync: [Int: ProgressStatus] = [:]        
     
     // MARK: Private Properties
     
@@ -44,7 +44,10 @@ final class SheetListViewModel: ObservableObject {
         // Bind published internet status
         networkMonitor.$isConnected
            .receive(on: DispatchQueue.main)
-           .assign(to: \.isInternetAvailable, on: self)
+//           .assign(to: \.isInternetAvailable, on: self)
+           .sink(receiveValue: { [weak self] result in
+               self?.isInternetAvailable = result
+           })
            .store(in: &cancellables)
                 
         sheetService.sheetWithUpdatesToPublishStorageRepo
@@ -53,9 +56,27 @@ final class SheetListViewModel: ObservableObject {
                 self?.sheetsListHasUpdatesToPublish = result
             })
             .store(in: &cancellables)
+        
+        sheetService.discussionsToPublishStorageRepo
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] result in
+                self?.sheetsDiscussionsToPublish = result
+            })
+            .store(in: &cancellables)
     }
 
     // MARK: - Public Methods
+    
+    func shouldShowSyncButton(sheetId: Int) -> Bool {
+        guard isInternetAvailable else {
+            return false
+        }
+        
+        let contentToPublish = sheetsListHasUpdatesToPublish.first(where: { $0.sheetId == sheetId })
+        let discussionsToPublish = sheetsDiscussionsToPublish.first(where: { $0.parentType == .sheet && $0.parentId == sheetId })
+        
+        return (contentToPublish != nil || discussionsToPublish != nil)
+    }
 
     func loadSheets() {
         Task {
@@ -72,6 +93,7 @@ final class SheetListViewModel: ObservableObject {
                     let sheetContentResult = try await sheetService.getSheetContent(sheetId: sheet.id)
                     sheetsContentList.append(sheetContentResult)
                     
+                    _ = try await sheetService.getSheetListHasUpdatesToPublish()
 //                    let discussionResult = try await sheetService.getDiscussionForSheet(sheetId: sheet.id)
 //                    discussionList.append(contentsOf: discussionResult)
                 }

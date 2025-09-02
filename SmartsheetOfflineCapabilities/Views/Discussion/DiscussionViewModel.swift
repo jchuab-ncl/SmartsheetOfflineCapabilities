@@ -9,7 +9,7 @@ import Combine
 import SwiftUI
 
 final class DiscussionViewModel: ObservableObject {
-    @Published var cachedSheetDiscussionToPublishDTOInMemory: [CachedSheetDiscussionToPublishDTO] = []
+//    @Published var cachedSheetDiscussionToPublishDTOInMemory: [CachedSheetDiscussionToPublishDTO] = []
     @Published var selectedTab: ParentTypeFilter = .row
     @Published var sheetContentDTO: SheetContentDTO?
     /// This variable contain the DiscussionDTO that is only stored locally, and was not synced yet
@@ -48,21 +48,21 @@ final class DiscussionViewModel: ObservableObject {
         self.httpApiClient = httpApiClient
         self.sheetService = sheetService
         
-        sheetService.sheetDiscussionToPublishDTOMemoryRepo
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink(receiveValue: { [weak self] result in
-                self?.cachedSheetDiscussionToPublishDTOInMemory.append(contentsOf: result)
-            })
-            .store(in: &cancellables)
+//        sheetService.sheetDiscussionToPublishDTOMemoryRepo
+//            .receive(on: DispatchQueue.main)
+//            .removeDuplicates()
+//            .sink(receiveValue: { [weak self] result in
+//                self?.cachedSheetDiscussionToPublishDTOInMemory.append(contentsOf: result)
+//            })
+//            .store(in: &cancellables)
         
-        sheetService.sheetContactToPublishStorageRepo
+        sheetService.discussionsToPublishStorageRepo
             .receive(on: DispatchQueue.main)
             .removeDuplicates()
             .sink(receiveValue: { [weak self] result in
                 self?.discussionsToPublish = result.map { .init(from: $0) }
             })
-            .store(in: &cancellables)            
+            .store(in: &cancellables)
     }
     
     // MARK: Public methods
@@ -91,7 +91,9 @@ final class DiscussionViewModel: ObservableObject {
             //TODO: Remove that and use only the storage one
             sheetService.addDiscussionToPublishInMemoryRepo(sheet:
                 .init(
+                    id: UUID().hashValue,
                     dateTime: Date(),
+                    sheetId: sheetId,
                     parentId: parentId,
                     parentType: parentType,
                     comment: .init(text: value),

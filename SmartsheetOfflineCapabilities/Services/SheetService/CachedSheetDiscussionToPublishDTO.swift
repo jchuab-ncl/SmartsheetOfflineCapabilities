@@ -14,8 +14,9 @@ public enum CachedSheetDiscussionToPublishDTOType: String, Codable, Sendable {
 }
 
 public struct CachedSheetDiscussionToPublishDTO: Identifiable, Hashable, Sendable {
-    public var id: Int = UUID().hashValue
+    public var id: Int
     public var dateTime: Date
+    public var sheetId: Int
     public var parentId: Int
     public var parentType: CachedSheetDiscussionToPublishDTOType
     public var comment: CachedSheetDiscussionTextDTO
@@ -27,14 +28,18 @@ public struct CachedSheetDiscussionToPublishDTO: Identifiable, Hashable, Sendabl
     }
     
     init(
+        id: Int,
         dateTime: Date,
+        sheetId: Int,
         parentId: Int,
         parentType: CachedSheetDiscussionToPublishDTOType,
         comment: CachedSheetDiscussionTextDTO,
         firstNameUser: String,
         lastNameUser: String
     ) {
+        self.id = id
         self.dateTime = dateTime
+        self.sheetId = sheetId
         self.parentId = parentId
         self.parentType = parentType
         self.comment = comment
@@ -43,7 +48,9 @@ public struct CachedSheetDiscussionToPublishDTO: Identifiable, Hashable, Sendabl
     }
     
     init(from value: CachedSheetDiscussionsToPublish) {
+        self.id = value.id
         self.dateTime = value.dateTime
+        self.sheetId = value.sheetId
         self.parentId = value.parentId
         self.parentId = value.parentId
         self.parentType = .init(rawValue: value.parentType) ?? .sheet
@@ -60,7 +67,9 @@ public struct CachedSheetDiscussionTextDTO: Identifiable, Hashable, Sendable {
 
 @Model
 public final class CachedSheetDiscussionsToPublish {
+    @Attribute(.unique) public var id: Int
     public var dateTime: Date
+    public var sheetId: Int
     public var parentId: Int
     public var parentType: String
     public var firstNameUser: String
@@ -69,13 +78,16 @@ public final class CachedSheetDiscussionsToPublish {
 
     init(
         dateTime: Date,
+        sheetId: Int,
         parentId: Int,
         parentType: String,
         firstNameUser: String,
         lastNameUser: String,
         comment: CachedSheetDiscussionText? = nil
     ) {
+        self.id = UUID().hashValue
         self.dateTime = dateTime
+        self.sheetId = sheetId
         self.parentId = parentId
         self.parentType = parentType
         self.firstNameUser = firstNameUser

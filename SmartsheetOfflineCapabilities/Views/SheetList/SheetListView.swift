@@ -158,7 +158,7 @@ struct SheetListView: View {
                     .font(.footnote)
             }
 
-            if viewModel.isInternetAvailable && viewModel.sheetsListHasUpdatesToPublish.first(where: { $0.sheetId == sheet.id }) != nil {
+            if viewModel.shouldShowSyncButton(sheetId: sheet.id) {
                 makeCardSyncView(sheet: sheet)
             }
         }

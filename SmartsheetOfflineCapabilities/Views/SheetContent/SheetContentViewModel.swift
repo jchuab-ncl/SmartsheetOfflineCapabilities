@@ -46,13 +46,13 @@ final class SheetContentViewModel: ObservableObject {
             })
             .store(in: &cancellables)
         
-        sheetService.sheetDiscussionToPublishDTOMemoryRepo
-            .receive(on: DispatchQueue.main)
-            .removeDuplicates()
-            .sink(receiveValue: { [weak self] result in
-                self?.showSaveButton = result.first(where: { $0.parentId == self?.sheetContentDTO.id }) != nil
-            })
-            .store(in: &cancellables)
+//        sheetService.sheetDiscussionToPublishDTOMemoryRepo
+//            .receive(on: DispatchQueue.main)
+//            .removeDuplicates()
+//            .sink(receiveValue: { [weak self] result in
+//                self?.showSaveButton = result.first(where: { $0.parentId == self?.sheetContentDTO.id }) != nil
+//            })
+//            .store(in: &cancellables)
     }
     
     // MARK: - Public Methods

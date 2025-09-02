@@ -77,8 +77,10 @@ struct DiscussionListResponse: Codable {
 public protocol SheetServiceProtocol {
     var sheetWithUpdatesToPublishStorageRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> { get }
     var sheetWithUpdatesToPublishMemoryRepo: Protected<[CachedSheetHasUpdatesToPublishDTO]> { get }
-    var sheetDiscussionToPublishDTOMemoryRepo: Protected<[CachedSheetDiscussionToPublishDTO]> { get }
-    var sheetContactToPublishStorageRepo: Protected<[CachedSheetDiscussionToPublishDTO]> { get }
+    var discussionsToPublishStorageRepo: Protected<[CachedSheetDiscussionToPublishDTO]> { get }
+    //    var sheetDiscussionToPublishDTOMemoryRepo: Protected<[CachedSheetDiscussionToPublishDTO]> { get }
+    
+    var sheetContactToPublishStorageRepo: Protected<[CachedSheetContactUpdatesToPublishDTO]> { get }
     
     /// Sheet List
     func getSheetList() async throws -> [CachedSheetDTO]
@@ -98,6 +100,7 @@ public protocol SheetServiceProtocol {
     func addDiscussionToPublishInMemoryRepo(sheet: CachedSheetDiscussionToPublishDTO)
     
     func removeSheetHasUpdatesToPublish(sheetId: Int) async throws
+    func removeDiscussionToPublishFromStorage(discussionDTO: DiscussionDTO) async throws
     func commitMemoryToStorage(sheetId: Int) async throws
     func pushChangesToApi(sheetId: Int) async throws
 }
@@ -124,12 +127,12 @@ public final class SheetService: SheetServiceProtocol {
 
     /// The stored instance of discussions to publish
     /// Used to observe changes externally
-    public var sheetContactToPublishStorageRepo: Protected<[CachedSheetDiscussionToPublishDTO]> {
-        $protectedDiscussionToPublishStorageRepo
+    public var sheetContactToPublishStorageRepo: Protected<[CachedSheetContactUpdatesToPublishDTO]> {
+        $protectedSheetContactToPublishStorageRepo
     }
     
-    public var discussionsToPublishStorageRepo: Protected<[CachedSheetContactUpdatesToPublishDTO]> {
-        $protectedSheetContactToPublishStorageRepo
+    public var discussionsToPublishStorageRepo: Protected<[CachedSheetDiscussionToPublishDTO]> {
+        $protectedDiscussionToPublishStorageRepo
     }
     
     /// The stored instance of updates to publish
@@ -146,9 +149,9 @@ public final class SheetService: SheetServiceProtocol {
     
     /// The memory instance of discussions/comments to publish
     /// Used to observe changes externally
-    public var sheetDiscussionToPublishDTOMemoryRepo: Protected<[CachedSheetDiscussionToPublishDTO]> {
-        $protectedDiscussionToPublishDTOMemoryRepo
-    }
+//    public var sheetDiscussionToPublishDTOMemoryRepo: Protected<[CachedSheetDiscussionToPublishDTO]> {
+//        $protectedDiscussionToPublishDTOMemoryRepo
+//    }
     
     // MARK: Initializers
 
@@ -314,6 +317,7 @@ public final class SheetService: SheetServiceProtocol {
         do {
             let newItem = CachedSheetDiscussionsToPublish(
                 dateTime: item.dateTime,
+                sheetId: item.sheetId,
                 parentId: item.parentId,
                 parentType: item.parentType.rawValue,
                 firstNameUser: item.firstNameUser,
@@ -351,7 +355,8 @@ public final class SheetService: SheetServiceProtocol {
             print("ℹ️ Added new in-memory record for SheetID: \(sheet.sheetId), RowID: \(sheet.rowId), ColumnID: \(sheet.columnId), OldValue: \(sheet.oldValue) with value: \(sheet.newValue)")
         }
     }
-    
+        
+    //TODO: Since the comments/discussions are being directly stored on SwiftData we probably can remove that.
     public func addDiscussionToPublishInMemoryRepo(sheet: CachedSheetDiscussionToPublishDTO) {
         // Append new record
         protectedDiscussionToPublishDTOMemoryRepo.append(sheet)
@@ -380,6 +385,29 @@ public final class SheetService: SheetServiceProtocol {
             print("✅ Removed sheet with pending updates: SheetID: \(sheetId)")
         } catch {
             print("❌ Failed to remove sheet with pending updates: SheetID: \(sheetId), Error: \(error)")
+            throw error
+        }
+    }
+    
+    public func removeDiscussionToPublishFromStorage(discussionDTO: DiscussionDTO) async throws {
+        do {
+            let descriptor = FetchDescriptor<CachedSheetDiscussionsToPublish>(sortBy: [SortDescriptor(\.dateTime)])
+
+            let results = try modelContext.fetch(descriptor)
+                       
+            guard let itemToDelete = results.first(where: { discussionDTO.id == $0.id }) else {
+                print("ℹ️ No matching discussion found for removal: \(discussionDTO)")
+                return
+            }
+            
+            modelContext.delete(itemToDelete)
+            
+            try modelContext.save()
+
+            try await getSheetListHasUpdatesToPublish()
+            print("✅ Removed discussion from storage for sheetId: \(discussionDTO.parentId)")
+        } catch {
+            print("❌ Error removing discussion: \(error)")
             throw error
         }
     }
@@ -618,7 +646,9 @@ public final class SheetService: SheetServiceProtocol {
                                     
             let resultMap: [CachedSheetDiscussionToPublishDTO] = results
                 .map { CachedSheetDiscussionToPublishDTO(
+                    id: $0.id,
                     dateTime: $0.dateTime,
+                    sheetId: $0.sheetId,
                     parentId: $0.parentId,
                     parentType: .init(rawValue: $0.parentType) ?? .sheet,
                     comment: .init(text: $0.comment?.text ?? ""),
@@ -627,6 +657,8 @@ public final class SheetService: SheetServiceProtocol {
                 }
                 .sorted { $0.dateTime < $1.dateTime }
            
+            protectedDiscussionToPublishStorageRepo = resultMap
+            
             return resultMap
         }
         
