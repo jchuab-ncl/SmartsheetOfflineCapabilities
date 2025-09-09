@@ -73,7 +73,8 @@ final class SheetListViewModel: ObservableObject {
         }
         
         let contentToPublish = sheetsListHasUpdatesToPublish.first(where: { $0.sheetId == sheetId })
-        let discussionsToPublish = sheetsDiscussionsToPublish.first(where: { $0.parentType == .sheet && $0.parentId == sheetId })
+        //TODO: Compare sheetId
+        let discussionsToPublish = sheetsDiscussionsToPublish.first(where: { $0.sheetId == sheetId })
         
         return (contentToPublish != nil || discussionsToPublish != nil)
     }
@@ -112,7 +113,8 @@ final class SheetListViewModel: ObservableObject {
             statusSync[sheetId] = .loading
             
             do {
-                try await sheetService.pushChangesToApi(sheetId: sheetId)
+                try await sheetService.pushSheetContentToApi(sheetId: sheetId)
+                try await sheetService.pushDiscussionsToApi(sheetId: sheetId)
                 
                 // After pushing the changes we can download the last changes from the API
                 // TODO: This will change once we implement the conflict solving feature

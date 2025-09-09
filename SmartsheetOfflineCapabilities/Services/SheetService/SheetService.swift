@@ -102,7 +102,10 @@ public protocol SheetServiceProtocol {
     func removeSheetHasUpdatesToPublish(sheetId: Int) async throws
     func removeDiscussionToPublishFromStorage(discussionDTO: DiscussionDTO) async throws
     func commitMemoryToStorage(sheetId: Int) async throws
-    func pushChangesToApi(sheetId: Int) async throws
+    
+    /// Push to the API methods
+    func pushSheetContentToApi(sheetId: Int) async throws
+    func pushDiscussionsToApi(sheetId: Int) async throws
 }
 
 // MARK: Implementation
@@ -417,7 +420,7 @@ public final class SheetService: SheetServiceProtocol {
         await commitSheetDiscussionToStorage(parentId: sheetId)
     }
     
-    public func pushChangesToApi(sheetId: Int) async throws {
+    public func pushSheetContentToApi(sheetId: Int) async throws {
         // 1) Build payload from stored items for this sheet
         let items = protectedSheetHasUpdatesToPublishStorageRepo.filter { $0.sheetId == sheetId }
         let contactItems = protectedSheetContactToPublishStorageRepo.filter { $0.sheetId == sheetId }
@@ -486,6 +489,125 @@ public final class SheetService: SheetServiceProtocol {
         }
         // Optionally refresh the update lists after success
         // try await getSheetListHasUpdatesToPublish()
+    }
+    
+    public func pushDiscussionsToApi(sheetId: Int) async throws {
+        // Fetch pending discussions for this sheet
+        let discussionsToPublish: [CachedSheetDiscussionToPublishDTO] = protectedDiscussionToPublishStorageRepo
+            .filter { $0.sheetId == sheetId }
+            .sorted(by: { $0.dateTime < $1.dateTime })
+        
+        guard !discussionsToPublish.isEmpty else {
+            print("ℹ️ No pending discussions to push for sheet \(sheetId).")
+            return
+        }
+
+        struct DiscussionCreatePayload: Encodable {
+            struct Comment: Encodable { let text: String }
+            let comment: Comment
+        }
+
+        var headers = makeHeaders()
+        headers["Content-Type"] = "application/json"
+
+        let encoder = JSONEncoder()
+        var succeededIDs = Set<Int>()
+        var errors: [String] = []
+
+        // Smartsheet API accepts exactly one discussion per request.
+        // Send each DTO individually to the proper endpoint.
+        for dto in discussionsToPublish {
+            let payload = DiscussionCreatePayload(comment: .init(text: dto.comment.text))
+            let body: Data
+            do {
+                body = try encoder.encode(payload)
+            } catch {
+                let msg = "❌ Failed to encode discussion payload (id: \(dto.id)) for sheet \(sheetId): \(error)"
+                print(msg)
+                errors.append(msg)
+                continue
+            }
+
+            // Build endpoint depending on parent type (sheet vs row)
+            let path: String
+            switch dto.parentType {
+            case .sheet:
+                path = "/sheets/\(sheetId)/discussions"
+            case .row:
+                path = "/sheets/\(sheetId)/rows/\(dto.parentId)/discussions"
+            }
+
+            let url: String
+            do {
+                url = try baseSheetsURL(path: path)
+            } catch {
+                let msg = "❌ Failed to build URL for discussion (id: \(dto.id)) — \(error)"
+                print(msg)
+                errors.append(msg)
+                continue
+            }
+
+            let result = await httpApiClient.request(
+                url: url,
+                method: .POST,
+                headers: headers,
+                queryParameters: nil,
+                body: body,
+                encoding: .json
+            )
+
+            switch result {
+            case .success(let data):
+                if let str = String(data: data, encoding: .utf8) {
+                    print("✅ Pushed discussion id=\(dto.id) to \(path). Response: \(str)")
+                } else {
+                    print("✅ Pushed discussion id=\(dto.id) to \(path).")
+                }
+                succeededIDs.insert(dto.id)
+            case .failure(let error):
+                let msg = "❌ Failed to push discussion id=\(dto.id) to \(path): \(error)"
+                print(msg)
+                errors.append(msg)
+            }
+        }
+
+        // Remove only the successfully posted items from storage
+        let succeededIDsSnapshot = succeededIDs
+
+        if !succeededIDsSnapshot.isEmpty {
+            do {
+                try await MainActor.run {
+                    let context = modelContext
+                    let descriptor = FetchDescriptor<CachedSheetDiscussionsToPublish>(
+                        predicate: #Predicate { $0.sheetId == sheetId }
+                    )
+                    let toCheck = try context.fetch(descriptor)
+                    let toDelete = toCheck.filter { succeededIDsSnapshot.contains($0.id) }
+                    toDelete.forEach { context.delete($0) }
+                    try context.save()
+
+                    // Update the in-memory mirror
+                    protectedDiscussionToPublishStorageRepo.removeAll {
+                        succeededIDsSnapshot.contains($0.id)
+                    }
+                    print("🧹 Removed \(toDelete.count) successfully posted discussion(s) from storage for sheetId \(sheetId).")
+                }
+            } catch {
+                let msg = "❌ Failed to clean up discussions after post for sheetId \(sheetId): \(error)"
+                print(msg)
+                errors.append(msg)
+            }
+        }
+
+        // Refresh lists
+        try? await getSheetListHasUpdatesToPublish()
+
+        // If any errors occurred, surface them
+        if !errors.isEmpty {
+            throw NSError(domain: "PushDiscussionsError", code: 0, userInfo: [
+                NSLocalizedDescriptionKey: errors.joined(separator: "\n")
+            ])
+        }
     }
     
     /// Fetches detailed information for a specific sheet from the Smartsheet API.

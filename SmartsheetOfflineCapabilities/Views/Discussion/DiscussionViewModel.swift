@@ -102,12 +102,12 @@ final class DiscussionViewModel: ObservableObject {
                 )
             )
             
-            if await httpApiClient.isInternetAvailable() {
-                //TODO: Save comments online
-            } else {
-                //TODO: Save comments offline
+//            if await httpApiClient.isInternetAvailable() {
+//                //TODO: Save comments online
+//            } else {
+//                //TODO: Save comments offline
                 await sheetService.commitSheetDiscussionToStorage(parentId: parentId)
-            }
+//            }
         }
     }
         

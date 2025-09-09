@@ -11,12 +11,31 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "DiscussionViewModel.post(sheetId:value:):DiscussionViewModel.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "authenticationService.cachedUserDTO">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in SelectFileViewModel.loadSheets():SelectFileViewModel.swift">
          <PersistentStrings>
             <PersistentString
                value = "self.sheetsList">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.addDiscussionWithUpdatesToPublishInMemoryRepo(sheet:):SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "protectedDiscussionToPublishDTOMemoryRepo">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.getSheetContentFromStorage(sheetId:):SheetService.swift">
       </ContextState>
       <ContextState
          contextName = "closure #1 in SheetListViewModel.loadSheets():SheetListViewModel.swift">
@@ -68,12 +87,18 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "SheetService.commitSheetDiscussionToStorage(parentId:):SheetService.swift">
+      </ContextState>
+      <ContextState
          contextName = "closure #2 in closure #1 in SheetService.getSheetContentFromStorage(sheetId:):SheetService.swift">
          <PersistentStrings>
             <PersistentString
                value = "$0.title">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in DiscussionViewModel.init(authenticationService:sheetService:):DiscussionViewModel.swift">
       </ContextState>
       <ContextState
          contextName = "closure #1 in LoginViewModel.init(authenticationService:):LoginViewModel.swift">
@@ -83,6 +108,9 @@
          <PersistentStrings>
             <PersistentString
                value = "$0">
+            </PersistentString>
+            <PersistentString
+               value = "protectedDiscussionToPublishStorageRepo">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -107,6 +135,14 @@
          contextName = "EditableCellView.buildDiscussionSheet():EditableCellView.swift">
       </ContextState>
       <ContextState
+         contextName = "closure #2 in closure #1 in closure #2 in closure #1 in closure #1 in closure #1 in AddDiscussionBottomView.body.getter:DiscussionView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "mode">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "Coordinator.makeLineNumberCell(for:in:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
@@ -127,14 +163,6 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "closure #2 in closure #1 in closure #2 in closure #1 in closure #1 in closure #1 in AddDiscussionBottomView.body.getter:DiscussionView.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "mode">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
          contextName = "closure #1 in LoginView.makeScreenContent():LoginView.swift">
          <PersistentStrings>
             <PersistentString
@@ -143,10 +171,21 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "DiscussionViewModel.filterDiscussions():DiscussionViewModel.swift">
+      </ContextState>
+      <ContextState
          contextName = "SheetService.getSheets():SheetService.swift">
          <PersistentStrings>
             <PersistentString
                value = "error.localizedDescription">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #1 in closure #1 in DiscussionView.makeDiscussionBottomView():DiscussionView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "commentBeingReplyTo">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -194,7 +233,31 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #1 in closure #1 in EditableCellView.body.getter:EditableCellView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "isEditing &amp;&amp; isEditable">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in closure #1 in SheetService.getSheetListHasUpdatesToPublish():SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "discussionResults">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #1 in closure #2 in closure #1 in closure #1 in closure #1 in AddDiscussionBottomView.body.getter:DiscussionView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "mode">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "AuthenticationService.getCurrentLoggedUserOnline():AuthenticationService.swift">
       </ContextState>
       <ContextState
          contextName = "closure #1 in EditableCellView.makeSheet():EditableCellView.swift">
@@ -211,35 +274,16 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "SpreadsheetViewWrapper.Coordinator.numberOfColumns(in:):SpreadsheetViewWrapper.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.cachedSheetContentDTO?.columns.count">
-            </PersistentString>
-            <PersistentString
-               value = "self.cachedSheetContentDTO">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in closure #1 in closure #2 in closure #1 in closure #1 in closure #1 in AddDiscussionBottomView.body.getter:DiscussionView.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "mode">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
          contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
-            <PersistentString
-               value = "self.sheetContentDTO?.columns[indexPath.column - 1]">
-            </PersistentString>
             <PersistentString
                value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })?">
             </PersistentString>
             <PersistentString
                value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells">
+            </PersistentString>
+            <PersistentString
+               value = "self.sheetContentDTO?.columns[indexPath.column - 1]">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -250,6 +294,28 @@
                value = "allDiscussions">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SpreadsheetViewWrapper.Coordinator.numberOfColumns(in:):SpreadsheetViewWrapper.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.cachedSheetContentDTO">
+            </PersistentString>
+            <PersistentString
+               value = "self.cachedSheetContentDTO?.columns.count">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in CustomEditableCell.updateContent():CustomEditableCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.text">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "SheetService.addSheetWithUpdatesToPublish_Storage(columnType:sheetId:name:newValue:oldValue:rowId:columnId:contacts:):SheetService.swift">
       </ContextState>
       <ContextState
          contextName = "Coordinator.spreadsheetView(_:heightForRow:):SpreadsheetViewWrapper.swift">
@@ -267,17 +333,6 @@
                value = "(textSize[rowId] ?? 0) / 4">
             </PersistentString>
          </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in CustomEditableCell.updateContent():CustomEditableCell.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.text">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "SheetService.addSheetWithUpdatesToPublish_Storage(columnType:sheetId:name:newValue:oldValue:rowId:columnId:contacts:):SheetService.swift">
       </ContextState>
       <ContextState
          contextName = "closure #1 in SheetService.getSheetContentOnline(sheetId:):SheetService.swift">
@@ -446,6 +501,9 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #2 in SheetListViewModel.init(sheetService:):SheetListViewModel.swift">
+      </ContextState>
+      <ContextState
          contextName = "KeychainService.save&lt;SmartsheetOfflineCapabilities.SmartsheetTokenResponse&gt;(_:for:):KeychainService.swift">
          <PersistentStrings>
             <PersistentString
@@ -479,6 +537,9 @@
                value = "self.cachedSheetContentDTO?.rows">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #1 in closure #1 in closure #2 in closure #1 in DiscussionView.body.getter:DiscussionView.swift">
       </ContextState>
       <ContextState
          contextName = "closure #1 in EditableCellView.body.getter:EditableCellView.swift">
