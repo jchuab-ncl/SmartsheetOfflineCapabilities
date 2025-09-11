@@ -26,7 +26,11 @@ struct SmartsheetOfflineCapabilitiesApp: App {
             CachedSheetContactUpdatesToPublish.self,
             CachedDiscussionDTO.self,
             CachedSheetDiscussionText.self,
-            CachedUser.self
+            CachedUser.self,
+            CachedServerInfoDTO.self,
+            CachedServerInfoFormatsDTO.self,
+            CachedCurrency.self,
+            CachedFontFamily.self
         ])
         
         let config = ModelConfiguration("SmartsheetOffline", schema: schema)

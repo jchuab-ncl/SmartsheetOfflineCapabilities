@@ -99,6 +99,8 @@ final class SheetListViewModel: ObservableObject {
 //                    discussionList.append(contentsOf: discussionResult)
                 }
                 
+                try await sheetService.getServerInfo()
+                
                 try await sheetService.getSheetListHasUpdatesToPublish()
                 
                 status = .success

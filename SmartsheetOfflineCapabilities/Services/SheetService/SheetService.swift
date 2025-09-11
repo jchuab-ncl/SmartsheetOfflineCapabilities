@@ -81,6 +81,7 @@ public protocol SheetServiceProtocol {
     //    var sheetDiscussionToPublishDTOMemoryRepo: Protected<[CachedSheetDiscussionToPublishDTO]> { get }
     
     var sheetContactToPublishStorageRepo: Protected<[CachedSheetContactUpdatesToPublishDTO]> { get }
+    var serverInfoDTOMemoryRepo: Protected<ServerInfoDTO> { get }
     
     /// Sheet List
     func getSheetList() async throws -> [CachedSheetDTO]
@@ -93,14 +94,20 @@ public protocol SheetServiceProtocol {
     /// Discussions to publish
     func getDiscussionToPublishForSheet(sheetId: Int) async throws -> [DiscussionDTO]
     func commitSheetDiscussionToStorage(parentId: Int) async
+    
+    /// ServerInfo
+    func getServerInfo() async throws
         
+    /// Add methods
     func addSheetWithUpdatesToPublish_Storage(columnType: String, sheetId: Int, name: String, newValue: String, oldValue: String, rowId: Int, columnId: Int, contacts: [CachedSheetContactUpdatesToPublishDTO]) async throws
-        
     func addSheetWithUpdatesToPublishInMemoryRepo(sheet: CachedSheetHasUpdatesToPublishDTO)
     func addDiscussionToPublishInMemoryRepo(sheet: CachedSheetDiscussionToPublishDTO)
     
+    /// Remove methods
     func removeSheetHasUpdatesToPublish(sheetId: Int) async throws
     func removeDiscussionToPublishFromStorage(discussionDTO: DiscussionDTO) async throws
+    
+    /// Commit Memory to storage
     func commitMemoryToStorage(sheetId: Int) async throws
     
     /// Push to the API methods
@@ -111,10 +118,12 @@ public protocol SheetServiceProtocol {
 // MARK: Implementation
 
 public final class SheetService: SheetServiceProtocol {
+    
+    let httpApiClient: HTTPApiClientProtocol
+    
     // MARK: Private properties
     
     private var modelContext: ModelContext
-    private let httpApiClient: HTTPApiClientProtocol
     private let infoPListLoader: InfoPlistLoaderProtocol
     private let keychainService: KeychainServiceProtocol
         
@@ -122,9 +131,9 @@ public final class SheetService: SheetServiceProtocol {
     @Protected private(set) var protectedSheetHasUpdatesToPublishStorageRepo: [CachedSheetHasUpdatesToPublishDTO] = []
     @Protected private(set) var protectedSheetContactToPublishStorageRepo: [CachedSheetContactUpdatesToPublishDTO] = []
     @Protected private(set) var protectedDiscussionToPublishStorageRepo: [CachedSheetDiscussionToPublishDTO] = []
-    
     @Protected private(set) var protectedSheetHasUpdatesToPublishMemoryRepo: [CachedSheetHasUpdatesToPublishDTO] = []
     @Protected private(set) var protectedDiscussionToPublishDTOMemoryRepo: [CachedSheetDiscussionToPublishDTO] = []
+    @Protected private(set) var protectedServerInfoDTOMemoryRepo: ServerInfoDTO = .empty
     
     // MARK: Public properties
 
@@ -155,6 +164,11 @@ public final class SheetService: SheetServiceProtocol {
 //    public var sheetDiscussionToPublishDTOMemoryRepo: Protected<[CachedSheetDiscussionToPublishDTO]> {
 //        $protectedDiscussionToPublishDTOMemoryRepo
 //    }
+    
+    /// The stored instance of ServerInfo to publish
+    public var serverInfoDTOMemoryRepo: Protected<ServerInfoDTO> {
+        $protectedServerInfoDTOMemoryRepo
+    }
     
     // MARK: Initializers
 
@@ -408,7 +422,7 @@ public final class SheetService: SheetServiceProtocol {
             try modelContext.save()
 
             try await getSheetListHasUpdatesToPublish()
-            print("✅ Removed discussion from storage for sheetId: \(discussionDTO.parentId)")
+            print("✅ Removed discussion from storage for sheetId: \(discussionDTO.parentId ?? 0)")
         } catch {
             print("❌ Error removing discussion: \(error)")
             throw error
@@ -683,8 +697,6 @@ public final class SheetService: SheetServiceProtocol {
 
         let resultOffline = try await getDiscussionToPublishFromStorage(sheetId: sheetId)
 
-        //TODO: WIP
-
         result.append(contentsOf: resultOffline.map{
             DiscussionDTO(from: $0)
         })
@@ -721,8 +733,99 @@ public final class SheetService: SheetServiceProtocol {
             }
         }
     }
-            
+    
+    public func getServerInfo() async throws {
+        let isInternetAvailable = await httpApiClient.isInternetAvailable()
+        
+        do {
+            if isInternetAvailable {
+                try await getServerInfoOnline()
+            } else {
+                try await getServerInfoFromStorage()
+            }
+        } catch {
+            print("❌ ServerInfo data could not be retrieved. Error: \(error)")
+        }
+    }
+    
+    private func getServerInfoOnline() async throws {
+        do {
+            let url = try baseSheetsURL(path: "/serverinfo")
+            let result = await httpApiClient.request(
+                url: url,
+                method: .GET,
+                headers: makeHeaders(),
+                queryParameters: nil
+            )
+            switch result {
+            case .success(let data):
+                do {
+                    let serverInfo = try JSONDecoder().decode(ServerInfoDTO.self, from: data)
+                                        
+                    protectedServerInfoDTOMemoryRepo = serverInfo
+                    
+                    /// Storing Server Info locally
+                    try await addServerInfoIntoStorage(serverInfo)
+                } catch {
+                    if let raw = String(data: data, encoding: .utf8) {
+                        print("❌ ServerInfo decode error: \(error)\nRaw: \(raw)")
+                    } else {
+                        print("❌ ServerInfo decode error: \(error)")
+                    }
+                    throw NSError(domain: "ServerInfoDecodeError", code: 0, userInfo: [
+                        NSLocalizedDescriptionKey: "Failed to decode ServerInfo: \(error.localizedDescription)"
+                    ])
+                }
+            case .failure(let error):
+                print("❌ Failed to fetch ServerInfo: \(error)")
+                throw NSError(domain: "ServerInfoNetworkError", code: 0, userInfo: [
+                    NSLocalizedDescriptionKey: "Failed to fetch server info: \(error)"
+                ])
+            }
+        } catch {
+            print("❌ Unexpected error in getServerInfoOnline: \(error)")
+            throw NSError(domain: "ServerInfoUnexpectedError", code: 0, userInfo: [
+                NSLocalizedDescriptionKey: "Unexpected error retrieving server info: \(error.localizedDescription)"
+            ])
+        }
+    }
+           
     // MARK: Private methods
+    
+    private func getServerInfoFromStorage() async throws {
+        return try await MainActor.run {
+            let context = modelContext
+            let descriptor = FetchDescriptor<CachedServerInfoDTO>()
+            let results = try context.fetch(descriptor)
+            if let first = results.first {
+                protectedServerInfoDTOMemoryRepo = first.toDTO()
+            } else {
+                print("❌ No cached ServerInfo found in storage.")
+                throw NSError(domain: "NoCachedServerInfo", code: 0, userInfo: [
+                    NSLocalizedDescriptionKey: "No cached ServerInfo found in storage."
+                ])
+            }
+        }
+    }
+    
+    private func addServerInfoIntoStorage(_ serverInfo: ServerInfoDTO) async throws {
+        try await MainActor.run {
+            let context = modelContext
+            // Remove existing CachedServerInfo entries
+            let existing = try context.fetch(FetchDescriptor<CachedServerInfoDTO>())
+            existing.forEach { context.delete($0) }
+            // Convert and insert new CachedServerInfo
+            let cache = CachedServerInfoDTO(dto: serverInfo)
+            context.insert(cache)
+            do {
+                try context.save()
+                print("✅ ServerInfo stored in SwiftData")
+            } catch {
+                print("❌ Error storing ServerInfo in SwiftData: \(error)")
+                throw error
+            }
+        }
+    }
     
     private func getDiscussionForSheetOnline(sheetId: Int) async throws -> [DiscussionDTO] {
         let result = await httpApiClient.request(
