@@ -52,6 +52,11 @@ struct SmartsheetOfflineCapabilitiesApp: App {
                     // The order should be as is, do not change
                     Dependencies.shared.sheetService = SheetService(modelContext: sharedModelContainer.mainContext)
                     Dependencies.shared.authenticationService.setupModelContext(modelContext: sharedModelContainer.mainContext)
+                    
+                    // Initializing here cause has dependency on Sheet Service
+                    Dependencies.shared.serverInfoFormatParserService = ServerInfoFormatParserService(sheetService: Dependencies.shared.sheetService)
+                    
+//                    DependencyEnvironment.configureDependencies()
                 }
         }
         .modelContainer(sharedModelContainer)

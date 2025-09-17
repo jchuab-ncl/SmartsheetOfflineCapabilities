@@ -16,6 +16,8 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     
     // MARK: Initializers
     
+    /// Initializes the SpreadsheetViewWrapper with the provided sheet content data.
+    /// - Parameter sheetContentDTO: The data transfer object containing the sheet content to display.
     init(sheetContentDTO: SheetContentDTO) {
         self.sheetContentDTO = sheetContentDTO
     }
@@ -47,13 +49,21 @@ class Coordinator: NSObject, SpreadsheetViewDelegate {
     private var sheetContentDTO: SheetContentDTO
     private var sheetService: SheetServiceProtocol
     private var textSize: [Int: Int] = [:] //RowId / TextSize
+    private var serverInfoFormatParser: ServerInfoFormatParserProtocol
     
+    /// Initializes the Coordinator for managing spreadsheet interactions.
+    /// - Parameters:
+    ///   - sheetContentDTO: The data transfer object containing the sheet content.
+    ///   - sheetService: Service protocol for handling sheet updates. Defaults to shared dependency.
+    ///   - serverInfoFormatParser: Service protocol for parsing server info formats. Defaults to shared dependency.
     init(
         sheetContentDTO: SheetContentDTO,
-        sheetService: SheetServiceProtocol = Dependencies.shared.sheetService
+        sheetService: SheetServiceProtocol = Dependencies.shared.sheetService,
+        serverInfoFormatParser: ServerInfoFormatParserProtocol = Dependencies.shared.serverInfoFormatParserService
     ) {
         self.sheetContentDTO = sheetContentDTO
         self.sheetService = sheetService
+        self.serverInfoFormatParser = serverInfoFormatParser
         
         for row in sheetContentDTO.rows {
             for cell in row.cells {
@@ -109,7 +119,13 @@ extension Coordinator: CustomEditableCellDelegate {
                 sheetContentDTO.rows[rowIndex].cells[cellIndex].displayValue = value
             } else {
                 // If this cell doesn't exist yet in the row, append it
-                let newCell = CellDTO(columnId: columnId, value: value, displayValue: value)
+                let newCell = CellDTO(
+                    columnId: columnId,
+                    conditionalFormat: nil,
+                    value: value,
+                    displayValue: value,
+                    format: nil
+                )
                 sheetContentDTO.rows[rowIndex].cells.append(newCell)
             }
         } else {
@@ -240,6 +256,17 @@ extension Coordinator: SpreadsheetViewDataSource {
         let column = sheetContentDTO.columns[indexPath.column - 1]
         let row = sheetContentDTO.rows[indexPath.row - 1]
         let cellData = row.cells.first(where: { $0.columnId == column.id })
+        
+        print("Log: Conditional Format: ", cellData?.conditionalFormat ?? "empty")
+        print("Log: Format: ", cellData?.conditionalFormat ?? "empty")
+        print("Log: ========", cellData?.conditionalFormat ?? "empty")
+        
+        if let format = cellData?.conditionalFormat {
+            cell.parsedFormat = serverInfoFormatParser.parse(formatString: format)
+        } else if let format = cellData?.format {
+            cell.parsedFormat = serverInfoFormatParser.parse(formatString: format)
+        }
+        
         let value = cellData?.displayValue ?? cellData?.value ?? ""
         self.textSize[row.id] = value.count > (self.textSize[row.id] ?? 0) ? value.count : self.textSize[row.id] ?? 0
 

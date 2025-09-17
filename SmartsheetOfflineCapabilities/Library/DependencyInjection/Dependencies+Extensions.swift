@@ -69,3 +69,16 @@ extension Dependencies {
         set { self[SheetServiceDependencyKey.self] = newValue }
     }
 }
+
+/// ServerInfoFormatParserService
+public enum ServerInfoFormatParserServiceDependencyKey: DependencyKey {
+    public typealias DataType = ServerInfoFormatParserProtocol
+}
+
+extension Dependencies {
+    /// SheetService instance from `Dependencies`.
+    public var serverInfoFormatParserService: ServerInfoFormatParserProtocol {
+        get { self[ServerInfoFormatParserServiceDependencyKey.self] }
+        set { self[ServerInfoFormatParserServiceDependencyKey.self] = newValue }
+    }
+}

@@ -139,6 +139,7 @@ extension Array where Element == Contact {
 //}
 
 public struct Column: Codable, Equatable {
+    public let format: String?
     public let id: Int
     public let index: Int
     public let title: String
@@ -153,6 +154,7 @@ public struct Column: Codable, Equatable {
     public let contactOptions: [Contact]?
     
     public enum CodingKeys: CodingKey {
+        case format
         case id
         case index
         case title
@@ -169,6 +171,7 @@ public struct Column: Codable, Equatable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.format = try container.decodeIfPresent(String.self, forKey: .format)
         self.id = try container.decode(Int.self, forKey: .id)
         self.index = try container.decode(Int.self, forKey: .index)
         self.title = try container.decode(String.self, forKey: .title)
@@ -246,6 +249,10 @@ public struct Row: Codable, Equatable {
 public struct SheetCell: Codable, Equatable {
     /// The unique identifier of the column this cell belongs to.
     public let columnId: Int
+    
+    /// The conditional format for the cell, example: "3,3,,,,,,,2,24,,,,,,,"
+    /// More info: https://developers.smartsheet.com/api/smartsheet/guides/format-text-elements
+    public let conditionalFormat: String?
 
     /// The raw value of the cell, decoded as a String. It can be originally a String or an Int.
     public var value: String?
@@ -261,22 +268,31 @@ public struct SheetCell: Codable, Equatable {
 
     /// Coding keys used for decoding from JSON.
     enum CodingKeys: String, CodingKey {
-        case columnId, value, displayValue, format, formula
+        case columnId, value, conditionalFormat, displayValue, format, formula
     }
 
     /// A static placeholder instance of an empty SheetCell.
-    public static var empty = SheetCell(columnId: 0, value: nil, displayValue: nil, format: nil, formula: nil)
+    public static var empty = SheetCell(columnId: 0, value: nil, conditionalFormat: nil, displayValue: nil, format: nil, formula: nil)
 
     /// Creates a new instance of `SheetCell` with the provided values.
     /// - Parameters:
     ///   - columnId: The identifier of the column this cell belongs to.
+    ///   - conditionalFormat: The conditional format for the cell, example: "3,3,,,,,,,2,24,,,,,,,"
     ///   - value: The raw value of the cell, stored as a `String`. Can be derived from a `String` or an `Int`.
     ///   - displayValue: The formatted display value shown in the Smartsheet UI.
     ///   - format: A format string applied to the cell, if any.
     ///   - formula: The formula string used to calculate the cell’s value, if applicable.
-    public init(columnId: Int, value: String?, displayValue: String?, format: String?, formula: String?) {
+    public init(
+        columnId: Int,
+        value: String?,
+        conditionalFormat: String?,
+        displayValue: String?,
+        format: String?,
+        formula: String?
+    ) {
         self.columnId = columnId
         self.value = value
+        self.conditionalFormat = conditionalFormat
         self.displayValue = displayValue
         self.format = format
         self.formula = formula
@@ -289,6 +305,7 @@ public struct SheetCell: Codable, Equatable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         columnId = try container.decode(Int.self, forKey: .columnId)
+        conditionalFormat = try container.decodeIfPresent(String.self, forKey: .conditionalFormat)
         displayValue = try container.decodeIfPresent(String.self, forKey: .displayValue)
         format = try container.decodeIfPresent(String.self, forKey: .format)
         formula = try container.decodeIfPresent(String.self, forKey: .formula)

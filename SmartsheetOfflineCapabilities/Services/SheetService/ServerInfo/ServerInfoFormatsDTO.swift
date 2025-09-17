@@ -146,8 +146,8 @@ final class CachedServerInfoFormatsDTO {
 
 @Model
 final class CachedCurrency {
-    @Attribute(.unique) var code: String
-    var symbol: String
+    var code: String?
+    var symbol: String?
     
     init(code: String, symbol: String) {
         self.code = code
@@ -159,14 +159,14 @@ final class CachedCurrency {
     }
     
     func toDTO() -> ServerInfoFormatsDTO.CurrencyDTO {
-        ServerInfoFormatsDTO.CurrencyDTO(code: code, symbol: symbol)
+        ServerInfoFormatsDTO.CurrencyDTO(code: code ?? "", symbol: symbol ?? "")
     }
 }
 
 @Model
 final class CachedFontFamily {
-    @Attribute(.unique) var name: String
-    var displayName: String
+    var name: String?
+    var displayName: String?
     
     init(name: String, displayName: String) {
         self.name = name
@@ -178,7 +178,7 @@ final class CachedFontFamily {
     }
     
     func toDTO() -> ServerInfoFormatsDTO.FontFamilyDTO {
-        ServerInfoFormatsDTO.FontFamilyDTO(name: name, displayName: displayName)
+        ServerInfoFormatsDTO.FontFamilyDTO(name: name ?? "", displayName: displayName ?? "")
     }
 }
 

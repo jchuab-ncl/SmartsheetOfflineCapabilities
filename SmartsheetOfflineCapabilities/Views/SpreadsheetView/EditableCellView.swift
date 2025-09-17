@@ -30,6 +30,7 @@ struct EditableCellView: View {
     var contactOptions: [ContactDTO] = []
     var rowDiscussions: [DiscussionDTO] = []
     var allDiscussions: [DiscussionDTO] = []
+    var parsedFormat: ParsedFormat = .empty
     
     var displayText: String {
         if isRowNumber {
@@ -48,9 +49,11 @@ struct EditableCellView: View {
     var body: some View {
         VStack {
             Text(displayText)
+                .foregroundStyle(parsedFormat.textColor)
                 .frame(maxWidth: .infinity, minHeight: 44)
-                .bold(isHeader || isRowNumber)
-                .multilineTextAlignment(.center)
+                .bold(isHeader || isRowNumber || parsedFormat.bold)
+                .italic(parsedFormat.italic)
+                .multilineTextAlignment(parsedFormat.horizontalAlign)
                 .padding(6)
                 .cornerRadius(6)
                 .sheet(isPresented: Binding(
@@ -79,6 +82,7 @@ struct EditableCellView: View {
                 }
             }
         }
+        .background(parsedFormat.backgroundColor)
         .onTapGesture {
             // Initialize the draft from current bound value
             draftText = text

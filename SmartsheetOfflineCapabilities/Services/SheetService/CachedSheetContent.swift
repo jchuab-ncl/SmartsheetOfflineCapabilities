@@ -60,6 +60,7 @@ public final class CachedOption {
 
 @Model
 public final class CachedColumn {
+    public var format: String?
     @Attribute(.unique) public var id: Int
     public var index: Int
     public var title: String
@@ -81,8 +82,10 @@ public final class CachedColumn {
         hidden: Bool,
         width: Int = 0,
         options: [String],
-        contactOptions: [CachedContact] = []
+        contactOptions: [CachedContact] = [],
+        format: String? = nil
     ) {
+        self.format = format
         self.id = id
         self.index = index
         self.title = title
@@ -112,12 +115,15 @@ public final class CachedColumn {
 @Model
 public final class CachedCell {
     public var columnId: Int
+    public var conditionalFormat: String?
     public var value: String?
     public var displayValue: String?
+    public var format: String?
     @Relationship(inverse: \CachedRow.cells) public var row: CachedRow?
 
-    public init(columnId: Int, value: String?, displayValue: String?) {
+    public init(columnId: Int, conditionalFormat: String?, value: String?, displayValue: String?, format: String?) {
         self.columnId = columnId
+        self.conditionalFormat = conditionalFormat
         self.value = value
         self.displayValue = displayValue
     }
@@ -181,6 +187,7 @@ public struct ContactDTO: Hashable, Sendable {
 }
 
 public struct ColumnDTO: Identifiable, Hashable, Sendable {
+    public var format: String?
     public var id: Int
     public var index: Int
     public var title: String
@@ -202,8 +209,10 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         hidden: Bool,
         width: Int,
         options: [String],
-        contactOptions: [ContactDTO] = []
+        contactOptions: [ContactDTO] = [],
+        format: String? = nil
     ) {
+        self.format = format
         self.id = id
         self.index = index
         self.title = title
@@ -217,6 +226,7 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
     }
     
     public init(from value: CachedColumn) {
+        self.format = value.format
         self.id = value.id
         self.index = value.index
         self.title = value.title
@@ -244,12 +254,22 @@ public struct RowDTO: Identifiable, Hashable, Sendable {
 
 public struct CellDTO: Hashable, Sendable {
     public var columnId: Int
+    public let conditionalFormat: String?
     public var value: String?
     public var displayValue: String?
+    public var format: String?
 
-    public init(columnId: Int, value: String?, displayValue: String?) {
+    public init(
+        columnId: Int,
+        conditionalFormat: String?,
+        value: String?,
+        displayValue: String?,
+        format: String?
+    ) {
         self.columnId = columnId
+        self.conditionalFormat = conditionalFormat
         self.value = value
         self.displayValue = displayValue
+        self.format = format
     }
 }

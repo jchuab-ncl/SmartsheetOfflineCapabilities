@@ -630,7 +630,7 @@ public final class SheetService: SheetServiceProtocol {
     /// - Throws: An error if the network request fails or the data cannot be decoded.
     public func getSheetContentOnline(sheetId: Int) async throws -> SheetContentDTO {
         let result = await httpApiClient.request(
-            url: try baseSheetsURL(path: "/sheets/\(sheetId)"),
+            url: try baseSheetsURL(path: "/sheets/\(sheetId)?include=format"),
             method: .GET,
             headers: makeHeaders(),
             queryParameters: nil
@@ -662,7 +662,13 @@ public final class SheetService: SheetServiceProtocol {
                         id: row.id,
                         rowNumber: row.rowNumber,
                         cells: (row.cells ?? []).map { cell in
-                            CellDTO(columnId: cell.columnId, value: cell.value ?? "", displayValue: cell.displayValue ?? "")
+                            CellDTO(
+                                columnId: cell.columnId,
+                                conditionalFormat: cell.conditionalFormat,
+                                value: cell.value ?? "",
+                                displayValue: cell.displayValue ?? "",
+                                format: cell.format
+                            )
                         }
                     )
                 }
@@ -974,8 +980,9 @@ public final class SheetService: SheetServiceProtocol {
                 sheetListResponse.data.forEach { print("- \($0.name)") }
                 
                 /// The only sheet that should show on the App
-                let sheetListFiltered = sheetListResponse.data.filter({
-                    $0.id == 4576181282099076
+                let sheetListFiltered = sheetListResponse.data
+                .filter({
+                    $0.id == 4576181282099076 || $0.id == 7642812506918788 ///Cards 
                 })
                 .sorted { $0.name < $1.name }
                 
@@ -1069,7 +1076,13 @@ public final class SheetService: SheetServiceProtocol {
                     id: row.id,
                     rowNumber: row.rowNumber,
                     cells: row.cells.map { cell in
-                        CellDTO(columnId: cell.columnId, value: cell.value, displayValue: cell.displayValue)
+                        CellDTO(
+                            columnId: cell.columnId,
+                            conditionalFormat: cell.conditionalFormat,
+                            value: cell.value,
+                            displayValue: cell.displayValue,
+                            format: cell.conditionalFormat
+                        )
                     }
                 )
             }.sorted { $0.rowNumber < $1.rowNumber }
@@ -1155,11 +1168,14 @@ public final class SheetService: SheetServiceProtocol {
                 let toDelete = try context.fetch(descriptor)
                 guard !toDelete.isEmpty else {
                     print("ℹ️ No pending sheet content found in storage for sheetId \(sheetId). Nothing to remove.")
+                    protectedSheetHasUpdatesToPublishStorageRepo.removeAll { $0.sheetId == sheetId }
                     return
                 }
 
                 toDelete.forEach { context.delete($0) }
                 try context.save()
+                
+                ///TODO: Fix for some reason is throwing an error when saving
                 print("✅ Removed \(toDelete.count) pending update record(s) from storage for sheetId \(sheetId).")
             } catch {
                 print("❌ Failed to remove pending sheet content from storage for sheetId \(sheetId): \(error)")
@@ -1182,7 +1198,9 @@ public final class SheetService: SheetServiceProtocol {
             let existing = try context.fetch(FetchDescriptor<CachedSheetContent>())
             existing
               .filter { (sheet: CachedSheetContent) in sheet.id == sheetListResponse.id }
-              .forEach { context.delete($0) }
+              .forEach { context.delete($0) } //TODO: Fix, is throwing an error
+            
+            
 
             // Convert columns
             let cachedColumns: [CachedColumn] = (sheetListResponse.columns ?? []).map { (column: Column) in
@@ -1203,7 +1221,13 @@ public final class SheetService: SheetServiceProtocol {
             // Convert rows and cells
             let cachedRows: [CachedRow] = (sheetListResponse.rows ?? []).map { (row: Row) in
                 let cachedCells: [CachedCell] = (row.cells ?? []).map { (cell: SheetCell) in
-                    CachedCell(columnId: cell.columnId, value: cell.value ?? "", displayValue: cell.displayValue ?? "")
+                    CachedCell(
+                        columnId: cell.columnId,
+                        conditionalFormat: cell.conditionalFormat,
+                        value: cell.value ?? "",
+                        displayValue: cell.displayValue ?? "",
+                        format: cell.format
+                    )
                 }
                 return CachedRow(id: row.id, rowNumber: row.rowNumber, cells: cachedCells)
             }

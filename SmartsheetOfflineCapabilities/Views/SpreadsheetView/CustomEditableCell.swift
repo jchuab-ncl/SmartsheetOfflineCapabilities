@@ -65,10 +65,11 @@ class CustomEditableCell: Cell {
     var sheetId: Int = 0
     var rowDiscussions: [DiscussionDTO] = []
     var allDiscussions: [DiscussionDTO] = []
+    var parsedFormat: ParsedFormat = .empty
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .white
+        backgroundColor = UIColor(parsedFormat.backgroundColor)
         layer.borderColor = UIColor.lightGray.cgColor
         layer.borderWidth = 0.5
         updateContent()
@@ -85,6 +86,7 @@ class CustomEditableCell: Cell {
         hostingController = nil
         isHeader = false
         isRowNumber = false
+        parsedFormat = .empty
     }
 
     private func updateContent() {
@@ -122,14 +124,15 @@ class CustomEditableCell: Cell {
             rowNumber: rowNumber,
             contactOptions: contactOptions,
             rowDiscussions: rowDiscussions,
-            allDiscussions: allDiscussions
+            allDiscussions: allDiscussions,
+            parsedFormat: parsedFormat
         )
         
         // Create and assign new hosting controller
         hostingController = UIHostingController(rootView: view)
         
         if let hostingView = hostingController?.view {
-            hostingView.backgroundColor = .clear
+            hostingView.backgroundColor = UIColor(parsedFormat.backgroundColor)
             hostingView.frame = contentView.bounds
             hostingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             contentView.addSubview(hostingView)

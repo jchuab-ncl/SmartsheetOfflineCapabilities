@@ -11,6 +11,6 @@ struct DependencyEnvironment {
         Dependencies.shared.infoPlistLoader = InfoPlistLoader()
         Dependencies.shared.keychainService = KeychainService()
         
-        Dependencies.shared.authenticationService = AuthenticationService()
+        Dependencies.shared.authenticationService = AuthenticationService()        
     }
 }
