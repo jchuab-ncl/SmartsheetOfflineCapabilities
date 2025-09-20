@@ -18,6 +18,8 @@ protocol CustomEditableCellDelegate: AnyObject {
         rowId: Int,
         columnId: Int
     )
+    
+    func solvedConflict(conflict: Conflict)
 }
 
 class CustomEditableCell: Cell {
@@ -54,6 +56,12 @@ class CustomEditableCell: Cell {
         }
     }
     
+    var conflict: Conflict? {
+        didSet {
+            updateContent()
+        }
+    }
+    
     var delegate: CustomEditableCellDelegate?
     var isEditable: Bool = true
     var pickListValues: [String] = []
@@ -65,7 +73,7 @@ class CustomEditableCell: Cell {
     var sheetId: Int = 0
     var rowDiscussions: [DiscussionDTO] = []
     var allDiscussions: [DiscussionDTO] = []
-    var parsedFormat: ParsedFormat = .empty
+    var parsedFormat: ParsedFormat = .empty    
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -87,6 +95,7 @@ class CustomEditableCell: Cell {
         isHeader = false
         isRowNumber = false
         parsedFormat = .empty
+        conflict = nil
     }
 
     private func updateContent() {
@@ -113,6 +122,13 @@ class CustomEditableCell: Cell {
                     )
                 }
             ),
+            conflict: Binding(get: {
+                self.conflict
+            }, set: { newValue in
+                self.conflict = nil
+                guard let newValue else { return }
+                self.delegate?.solvedConflict(conflict: newValue)
+            }) ,
             isEditable: isEditable,
             pickListValues: pickListValues,
             columnType: columnType,

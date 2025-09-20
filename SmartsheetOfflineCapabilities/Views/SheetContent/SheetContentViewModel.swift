@@ -16,7 +16,8 @@ final class SheetContentViewModel: ObservableObject {
     
     @Published var status: ProgressStatus = .initial
     @Published var sheetContentDTO: SheetContentDTO = .empty
-    @Published var showSaveButton = false    
+    @Published var showSaveButton = false
+    @Published var cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO] = []
         
     // MARK: Private Properties
     
@@ -43,6 +44,14 @@ final class SheetContentViewModel: ObservableObject {
             .removeDuplicates()
             .sink(receiveValue: { [weak self] result in
                 self?.showSaveButton = result.first(where: { $0.sheetId == self?.sheetContentDTO.id }) != nil
+            })
+            .store(in: &cancellables)
+        
+        sheetService.sheetWithUpdatesToPublishStorageRepo
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .sink(receiveValue: { [weak self] result in
+                self?.cachedSheetHasUpdatesToPublishDTO = result
             })
             .store(in: &cancellables)
         
@@ -94,7 +103,7 @@ final class SheetContentViewModel: ObservableObject {
             status = .loading
             
             do {
-                try await sheetService.removeSheetHasUpdatesToPublish(sheetId: sheetId)
+                try await sheetService.removeSheetHasUpdatesToPublish(sheetId: sheetId, rowId: nil, columnId: nil)
                 try await sheetService.getSheetListHasUpdatesToPublish()
                 
                 status = .success

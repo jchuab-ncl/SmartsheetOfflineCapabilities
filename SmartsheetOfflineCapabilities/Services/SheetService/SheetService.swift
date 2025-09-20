@@ -82,6 +82,8 @@ public protocol SheetServiceProtocol {
     
     var sheetContactToPublishStorageRepo: Protected<[CachedSheetContactUpdatesToPublishDTO]> { get }
     var serverInfoDTOMemoryRepo: Protected<ServerInfoDTO> { get }
+    var conflictResultMemoryRepo: Protected<[Conflict]> { get }
+//    var conflictSolvedMemoryRepo: Protected<[Conflict]> { get }
     
     /// Sheet List
     func getSheetList() async throws -> [CachedSheetDTO]
@@ -89,7 +91,7 @@ public protocol SheetServiceProtocol {
     
     /// Sheet Content
     func getSheetContent(sheetId: Int) async throws -> SheetContentDTO
-    func getSheetContentOnline(sheetId: Int) async throws -> SheetContentDTO
+    func getSheetContentOnline(sheetId: Int, storeContent: Bool) async throws -> SheetContentDTO
     
     /// Discussions to publish
     func getDiscussionToPublishForSheet(sheetId: Int) async throws -> [DiscussionDTO]
@@ -99,12 +101,23 @@ public protocol SheetServiceProtocol {
     func getServerInfo() async throws
         
     /// Add methods
-    func addSheetWithUpdatesToPublish_Storage(columnType: String, sheetId: Int, name: String, newValue: String, oldValue: String, rowId: Int, columnId: Int, contacts: [CachedSheetContactUpdatesToPublishDTO]) async throws
+    func addSheetWithUpdatesToPublish_Storage(
+        columnType: String,
+        sheetId: Int,
+        name: String,
+        newValue: String,
+        oldValue: String,
+        rowNumber: Int,
+        rowId: Int,
+        columnName: String,
+        columnId: Int,
+        contacts: [CachedSheetContactUpdatesToPublishDTO]
+    ) async throws
     func addSheetWithUpdatesToPublishInMemoryRepo(sheet: CachedSheetHasUpdatesToPublishDTO)
     func addDiscussionToPublishInMemoryRepo(sheet: CachedSheetDiscussionToPublishDTO)
     
     /// Remove methods
-    func removeSheetHasUpdatesToPublish(sheetId: Int) async throws
+    func removeSheetHasUpdatesToPublish(sheetId: Int, rowId: Int?, columnId: Int?) async throws
     func removeDiscussionToPublishFromStorage(discussionDTO: DiscussionDTO) async throws
     
     /// Commit Memory to storage
@@ -113,6 +126,10 @@ public protocol SheetServiceProtocol {
     /// Push to the API methods
     func pushSheetContentToApi(sheetId: Int) async throws
     func pushDiscussionsToApi(sheetId: Int) async throws
+    
+    /// Check for Conflicts
+    func checkForConflicts(sheetId: Int) async throws
+    func addSolvedConflict(conflict: Conflict)
 }
 
 // MARK: Implementation
@@ -123,7 +140,7 @@ public final class SheetService: SheetServiceProtocol {
     
     // MARK: Private properties
     
-    private var modelContext: ModelContext
+    var modelContext: ModelContext
     private let infoPListLoader: InfoPlistLoaderProtocol
     private let keychainService: KeychainServiceProtocol
         
@@ -135,6 +152,8 @@ public final class SheetService: SheetServiceProtocol {
     @Protected private(set) var protectedDiscussionToPublishDTOMemoryRepo: [CachedSheetDiscussionToPublishDTO] = []
     @Protected private(set) var protectedServerInfoDTOMemoryRepo: ServerInfoDTO = .empty
     
+    @Protected var protectedConflictResultMemoryRepo: [Conflict] = []
+        
     // MARK: Public properties
 
     /// The stored instance of discussions to publish
@@ -159,16 +178,19 @@ public final class SheetService: SheetServiceProtocol {
         $protectedSheetHasUpdatesToPublishMemoryRepo
     }
     
-    /// The memory instance of discussions/comments to publish
-    /// Used to observe changes externally
-//    public var sheetDiscussionToPublishDTOMemoryRepo: Protected<[CachedSheetDiscussionToPublishDTO]> {
-//        $protectedDiscussionToPublishDTOMemoryRepo
-//    }
-    
-    /// The stored instance of ServerInfo to publish
+    /// The stored instance of ServerInfo
     public var serverInfoDTOMemoryRepo: Protected<ServerInfoDTO> {
         $protectedServerInfoDTOMemoryRepo
     }
+    
+    /// The stored instance of ConflictResult
+    public var conflictResultMemoryRepo: Protected<[Conflict]> {
+        $protectedConflictResultMemoryRepo
+    }
+    
+//    public var conflictSolvedMemoryRepo: Protected<[Conflict]> {
+//        $protectedConflictSolvedMemoryRepo
+//    }
     
     // MARK: Initializers
 
@@ -285,21 +307,38 @@ public final class SheetService: SheetServiceProtocol {
         name: String,
         newValue: String,
         oldValue: String,
+        rowNumber: Int,
         rowId: Int,
+        columnName: String,
         columnId: Int,
         contacts: [CachedSheetContactUpdatesToPublishDTO]
     ) async throws {
         do {
-            let newItem = CachedSheetHasUpdatesToPublish(
-                columnType: columnType,
-                sheetId: sheetId,
-                name: name,
-                newValue: newValue,
-                oldValue: oldValue,
-                rowId: rowId,
-                columnId: columnId
+            // Check for existing record for this (sheetId, rowId, columnId)
+            let existingDescriptor = FetchDescriptor<CachedSheetHasUpdatesToPublish>(
+                predicate: #Predicate { $0.sheetId == sheetId && $0.rowId == rowId && $0.columnId == columnId }
             )
-            modelContext.insert(newItem)
+            let existingItems = try modelContext.fetch(existingDescriptor)
+            if let existing = existingItems.first {
+                // Update its newValue
+                existing.newValue = newValue
+                print("ℹ️ Updated existing sheet update record in storage for SheetID: \(sheetId), RowID: \(rowId), ColumnID: \(columnId) with new value: \(newValue)")
+            } else {
+                // Not found: insert new
+                let newItem = CachedSheetHasUpdatesToPublish(
+                    columnType: columnType,
+                    sheetId: sheetId,
+                    name: name,
+                    newValue: newValue,
+                    oldValue: oldValue,
+                    rowNumber: rowNumber,
+                    rowId: rowId,
+                    columnName: columnName,
+                    columnId: columnId
+                )
+                modelContext.insert(newItem)
+                print("ℹ️ Inserted new sheet update record in storage for SheetID: \(sheetId), RowID: \(rowId), ColumnID: \(columnId) with value: \(newValue)")
+            }
 
             // Upsert contacts: remove existing entries for this (sheetId,rowId,columnId), then insert the new ones
             let existingContactsDescriptor = FetchDescriptor<CachedSheetContactUpdatesToPublish>(
@@ -323,7 +362,7 @@ public final class SheetService: SheetServiceProtocol {
 
             /// Calling this method to publish the changes
             try await getSheetListHasUpdatesToPublish()
-            print("✅ Added sheet with pending updates: Name: \(name) SheetID: \(sheetId)")
+            print("✅ Added/Updated sheet with pending updates: Name: \(name) SheetID: \(sheetId)")
         } catch {
             print("❌ Failed to add sheet with pending updates: Name: \(error) SheetID: \(sheetId)")
             throw error
@@ -380,16 +419,42 @@ public final class SheetService: SheetServiceProtocol {
         print("ℹ️ Added new in-memory discussion record for SheetID: \(sheet.parentId), Value: \(sheet.comment)")
     }
     
-    public func removeSheetHasUpdatesToPublish(sheetId: Int) async throws {
+    public func removeSheetHasUpdatesToPublish(sheetId: Int, rowId: Int? = nil, columnId: Int? = nil) async throws {
         do {
-            let descriptor = FetchDescriptor<CachedSheetHasUpdatesToPublish>(
-                predicate: #Predicate { $0.sheetId == sheetId }
-            )
+            // Build predicate dynamically depending on parameters
+            let descriptor: FetchDescriptor<CachedSheetHasUpdatesToPublish>
+            if let rowId = rowId, let columnId = columnId {
+                descriptor = FetchDescriptor(
+                    predicate: #Predicate {
+                        $0.sheetId == sheetId &&
+                        $0.rowId == rowId &&
+                        $0.columnId == columnId
+                    }
+                )
+            } else if let rowId = rowId {
+                descriptor = FetchDescriptor(
+                    predicate: #Predicate {
+                        $0.sheetId == sheetId &&
+                        $0.rowId == rowId
+                    }
+                )
+            } else if let columnId = columnId {
+                descriptor = FetchDescriptor(
+                    predicate: #Predicate {
+                        $0.sheetId == sheetId &&
+                        $0.columnId == columnId
+                    }
+                )
+            } else {
+                descriptor = FetchDescriptor(
+                    predicate: #Predicate { $0.sheetId == sheetId }
+                )
+            }
 
             let results = try modelContext.fetch(descriptor)
             
             guard !results.isEmpty else {
-                print("ℹ️ No sheet with ID \(sheetId) found in updates to remove.")
+                print("ℹ️ No matching updates found for SheetID: \(sheetId), RowID: \(String(describing: rowId)), ColumnID: \(String(describing: columnId))")
                 return
             }
             
@@ -399,9 +464,9 @@ public final class SheetService: SheetServiceProtocol {
             // Refresh local list after removal
             try await getSheetListHasUpdatesToPublish()
             
-            print("✅ Removed sheet with pending updates: SheetID: \(sheetId)")
+            print("✅ Removed \(results.count) pending updates for SheetID: \(sheetId), RowID: \(String(describing: rowId)), ColumnID: \(String(describing: columnId))")
         } catch {
-            print("❌ Failed to remove sheet with pending updates: SheetID: \(sheetId), Error: \(error)")
+            print("❌ Failed to remove sheet updates for SheetID: \(sheetId). Error: \(error)")
             throw error
         }
     }
@@ -625,10 +690,12 @@ public final class SheetService: SheetServiceProtocol {
     }
     
     /// Fetches detailed information for a specific sheet from the Smartsheet API.
-    /// - Parameter sheetId: The unique identifier of the sheet to retrieve.
+    /// - Parameters:
+    ///  -  sheetId: The unique identifier of the sheet to retrieve.
+    ///  - storeContent: Indicates if the obtained value should be locally stored.
     /// - Returns: A `CachedSheetContentDTO` object containing detailed information about the requested sheet.
     /// - Throws: An error if the network request fails or the data cannot be decoded.
-    public func getSheetContentOnline(sheetId: Int) async throws -> SheetContentDTO {
+    public func getSheetContentOnline(sheetId: Int, storeContent: Bool = true) async throws -> SheetContentDTO {
         let result = await httpApiClient.request(
             url: try baseSheetsURL(path: "/sheets/\(sheetId)?include=format"),
             method: .GET,
@@ -674,7 +741,10 @@ public final class SheetService: SheetServiceProtocol {
                 }
                                 
                 let discussions = try await getDiscussionForSheetOnline(sheetId: sheetId)
-                try await storeSheetContent(sheetListResponse: sheetContent, discussions: discussions)
+                
+                if storeContent {
+                    try await storeSheetContent(sheetListResponse: sheetContent, discussions: discussions)
+                }
                 
                 return SheetContentDTO(
                     id: sheetContent.id,
@@ -918,7 +988,9 @@ public final class SheetService: SheetServiceProtocol {
                     name: item.sheetName,
                     newValue: item.newValue,
                     oldValue: item.oldValue,
+                    rowNumber: item.rowNumber,
                     rowId: item.rowId,
+                    columnName: item.columnName,
                     columnId: item.columnId,
                     contacts: item.contacts
                 )
@@ -931,7 +1003,8 @@ public final class SheetService: SheetServiceProtocol {
                 })
             }
                         
-            try await updateSheetContentOnStorage(sheetId: sheetId)
+            /// WIP: Commenting this code, so we can have a instance of the original sheet, without user changes.
+//            try await updateSheetContentOnStorage(sheetId: sheetId)
         } catch {
             if let currentItem = currentItem {
                 print("❌ Failed to persist in-memory update — SheetID: \(currentItem.sheetId), RowID: \(currentItem.rowId), ColumnID: \(currentItem.columnId). Error: \(error)")
@@ -982,7 +1055,7 @@ public final class SheetService: SheetServiceProtocol {
                 /// The only sheet that should show on the App
                 let sheetListFiltered = sheetListResponse.data
                 .filter({
-                    $0.id == 4576181282099076 || $0.id == 7642812506918788 ///Cards 
+                    $0.id == 4576181282099076 || $0.id == 7642812506918788 ///Cards
                 })
                 .sorted { $0.name < $1.name }
                 
@@ -1200,8 +1273,6 @@ public final class SheetService: SheetServiceProtocol {
               .filter { (sheet: CachedSheetContent) in sheet.id == sheetListResponse.id }
               .forEach { context.delete($0) } //TODO: Fix, is throwing an error
             
-            
-
             // Convert columns
             let cachedColumns: [CachedColumn] = (sheetListResponse.columns ?? []).map { (column: Column) in
                 CachedColumn(

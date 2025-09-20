@@ -19,7 +19,10 @@ final class SheetListViewModel: ObservableObject {
     @Published var sheetsListHasUpdatesToPublish: [CachedSheetHasUpdatesToPublishDTO] = []
     @Published var sheetsDiscussionsToPublish: [CachedSheetDiscussionToPublishDTO] = []
     @Published var status: ProgressStatus = .initial
-    @Published var statusSync: [Int: ProgressStatus] = [:]        
+    @Published var statusSync: [Int: ProgressStatus] = [:]
+    @Published var statusDiscard: [Int: ProgressStatus] = [:]
+    @Published var conflicts: [Conflict] = []
+//    @Published var conflictSolved: [Conflict] = []
     
     // MARK: Private Properties
     
@@ -44,7 +47,6 @@ final class SheetListViewModel: ObservableObject {
         // Bind published internet status
         networkMonitor.$isConnected
            .receive(on: DispatchQueue.main)
-//           .assign(to: \.isInternetAvailable, on: self)
            .sink(receiveValue: { [weak self] result in
                self?.isInternetAvailable = result
            })
@@ -63,6 +65,20 @@ final class SheetListViewModel: ObservableObject {
                 self?.sheetsDiscussionsToPublish = result
             })
             .store(in: &cancellables)
+        
+        sheetService.conflictResultMemoryRepo
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] result in
+                self?.conflicts = result
+            })
+            .store(in: &cancellables)
+        
+        sheetService.conflictResultMemoryRepo
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] result in
+                self?.conflicts = result
+            })
+            .store(in: &cancellables)
     }
 
     // MARK: - Public Methods
@@ -77,6 +93,18 @@ final class SheetListViewModel: ObservableObject {
         let discussionsToPublish = sheetsDiscussionsToPublish.first(where: { $0.sheetId == sheetId })
         
         return (contentToPublish != nil || discussionsToPublish != nil)
+    }
+    
+    func shouldShowResolveConflictsButton(sheetId: Int) -> Bool {
+        guard isInternetAvailable else {
+            return false
+        }
+        
+        if conflicts.filter({ $0.sheetId == sheetId && !$0.isResolved }).isEmpty {
+            return false
+        } else {
+            return true
+        }
     }
 
     func loadSheets() {
@@ -115,15 +143,37 @@ final class SheetListViewModel: ObservableObject {
             statusSync[sheetId] = .loading
             
             do {
-                try await sheetService.pushSheetContentToApi(sheetId: sheetId)
-                try await sheetService.pushDiscussionsToApi(sheetId: sheetId)
+                try await sheetService.checkForConflicts(sheetId: sheetId)
+                print("LOG: Conflict result: ", conflicts)
                 
-                // After pushing the changes we can download the last changes from the API
-                // TODO: This will change once we implement the conflict solving feature
-                _ = try await sheetService.getSheetContentOnline(sheetId: sheetId)
+                if !conflicts.isNotEmpty {
+                    try await sheetService.pushSheetContentToApi(sheetId: sheetId)
+                    try await sheetService.pushDiscussionsToApi(sheetId: sheetId)
+                    
+                    // After pushing the changes we can download the last changes from the API
+                    _ = try await sheetService.getSheetContentOnline(sheetId: sheetId, storeContent: true)
+                }
+                
                 self.statusSync[sheetId] = .success
             } catch {
                 statusSync[sheetId] = .error
+            }
+        }
+    }
+    
+    func discardLocalChanges(sheetId: Int) {
+        Task {
+            statusDiscard[sheetId] = .loading
+            
+            do {
+                try await sheetService.removeSheetHasUpdatesToPublish(sheetId: sheetId, rowId: nil, columnId: nil)
+                self.conflicts = []
+                
+                print("✅ Changes discarded for sheet id: ", sheetId)
+                statusDiscard[sheetId] = .success
+            } catch {
+                statusDiscard[sheetId] = .error
+                print("❌ An error occured while discarding changes for sheet id: \(sheetId) error: ", error.localizedDescription)
             }
         }
     }

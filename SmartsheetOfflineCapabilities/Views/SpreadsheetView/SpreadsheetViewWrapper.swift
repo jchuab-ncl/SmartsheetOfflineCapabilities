@@ -13,13 +13,24 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     // MARK: Private properties
     
     private var sheetContentDTO: SheetContentDTO
+    private var cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO]
+    private let conflictResult: [Conflict]
     
     // MARK: Initializers
     
     /// Initializes the SpreadsheetViewWrapper with the provided sheet content data.
-    /// - Parameter sheetContentDTO: The data transfer object containing the sheet content to display.
-    init(sheetContentDTO: SheetContentDTO) {
+    /// - Parameters:
+    ///  - sheetContentDTO: The data transfer object containing the sheet content to display.
+    ///
+    ///  - conflictResult: Holds the result of a conflict check: conflicts and mergeable updates.
+    init(
+        sheetContentDTO: SheetContentDTO,
+        cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO],
+        conflictResult: [Conflict]
+    ) {
         self.sheetContentDTO = sheetContentDTO
+        self.cachedSheetHasUpdatesToPublishDTO = cachedSheetHasUpdatesToPublishDTO
+        self.conflictResult = conflictResult
     }
         
     func makeUIView(context: Context) -> SpreadsheetView {
@@ -41,27 +52,38 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     func makeCoordinator() -> Coordinator {
         print("Log: makeCoordinator")
         
-        return Coordinator(sheetContentDTO: self.sheetContentDTO)
+        return Coordinator(
+            sheetContentDTO: self.sheetContentDTO,
+            cachedSheetHasUpdatesToPublishDTO: self.cachedSheetHasUpdatesToPublishDTO,
+            conflictResult: self.conflictResult
+        )
     }
 }
 
 class Coordinator: NSObject, SpreadsheetViewDelegate {
     private var sheetContentDTO: SheetContentDTO
+    private let conflictResult: [Conflict]
     private var sheetService: SheetServiceProtocol
     private var textSize: [Int: Int] = [:] //RowId / TextSize
     private var serverInfoFormatParser: ServerInfoFormatParserProtocol
+    private var cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO]
     
     /// Initializes the Coordinator for managing spreadsheet interactions.
     /// - Parameters:
     ///   - sheetContentDTO: The data transfer object containing the sheet content.
+    ///   - conflictResult:
     ///   - sheetService: Service protocol for handling sheet updates. Defaults to shared dependency.
     ///   - serverInfoFormatParser: Service protocol for parsing server info formats. Defaults to shared dependency.
     init(
         sheetContentDTO: SheetContentDTO,
+        cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO],
+        conflictResult: [Conflict],
         sheetService: SheetServiceProtocol = Dependencies.shared.sheetService,
         serverInfoFormatParser: ServerInfoFormatParserProtocol = Dependencies.shared.serverInfoFormatParserService
     ) {
         self.sheetContentDTO = sheetContentDTO
+        self.cachedSheetHasUpdatesToPublishDTO = cachedSheetHasUpdatesToPublishDTO
+        self.conflictResult = conflictResult
         self.sheetService = sheetService
         self.serverInfoFormatParser = serverInfoFormatParser
         
@@ -82,6 +104,7 @@ extension Coordinator: CustomEditableCellDelegate {
         rowId: Int,
         columnId: Int
     ) {
+        
         /// Saving the changes that the user mades in memory so this could be saved if the user clicks on Save button
         var value = ""
         var selectedContactsArray: [CachedSheetContactUpdatesToPublishDTO] = []
@@ -112,25 +135,33 @@ extension Coordinator: CustomEditableCellDelegate {
         //TODO: Update the value and diplayValue fields for the sheetContentDTO.rows.cell filtering by rowId and columnID
 
         // Update the local DTO so UI reflects changes immediately
-        if let rowIndex = sheetContentDTO.rows.firstIndex(where: { $0.id == rowId }) {
-            // Find existing cell
-            if let cellIndex = sheetContentDTO.rows[rowIndex].cells.firstIndex(where: { $0.columnId == columnId }) {
-                sheetContentDTO.rows[rowIndex].cells[cellIndex].value = value
-                sheetContentDTO.rows[rowIndex].cells[cellIndex].displayValue = value
-            } else {
-                // If this cell doesn't exist yet in the row, append it
-                let newCell = CellDTO(
-                    columnId: columnId,
-                    conditionalFormat: nil,
-                    value: value,
-                    displayValue: value,
-                    format: nil
-                )
-                sheetContentDTO.rows[rowIndex].cells.append(newCell)
-            }
-        } else {
+        
+        guard let rowIndex = sheetContentDTO.rows.firstIndex(where: { $0.id == rowId }) else {
             // You could log if the row isn't found
             print("⚠️ didChangeText: Row with id \(rowId) not found in sheetContentDTO.")
+            return
+        }
+        
+//        if let rowIndex = sheetContentDTO.rows.firstIndex(where: { $0.id == rowId }) {
+//            // Find existing cell
+//            
+//        } else {
+//            
+//        }
+        
+        if let cellIndex = sheetContentDTO.rows[rowIndex].cells.firstIndex(where: { $0.columnId == columnId }) {
+            sheetContentDTO.rows[rowIndex].cells[cellIndex].value = value
+            sheetContentDTO.rows[rowIndex].cells[cellIndex].displayValue = value
+        } else {
+            // If this cell doesn't exist yet in the row, append it
+            let newCell = CellDTO(
+                columnId: columnId,
+                conditionalFormat: nil,
+                value: value,
+                displayValue: value,
+                format: nil
+            )
+            sheetContentDTO.rows[rowIndex].cells.append(newCell)
         }
         
         sheetService.addSheetWithUpdatesToPublishInMemoryRepo(sheet:
@@ -140,11 +171,17 @@ extension Coordinator: CustomEditableCellDelegate {
                     name: sheetContentDTO.name,
                     newValue: value,
                     oldValue: oldValue,
+                    rowNumber: rowIndex,
                     rowId: rowId,
+                    columnName: self.sheetContentDTO.columns.first(where: { $0.id == columnId })?.title ?? "",
                     columnId: columnId,
                     contacts: selectedContactsArray
                 )
         )
+    }
+    
+    func solvedConflict(conflict: Conflict) {
+        sheetService.addSolvedConflict(conflict: conflict)
     }
 }
 
@@ -252,14 +289,18 @@ extension Coordinator: SpreadsheetViewDataSource {
     private func makeDataCell(for indexPath: IndexPath, in spreadsheetView: SpreadsheetView) -> CustomEditableCell {
         let cell = spreadsheetView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? CustomEditableCell ?? CustomEditableCell()
         cell.delegate = self
-        
+                
         let column = sheetContentDTO.columns[indexPath.column - 1]
         let row = sheetContentDTO.rows[indexPath.row - 1]
-        let cellData = row.cells.first(where: { $0.columnId == column.id })
+                        
+        var cellData = row.cells.first(where: { $0.columnId == column.id })
+    
+        /// Check if has local user updates
+        let cachedSheetHasUpdatesToPublishDTO = cachedSheetHasUpdatesToPublishDTO.first(where: { $0.rowId == row.id && $0.columnId == column.id })
         
-        print("Log: Conditional Format: ", cellData?.conditionalFormat ?? "empty")
-        print("Log: Format: ", cellData?.conditionalFormat ?? "empty")
-        print("Log: ========", cellData?.conditionalFormat ?? "empty")
+        if cachedSheetHasUpdatesToPublishDTO != nil {
+            cellData?.displayValue = cachedSheetHasUpdatesToPublishDTO!.newValue
+        }
         
         if let format = cellData?.conditionalFormat {
             cell.parsedFormat = serverInfoFormatParser.parse(formatString: format)
@@ -277,6 +318,12 @@ extension Coordinator: SpreadsheetViewDataSource {
         cell.pickListValues = []
         cell.rowId = row.id
         cell.columnId = column.id
+        
+        if let conflict = conflictResult.first(where: {
+            $0.columnId == column.id && $0.rowId == row.id
+        }) {
+            cell.conflict = conflict
+        }
 
         switch column.type {
         case .abstractDateTime, .contactList, .multiContactList, .checkbox, .duration, .predecessor, .textNumber:

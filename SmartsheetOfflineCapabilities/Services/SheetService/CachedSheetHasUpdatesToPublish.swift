@@ -15,7 +15,9 @@ public struct CachedSheetHasUpdatesToPublishDTO: Identifiable, Hashable, Sendabl
     public var sheetName: String
     public var newValue: String
     public var oldValue: String
+    public var rowNumber: Int
     public var rowId: Int
+    public var columnName: String
     public var columnId: Int
     public var contacts: [CachedSheetContactUpdatesToPublishDTO]
 
@@ -25,7 +27,9 @@ public struct CachedSheetHasUpdatesToPublishDTO: Identifiable, Hashable, Sendabl
         name: String,
         newValue: String,
         oldValue: String,
+        rowNumber: Int,
         rowId: Int,
+        columnName: String,
         columnId: Int,
         contacts: [CachedSheetContactUpdatesToPublishDTO]
     ) {
@@ -34,7 +38,9 @@ public struct CachedSheetHasUpdatesToPublishDTO: Identifiable, Hashable, Sendabl
         self.sheetName = name
         self.newValue = newValue
         self.oldValue = oldValue
+        self.rowNumber = rowNumber
         self.rowId = rowId
+        self.columnName = columnName
         self.columnId = columnId
         self.contacts = contacts
     }
@@ -45,10 +51,12 @@ public struct CachedSheetHasUpdatesToPublishDTO: Identifiable, Hashable, Sendabl
         self.sheetName = model.name
         self.newValue = model.newValue
         self.oldValue = model.oldValue
+        self.rowNumber = model.rowNumber
         self.rowId = model.rowId
+        self.columnName = model.columnName
         self.columnId = model.columnId
         
-        //TODO: 
+        //TODO:
         self.contacts = contacts
     }
 }
@@ -60,7 +68,9 @@ public final class CachedSheetHasUpdatesToPublish {
     public var name: String
     public var newValue: String
     public var oldValue: String
+    public var rowNumber: Int
     public var rowId: Int
+    public var columnName: String
     public var columnId: Int
 
     public init(
@@ -69,7 +79,9 @@ public final class CachedSheetHasUpdatesToPublish {
         name: String,
         newValue: String,
         oldValue: String,
+        rowNumber: Int,
         rowId: Int,
+        columnName: String,
         columnId: Int
     ) {
         self.columnType = columnType
@@ -77,7 +89,9 @@ public final class CachedSheetHasUpdatesToPublish {
         self.name = name
         self.newValue = newValue
         self.oldValue = oldValue
+        self.rowNumber = rowNumber
         self.rowId = rowId
+        self.columnName = columnName
         self.columnId = columnId
     }
 }

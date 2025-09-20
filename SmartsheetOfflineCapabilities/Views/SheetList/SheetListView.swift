@@ -10,11 +10,15 @@ import SwiftUI
 
 struct SheetListView: View {
     @Environment(\.modelContext) private var modelContext: ModelContext
+    @Environment(\.dismiss) private var dismiss
     
     @StateObject private var viewModel = SheetListViewModel()
     
     @State private var selectedFile: CachedSheetDTO?
     @State private var searchText = ""
+    @State private var showDiscardAlert = false
+    
+    @State private var selectedSheet: CachedSheetDTO?
     
     var filteredFiles: [CachedSheetDTO] {
         if searchText.isEmpty {
@@ -31,26 +35,23 @@ struct SheetListView: View {
         NavigationStack {
             GeometryReader { geometry in
                 VStack {
-//                    Group {
-                        if viewModel.status == .loading {
-                            ProgressView()
-                                .frame(width: geometry.size.width)
-                                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
-                        } else if viewModel.status == .error {
-                            makeErrorView()
-                        } else if filteredFiles.isEmpty {
-                            makeEmptyView()
-                        } else {
-                            List(filteredFiles) { file in
-                                makeCard(sheet: file)
-                            }
-                            .refreshable {
-                                viewModel.loadSheets()
-                            }
-//                            .searchable(text: $searchText)
-                            .navigationTitle("Select a Sheet")
+                    if viewModel.status == .loading {
+                        ProgressView()
+                            .frame(width: geometry.size.width)
+                            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                    } else if viewModel.status == .error {
+                        makeErrorView()
+                    } else if filteredFiles.isEmpty {
+                        makeEmptyView()
+                    } else {
+                        List(filteredFiles) { file in
+                            makeCard(sheet: file)
                         }
-//                    }
+                        .refreshable {
+                            viewModel.loadSheets()
+                        }
+                        .navigationTitle("Select a Sheet")
+                    }
                     
                     Spacer()
                     
@@ -63,12 +64,22 @@ struct SheetListView: View {
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
             }
+            .alert("Discard all changes?", isPresented: $showDiscardAlert) {
+                Button("Yes", role: .destructive) {
+                    viewModel.discardLocalChanges(sheetId: selectedSheet?.id ?? 0)                    
+                }
+                Button("No", role: .cancel) {
+                   showDiscardAlert = false
+                }
+            } message: {
+                Text("Are you sure you want to discard your changes? This action cannot be undone.")
+            }
             .onAppear {
                 viewModel.loadSheets()
             }
         }
         .navigationDestination(item: $selectedFile) { file in
-            SheetContentView(cachedSheetDTO: file, /*modelContext: modelContext*/)
+            SheetContentView(cachedSheetDTO: file, conflictResult: viewModel.conflicts)
         }
     }
     
@@ -157,8 +168,11 @@ struct SheetListView: View {
                     .foregroundStyle(.green)
                     .font(.footnote)
             }
-
-            if viewModel.shouldShowSyncButton(sheetId: sheet.id) {
+            
+            if viewModel.shouldShowResolveConflictsButton(sheetId: sheet.id) {
+                makeCardConflictsView(sheet: sheet)
+                makeCardDiscardChangesView(sheet: sheet)
+            } else if viewModel.shouldShowSyncButton(sheetId: sheet.id) {
                 makeCardSyncView(sheet: sheet)
             }
         }
@@ -204,6 +218,73 @@ struct SheetListView: View {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         } else if viewModel.statusSync[sheet.id] == .error {
+                            Text("An error has occurred. Try again later.")
+                                .foregroundStyle(.white)
+                                .fontWeight(.medium)
+                            Image(systemName: "exclamationmark.icloud")
+                                .foregroundStyle(.white)
+                        }
+                    }
+                }
+            })
+            .buttonStyle(.plain)
+        }
+        .padding(.top, 8)
+    }
+    
+    private func makeCardConflictsView(sheet: CachedSheetDTO) -> some View {
+        VStack(alignment: .leading) {
+            Text("Sheet has content conflicts to be solved.")
+                .foregroundStyle(.red)
+                .font(.footnote)
+
+            Button(action: {
+                selectedFile = sheet
+            }, label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Colors.blueNCL)
+                        .frame(height: 44)
+                    HStack {
+                        Text("Resolve conflicts")
+                            .foregroundStyle(.white)
+                            .fontWeight(.medium)
+                        
+                        Image(systemName: "doc.on.doc")
+                            .foregroundStyle(.white)
+                    }
+                }
+            })
+            .buttonStyle(.plain)
+        }
+        .padding(.top, 8)
+    }
+    
+    private func makeCardDiscardChangesView(sheet: CachedSheetDTO) -> some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                self.selectedSheet = sheet
+                showDiscardAlert = true
+            }, label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.blueNCL)
+                        .frame(height: 44)
+                    HStack {
+                        if viewModel.statusDiscard[sheet.id] == nil || viewModel.statusDiscard[sheet.id] == .success {
+                            Text("Discard all local changes")
+                                .foregroundStyle(.white)
+                                .fontWeight(.medium)
+                            
+                            Image(systemName: "trash")
+                                .foregroundStyle(.white)
+                        } else if viewModel.statusDiscard[sheet.id] == .loading {
+                            Text("Discarding...")
+                                .foregroundStyle(.white)
+                                .fontWeight(.medium)
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else if viewModel.statusDiscard[sheet.id] == .error {
                             Text("An error has occurred. Try again later.")
                                 .foregroundStyle(.white)
                                 .fontWeight(.medium)

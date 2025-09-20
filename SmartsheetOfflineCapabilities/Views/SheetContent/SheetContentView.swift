@@ -15,14 +15,19 @@ struct SheetContentView: View {
     
     @State private var showDiscardAlert = false
     
-    private let cachedSheetDTO: CachedSheetDTO    
+    private let cachedSheetDTO: CachedSheetDTO
+    private let conflictResult: [Conflict]
 
     var body: some View {        
         ZStack {
             if viewModel.status == .loading {
                 ProgressView()
             } else {
-                SpreadsheetViewWrapper(sheetContentDTO: viewModel.sheetContentDTO)
+                SpreadsheetViewWrapper(
+                    sheetContentDTO: viewModel.sheetContentDTO,
+                    cachedSheetHasUpdatesToPublishDTO: viewModel.cachedSheetHasUpdatesToPublishDTO,
+                    conflictResult: self.conflictResult
+                )
             }
         }
         .padding()
@@ -50,8 +55,13 @@ struct SheetContentView: View {
     ///
     /// - Parameters:
     ///   - cachedSheetDTO: The cached sheet metadata used to display the sheet name and fetch detailed content.
-    init(cachedSheetDTO: CachedSheetDTO) {
+    ///   - conflictResult: Holds the result of a conflict check: conflicts and mergeable updates.
+    init(
+        cachedSheetDTO: CachedSheetDTO,
+        conflictResult: [Conflict] = []
+    ) {
         self.cachedSheetDTO = cachedSheetDTO
+        self.conflictResult = conflictResult
     }
     
     // MARK: Private methods

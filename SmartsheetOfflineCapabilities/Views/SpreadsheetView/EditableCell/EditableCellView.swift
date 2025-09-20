@@ -11,11 +11,17 @@ struct EditableCellView: View {
     @Binding var text: String
     @State var selectedContact: Set<ContactDTO> = []
     
+    @StateObject private var viewModel = EditableCellViewModel()
+    
     @FocusState private var isFocused: Bool
     @State private var isEditing: Bool = false
 
     // Stage edits here; commit to `text` on Done
     @State private var draftText: String = ""
+    
+    @State private var showConflictResolutionSheet: Bool = false
+    
+    @Binding var conflict: Conflict?
 
     var isEditable: Bool = false
     var isClickable: Bool = false
@@ -47,6 +53,14 @@ struct EditableCellView: View {
     }
 
     var body: some View {
+        if conflict != nil {
+            makeConflictedCellView()
+        } else {
+            makeCellView()
+        }
+    }
+    
+    private func makeCellView() -> some View {
         VStack {
             Text(displayText)
                 .foregroundStyle(parsedFormat.textColor)
@@ -62,9 +76,7 @@ struct EditableCellView: View {
                     },
                     set: { newValue in isEditing = newValue }
                 )) {
-//                    NavigationStack {
-                        makeSheet()
-//                    }                    
+                    makeSheet()
                 }
                 .onAppear {
                     guard !contactOptions.isEmpty else { return }
@@ -87,6 +99,132 @@ struct EditableCellView: View {
             // Initialize the draft from current bound value
             draftText = text
             isEditing = true
+        }
+    }
+    
+    private func makeConflictedCellView() -> some View {
+        VStack {
+            Image(systemName: "doc.on.doc")
+                .foregroundStyle(.red)
+        }
+        .onTapGesture {
+            showConflictResolutionSheet = true
+        }
+        .sheet(isPresented: $showConflictResolutionSheet) {
+            makeConflictResolutionSheet()
+        }
+    }
+    
+    private func makeConflictResolutionSheet() -> some View {
+        ScrollView {
+            VStack {
+                Text("Conflict Resolution")
+                    .font(.headline)
+                    .padding()
+                
+                Text("Someone else updated at the same time as you. Choose how you want to resolve this conflict.")
+                    .font(.footnote)
+                    .multilineTextAlignment(.center)
+                    .padding()
+                
+                if let conflict = self.conflict {
+                    makeSomeoneElseView(conflict: conflict)
+                    
+                    Divider()
+                        .padding(.vertical)
+                    
+                    makeMyChangeView(conflict: conflict)
+                }
+                
+                Spacer()
+            }
+        }
+        .padding()
+    }
+    
+    private func makeSomeoneElseView(conflict: Conflict) -> some View {
+        VStack(alignment: .center) {
+            Text("Someone else change:")
+                .font(.subheadline)
+                .bold()
+            
+            Text(viewModel.formatData(value: conflict.serverValue, columnType: conflict.columnType))
+                .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding()
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(8)
+            
+            Button(action: {
+                viewModel.discardLocalChanges(conflict: conflict)
+                draftText = viewModel.formatData(value: conflict.serverValue, columnType: conflict.columnType)
+                text = draftText
+                self.conflict?.isResolved = true
+                showConflictResolutionSheet = false
+            }, label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Colors.blueNCL)
+                        .frame(height: 50)
+                    HStack {
+                        if viewModel.status == .initial {
+                            Text("Keep someone else's change")
+                                .multilineTextAlignment(.center)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding()
+                                .foregroundStyle(.white)
+                                .fontWeight(.medium)
+                                .font(.callout)
+                        } else if viewModel.status == .loading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        }
+                    }
+                }
+            })
+            .frame(height: 40)
+            .buttonStyle(.plain)
+            .padding(.top)
+        }
+    }
+    
+    private func makeMyChangeView(conflict: Conflict) -> some View {
+        VStack(alignment: .center)  {
+            Text("My change:")
+                .font(.subheadline)
+                .bold()
+            
+            Text(viewModel.formatData(value: conflict.localValue, columnType: conflict.columnType))
+                .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .padding()
+                .background(Color.gray.opacity(0.2))
+                .fixedSize(horizontal: false, vertical: true)
+                .cornerRadius(8)
+            
+            Button(action: {
+                draftText = viewModel.formatData(value: conflict.localValue, columnType: conflict.columnType)
+                text = draftText
+                self.conflict?.isResolved = true
+                showConflictResolutionSheet = false
+            }, label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Colors.blueNCL)
+                        .frame(height: 50)
+                    HStack {
+                        Text("Keep my change")
+                            .padding()
+                            .foregroundStyle(.white)
+                            .fontWeight(.medium)
+                    }
+                }
+            })
+            .frame(height: 40)
+            .buttonStyle(.plain)
+            .padding(.top)
         }
     }
 
