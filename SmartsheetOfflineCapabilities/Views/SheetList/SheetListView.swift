@@ -84,20 +84,6 @@ struct SheetListView: View {
     }
     
     // MARK: Private methods
-    
-//    private func makeiPadView() -> some View {
-//        ScrollView {
-//            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-//                ForEach(filteredFiles) { file in
-//                    makeCard(sheet: file)
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)).shadow(radius: 2))
-//                        .padding(.horizontal)
-//                }
-//            }
-//            .padding(.vertical)
-//        }
-//    }
         
     private func makeErrorView() -> some View {
         ZStack {
@@ -168,7 +154,7 @@ struct SheetListView: View {
                     .foregroundStyle(.green)
                     .font(.footnote)
             }
-            
+                                    
             if viewModel.shouldShowResolveConflictsButton(sheetId: sheet.id) {
                 makeCardConflictsView(sheet: sheet)
                 makeCardDiscardChangesView(sheet: sheet)
@@ -195,39 +181,49 @@ struct SheetListView: View {
             Text("Sheet has content to be sent to server.")
                 .foregroundStyle(.red)
                 .font(.footnote)
+            
+            Divider()
+                .padding(.vertical)
 
-            Button(action: {
-                print(">>> Sync now button tapped for sheet: \(sheet.id)")
-                viewModel.syncData(sheetId: sheet.id)
-            }, label: {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Colors.blueNCL)
-                        .frame(height: 44)
-                    HStack {
-                        if viewModel.statusSync[sheet.id] == nil || viewModel.statusSync[sheet.id] == .success {
-                            Text("Sync now")
-                                .foregroundStyle(.white)
-                                .fontWeight(.medium)
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                                .foregroundStyle(.white)
-                        } else if viewModel.statusSync[sheet.id] == .loading {
-                            Text("Sync in progress")
-                                .foregroundStyle(.white)
-                                .fontWeight(.medium)
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else if viewModel.statusSync[sheet.id] == .error {
-                            Text("An error has occurred. Try again later.")
-                                .foregroundStyle(.white)
-                                .fontWeight(.medium)
-                            Image(systemName: "exclamationmark.icloud")
-                                .foregroundStyle(.white)
+            HStack(alignment: .center) {
+                Spacer()
+                
+                Button(action: {
+                    print(">>> Sync now button tapped for sheet: \(sheet.id)")
+                    viewModel.syncData(sheetId: sheet.id)
+                }, label: {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Colors.blueNCL)
+                            .frame(height: 44)
+                        HStack {
+                            if viewModel.statusSync[sheet.id] == nil || viewModel.statusSync[sheet.id] == .success {
+                                Text("Sync now")
+                                    .foregroundStyle(.white)
+                                    .fontWeight(.medium)
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .foregroundStyle(.white)
+                            } else if viewModel.statusSync[sheet.id] == .loading {
+                                Text("Sync in progress")
+                                    .foregroundStyle(.white)
+                                    .fontWeight(.medium)
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else if viewModel.statusSync[sheet.id] == .error {
+                                Text("An error has occurred. Try again later.")
+                                    .foregroundStyle(.white)
+                                    .fontWeight(.medium)
+                                Image(systemName: "exclamationmark.icloud")
+                                    .foregroundStyle(.white)
+                            }
                         }
                     }
-                }
-            })
-            .buttonStyle(.plain)
+                })
+                .frame(maxWidth: 300)
+                .buttonStyle(.plain)
+                
+                Spacer()
+            }
         }
         .padding(.top, 8)
     }
@@ -237,31 +233,43 @@ struct SheetListView: View {
             Text("Sheet has content conflicts to be solved.")
                 .foregroundStyle(.red)
                 .font(.footnote)
+            
+            Divider()
+                .padding(.vertical)
 
-            Button(action: {
-                selectedFile = sheet
-            }, label: {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Colors.blueNCL)
-                        .frame(height: 44)
-                    HStack {
-                        Text("Resolve conflicts")
-                            .foregroundStyle(.white)
-                            .fontWeight(.medium)
-                        
-                        Image(systemName: "doc.on.doc")
-                            .foregroundStyle(.white)
+            HStack(alignment: .center) {
+                Spacer()
+                
+                Button(action: {
+                    selectedFile = sheet
+                }, label: {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Colors.blueNCL)
+                            .frame(height: 44)
+                        HStack {
+                            Text("Resolve conflicts")
+                                .foregroundStyle(.white)
+                                .fontWeight(.medium)
+                            
+                            Image(systemName: "doc.on.doc")
+                                .foregroundStyle(.white)
+                        }
                     }
-                }
-            })
-            .buttonStyle(.plain)
+                })
+                .frame(maxWidth: 300)
+                .buttonStyle(.plain)
+                
+                Spacer()
+            }
         }
         .padding(.top, 8)
     }
     
     private func makeCardDiscardChangesView(sheet: CachedSheetDTO) -> some View {
-        VStack(alignment: .leading) {
+        HStack {
+            Spacer()
+            
             Button(action: {
                 self.selectedSheet = sheet
                 showDiscardAlert = true
@@ -294,7 +302,10 @@ struct SheetListView: View {
                     }
                 }
             })
+            .frame(maxWidth: 300)
             .buttonStyle(.plain)
+            
+            Spacer()
         }
         .padding(.top, 8)
     }
