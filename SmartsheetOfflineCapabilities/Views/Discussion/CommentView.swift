@@ -83,14 +83,15 @@ struct CommentView: View {
                         .padding(.vertical, 16)
                 }
                 
-                Button(action: {
-                    onStartReply?()
-                }) {
-                    Text("↩︎ Reply")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                }
-                .padding(.top, 4)
+                /// Hidding reply option until we got the information from Smartsheet Team how to publish that on the API
+//                Button(action: {
+//                    onStartReply?()
+//                }) {
+//                    Text("↩︎ Reply")
+//                        .font(.caption)
+//                        .foregroundColor(.blue)
+//                }
+//                .padding(.top, 4)
             }
         }
     }

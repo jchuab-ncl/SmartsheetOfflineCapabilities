@@ -1055,7 +1055,7 @@ public final class SheetService: SheetServiceProtocol {
                 /// The only sheet that should show on the App
                 let sheetListFiltered = sheetListResponse.data
                 .filter({
-                    $0.id == 4576181282099076 || $0.id == 7642812506918788 ///Cards
+                    $0.id == 4576181282099076
                 })
                 .sorted { $0.name < $1.name }
                 
