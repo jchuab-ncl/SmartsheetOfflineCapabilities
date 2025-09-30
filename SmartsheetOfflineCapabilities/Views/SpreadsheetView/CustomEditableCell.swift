@@ -96,9 +96,10 @@ class CustomEditableCell: Cell {
         isRowNumber = false
         parsedFormat = .empty
         conflict = nil
+        text = ""
     }
 
-    private func updateContent() {
+    private func updateContent(){ 
         // Remove the old hosting view if it exists
         hostingController?.view.removeFromSuperview()
         
