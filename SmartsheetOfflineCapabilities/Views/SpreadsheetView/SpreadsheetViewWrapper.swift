@@ -15,22 +15,27 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     private var sheetContentDTO: SheetContentDTO
     private var cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO]
     private let conflictResult: [Conflict]
+    @State private var isFirstLoad = true
+    @Binding var scrollToRow: Int?
     
     // MARK: Initializers
     
     /// Initializes the SpreadsheetViewWrapper with the provided sheet content data.
     /// - Parameters:
     ///  - sheetContentDTO: The data transfer object containing the sheet content to display.
-    ///
+    ///  - cachedSheetHasUpdatesToPublishDTO:
     ///  - conflictResult: Holds the result of a conflict check: conflicts and mergeable updates.
+    ///
     init(
         sheetContentDTO: SheetContentDTO,
         cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO],
-        conflictResult: [Conflict]
+        conflictResult: [Conflict],
+        scrollToRow: Binding<Int?>
     ) {
         self.sheetContentDTO = sheetContentDTO
         self.cachedSheetHasUpdatesToPublishDTO = cachedSheetHasUpdatesToPublishDTO
         self.conflictResult = conflictResult
+        self._scrollToRow = scrollToRow
     }
         
     func makeUIView(context: Context) -> SpreadsheetView {
@@ -45,8 +50,24 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: SpreadsheetView, context: Context) {
-        // Update logic if needed
         print("Log: updateUIView")
+        print("Log: spreadsheet has \(sheetContentDTO.rows.count) rows")
+        
+        if let row = scrollToRow {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                uiView.scrollToItem(at: IndexPath(row: sheetContentDTO.rows.count, column: 0), at: .bottom, animated: true)
+            }
+        }
+        
+        if context.coordinator.isFirstLoad {
+            context.coordinator.isFirstLoad = false
+            return
+        }
+
+        if sheetContentDTO.rows.last?.id == 0 {
+            context.coordinator.update(sheetContentDTO: sheetContentDTO)
+            uiView.reloadData()
+        }
     }
 
     func makeCoordinator() -> Coordinator {
@@ -67,6 +88,7 @@ class Coordinator: NSObject, SpreadsheetViewDelegate {
     private var textSize: [Int: Int] = [:] //RowId / TextSize
     private var serverInfoFormatParser: ServerInfoFormatParserProtocol
     private var cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO]
+    var isFirstLoad: Bool = true
     
     /// Initializes the Coordinator for managing spreadsheet interactions.
     /// - Parameters:
@@ -93,9 +115,20 @@ class Coordinator: NSObject, SpreadsheetViewDelegate {
             }
         }
     }
+    
+    func update(sheetContentDTO: SheetContentDTO) {
+        self.sheetContentDTO = sheetContentDTO
+
+        // Optionally update textSize dictionary here too:
+        for row in sheetContentDTO.rows {
+            for cell in row.cells {
+                self.textSize[row.id] = max(self.textSize[row.id] ?? 0, cell.value?.count ?? 0)
+            }
+        }
+    }
 }
 
-extension Coordinator: CustomEditableCellDelegate {    
+extension Coordinator: CustomEditableCellDelegate {
     func didChangeText(
         columnType: ColumnType,
         newValue: String,
@@ -104,7 +137,6 @@ extension Coordinator: CustomEditableCellDelegate {
         rowId: Int,
         columnId: Int
     ) {
-        
         /// Saving the changes that the user mades in memory so this could be saved if the user clicks on Save button
         var value = ""
         var selectedContactsArray: [CachedSheetContactUpdatesToPublishDTO] = []
@@ -132,7 +164,7 @@ extension Coordinator: CustomEditableCellDelegate {
             value = newValue
         }
         
-        //TODO: Update the value and diplayValue fields for the sheetContentDTO.rows.cell filtering by rowId and columnID
+        //TODO: Update the value and displayValue fields for the sheetContentDTO.rows.cell filtering by rowId and columnID
 
         // Update the local DTO so UI reflects changes immediately
         
@@ -141,13 +173,6 @@ extension Coordinator: CustomEditableCellDelegate {
             print("⚠️ didChangeText: Row with id \(rowId) not found in sheetContentDTO.")
             return
         }
-        
-//        if let rowIndex = sheetContentDTO.rows.firstIndex(where: { $0.id == rowId }) {
-//            // Find existing cell
-//            
-//        } else {
-//            
-//        }
         
         if let cellIndex = sheetContentDTO.rows[rowIndex].cells.firstIndex(where: { $0.columnId == columnId }) {
             sheetContentDTO.rows[rowIndex].cells[cellIndex].value = value
@@ -171,7 +196,7 @@ extension Coordinator: CustomEditableCellDelegate {
                     name: sheetContentDTO.name,
                     newValue: value,
                     oldValue: oldValue,
-                    rowNumber: rowIndex,
+                    rowNumber: rowIndex + 1,
                     rowId: rowId,
                     columnName: self.sheetContentDTO.columns.first(where: { $0.id == columnId })?.title ?? "",
                     columnId: columnId,
@@ -351,7 +376,7 @@ extension Coordinator: SpreadsheetViewDataSource {
         case .dateTime:
             if let value = cellData?.value {
                 cell.text = value.asFormattedDate(inputFormat: "yyyy-MM-dd'T'HH:mm:ssZ", outputFormat: "MM/dd/yy h:mm a")
-            }            
+            }
         case .multiPicklist, .picklist:
             cell.pickListValues = column.options
             cell.selectedContact = []

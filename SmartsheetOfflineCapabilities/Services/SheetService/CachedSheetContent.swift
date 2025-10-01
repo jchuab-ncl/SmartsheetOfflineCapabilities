@@ -5,6 +5,7 @@
 //  Created by Jeann Luiz Chuab on 25/07/25.
 //
 
+import Foundation
 import SwiftData
 
 // MARK: Model
@@ -242,9 +243,19 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
 
 public struct RowDTO: Identifiable, Hashable, Sendable {
     public var id: Int
+    public var dateTime: Date?
     public let rowNumber: Int
     public var cells: [CellDTO]
 
+    public init(id: Int, dateTime: Date?, rowNumber: Int, cells: [CellDTO]) {
+        self.id = id
+        self.dateTime = dateTime
+        self.rowNumber = rowNumber
+        self.cells = cells
+    }
+    
+    //TODO: The row's order when pushing to the server are not correct.
+    
     public init(id: Int, rowNumber: Int, cells: [CellDTO]) {
         self.id = id
         self.rowNumber = rowNumber

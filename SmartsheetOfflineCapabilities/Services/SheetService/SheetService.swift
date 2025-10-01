@@ -59,8 +59,17 @@ struct CellUpdate: Codable {
 }
 
 struct RowUpdate: Codable {
-    let id: String
-    let cells: [CellUpdate]
+    var id: Int?
+    var cells: [CellUpdate]
+    
+    init(id: Int, cells: [CellUpdate]) {
+        self.id = id
+        self.cells = cells
+    }
+    
+    init(cells: [CellUpdate]) {
+        self.cells = cells
+    }
 }
 
 // Wrapper for discussion list responses
@@ -510,12 +519,12 @@ public final class SheetService: SheetServiceProtocol {
 
         // Build rows dictionary: rowId -> [CellUpdate]
         var rows: [Int: [CellUpdate]] = [:]
-        
+
         // Regular value updates
         for item in items where item.contacts.isEmpty {
             rows[item.rowId, default: []].append(CellUpdate(columnId: item.columnId, value: item.newValue))
         }
-        
+
         // Contact updates, grouped by (rowId, columnId)
         struct RowColumnKey: Hashable { let rowId: Int; let columnId: Int }
         let contactsByRowAndColumn = Dictionary(grouping: contactItems, by: { RowColumnKey(rowId: $0.rowId, columnId: $0.columnId) })
@@ -524,50 +533,73 @@ public final class SheetService: SheetServiceProtocol {
         }
 
         // Prepare final payload, sorted by row id
+        // Sending the id only when the rowId is not zero, this means a new row was created locally
         let rowsPayload: [RowUpdate] = rows
-            .sorted { $0.key < $1.key }
-            .map { (rowId, cells) in
-                RowUpdate(id: String(rowId), cells: cells)
+            .sorted {
+                $0.key > $1.key
             }
+            .map { (rowId, cells) in
+                if rowId <= 0 {
+                    RowUpdate(cells: cells)
+                } else {
+                    RowUpdate(id: rowId, cells: cells)
+                }
+            }
+
+        // Split into new and existing rows
+        let newRowsPayload = rowsPayload.filter { $0.id == nil }
+        let existingRowsPayload = rowsPayload.filter { $0.id != nil }
 
         let encoder = JSONEncoder()
-        let body = try encoder.encode(rowsPayload)
-
-        // 2) Make request
         var headers = makeHeaders()
         headers["Content-Type"] = "application/json"
-
         let url = try baseSheetsURL(path: "/sheets/\(sheetId)/rows")
 
-        let result = await httpApiClient.request(
-            url: url,
-            method: .PUT,
-            headers: headers,
-            queryParameters: nil,
-            body: body,
-            encoding: .json
-        )
+        var succeeded = true
 
-        // 3) Handle response
-        switch result {
-        case .success(let data):
-            // Optionally log the response for debugging
-            if let str = String(data: data, encoding: .utf8) {
-                print("✅ Pushed \(items.count) value update(s) and \(contactItems.count) contact update(s) to sheet \(sheetId). Response: \(str)")
-            } else {
-                print("✅ Pushed \(items.count) value update(s) and \(contactItems.count) contact update(s) to sheet \(sheetId).")
+        // POST new rows (rowId == 0)
+        if !newRowsPayload.isEmpty {
+            let newBody = try encoder.encode(newRowsPayload)
+            let postResult = await httpApiClient.request(
+                url: url,
+                method: .POST,
+                headers: headers,
+                queryParameters: nil,
+                body: newBody,
+                encoding: .json
+            )
+            switch postResult {
+            case .success(let data):
+                print("✅ POSTed \(newRowsPayload.count) new row(s) to sheet \(sheetId). Response: \(String(data: data, encoding: .utf8) ?? "N/A")")
+            case .failure(let error):
+                print("❌ Failed to POST new rows: \(error)")
+                succeeded = false
             }
-            
-            // Remove only the items for this sheet from storage
-            try await removePendingSheetContentFromStorage(sheetId: sheetId)
-        case .failure(let error):
-            print("❌ Failed to push updates for sheet \(sheetId): \(error)")
-            throw NSError(domain: "PushChangesError", code: 0, userInfo: [
-                NSLocalizedDescriptionKey: "Failed to push changes to API: \(error)"
-            ])
         }
-        // Optionally refresh the update lists after success
-        // try await getSheetListHasUpdatesToPublish()
+
+        // PUT existing rows (rowId != 0)
+        if !existingRowsPayload.isEmpty {
+            let updateBody = try encoder.encode(existingRowsPayload)
+            let putResult = await httpApiClient.request(
+                url: url,
+                method: .PUT,
+                headers: headers,
+                queryParameters: nil,
+                body: updateBody,
+                encoding: .json
+            )
+            switch putResult {
+            case .success(let data):
+                print("✅ PUT \(existingRowsPayload.count) existing row(s) to sheet \(sheetId). Response: \(String(data: data, encoding: .utf8) ?? "N/A")")
+            case .failure(let error):
+                print("❌ Failed to PUT existing rows: \(error)")
+                succeeded = false
+            }
+        }
+
+        if succeeded {
+            try await removePendingSheetContentFromStorage(sheetId: sheetId)
+        }
     }
     
     public func pushDiscussionsToApi(sheetId: Int) async throws {
@@ -1114,37 +1146,21 @@ public final class SheetService: SheetServiceProtocol {
     private func getSheetContentFromStorage(sheetId: Int) async throws -> SheetContentDTO {
         let sheetContentDTO = try await MainActor.run {
             let context = modelContext
-            
+
             let descriptor = FetchDescriptor<CachedSheetContent>(predicate: #Predicate { $0.id == sheetId })
             guard let cachedSheet = try context.fetch(descriptor).first else {
                 print("❌ No cached sheet content found for id \(sheetId)")
                 throw NSError(domain: "No cached sheet content found for id \(sheetId)", code: 0)
             }
-            
+
             let columnsDTO: [ColumnDTO] = cachedSheet.columns.map {
                 ColumnDTO(from: $0)
             }
             .filter { !($0.hidden) }
             .sorted { $0.index < $1.index }
-            
-//            let columnsDTO: [ColumnDTO] = cachedSheet.columns.map { .init(value: $0)
-//                ColumnDTO(
-//                    id: $0.id,
-//                    index: $0.index,
-//                    title: $0.title,
-//                    type: ColumnType(rawValue: $0.type) ?? .textNumber,
-//                    primary: $0.primary,
-//                    systemColumnType: $0.systemColumnType ?? "",
-//                    hidden: $0.hidden ?? true,
-//                    width: $0.width,
-//                    options: $0.options.map { $0.value },
-//                    contactOptions: $0.contactOptions.asDTOs
-//                )
-//            }
-//                .filter { !($0.hidden) }
-//                .sorted { $0.index < $1.index }
-            
-            let rowsDTO: [RowDTO] = cachedSheet.rows.map { row in
+
+            // Use var so we can append a new row if needed
+            var rowsDTO: [RowDTO] = cachedSheet.rows.map { row in
                 RowDTO(
                     id: row.id,
                     rowNumber: row.rowNumber,
@@ -1159,11 +1175,38 @@ public final class SheetService: SheetServiceProtocol {
                     }
                 )
             }.sorted { $0.rowNumber < $1.rowNumber }
-            
+
+            // Add new row from local updates where rowId < 0, which means the row was added locally
+            let pendingInserts = protectedSheetHasUpdatesToPublishStorageRepo
+                .filter { $0.sheetId == sheetId && $0.rowId <= 0 }
+                .sorted(by: { $0.rowNumber < $1.rowNumber })
+
+            let groupedInserts = Dictionary(grouping: pendingInserts, by: { $0.rowId }).sorted(by: { $0.key > $1.key })
+
+            for (rowId, updates) in groupedInserts {
+                let cells = updates.map {
+                    CellDTO(
+                        columnId: $0.columnId,
+                        conditionalFormat: nil,
+                        value: $0.newValue,
+                        displayValue: $0.newValue,
+                        format: nil
+                    )
+                }
+
+                let newRow = RowDTO(
+                    id: rowId,
+                    rowNumber: rowId * -1,
+                    cells: cells
+                )
+
+                rowsDTO.append(newRow)
+            }
+
             let discussionsDTO: [DiscussionDTO] = cachedSheet.discussions.map { discussion in
                 DiscussionDTO(from: discussion)
             }
-            
+
             return SheetContentDTO(
                 id: cachedSheet.id,
                 name: cachedSheet.name,
@@ -1172,7 +1215,7 @@ public final class SheetService: SheetServiceProtocol {
                 discussions: discussionsDTO
             )
         }
-        
+
         return sheetContentDTO
     }
     

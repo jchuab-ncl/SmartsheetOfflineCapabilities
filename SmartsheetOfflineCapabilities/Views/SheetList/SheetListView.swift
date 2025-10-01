@@ -160,6 +160,7 @@ struct SheetListView: View {
                 makeCardDiscardChangesView(sheet: sheet)
             } else if viewModel.shouldShowSyncButton(sheetId: sheet.id) {
                 makeCardSyncView(sheet: sheet)
+                makeCardDiscardChangesView(sheet: sheet)
             }
         }
         .padding(.vertical, 8)

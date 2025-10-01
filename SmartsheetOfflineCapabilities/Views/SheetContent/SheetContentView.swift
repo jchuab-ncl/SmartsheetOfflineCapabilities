@@ -23,11 +23,32 @@ struct SheetContentView: View {
             if viewModel.status == .loading {
                 ProgressView()
             } else {
-                SpreadsheetViewWrapper(
-                    sheetContentDTO: viewModel.sheetContentDTO,
-                    cachedSheetHasUpdatesToPublishDTO: viewModel.cachedSheetHasUpdatesToPublishDTO,
-                    conflictResult: self.conflictResult
-                )
+                VStack {
+                    SpreadsheetViewWrapper(
+                        sheetContentDTO: viewModel.sheetContentDTO,
+                        cachedSheetHasUpdatesToPublishDTO: viewModel.cachedSheetHasUpdatesToPublishDTO,
+                        conflictResult: self.conflictResult,
+                        scrollToRow: $viewModel.scrollToRow
+                    )
+                    
+                    if self.conflictResult.isEmpty {
+                        Button(action: {
+                            viewModel.addEmptyRow(sheetId: cachedSheetDTO.id)
+                        }) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Colors.blueNCL)
+                                    .frame(height: 44)
+
+                                Text("Add new row")
+                                    .foregroundColor(.white)
+                                    .fontWeight(.medium)
+                            }
+                        }
+                        .frame(maxWidth: 300)
+                        .padding()
+                    }
+                }
             }
         }
         .padding()

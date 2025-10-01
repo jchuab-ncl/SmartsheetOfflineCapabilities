@@ -94,12 +94,19 @@ struct EditableCellView: View {
                 }
             }
         }
-        .background(parsedFormat.backgroundColor)
+        .contentShape(Rectangle())
         .onTapGesture {
             // Initialize the draft from current bound value
             draftText = text
-            isEditing = true
+            
+            /// Comments are not available for rows that weren't send to the server yet.
+            if rowId <= 0 && isRowNumber {
+                isEditing = false
+            } else {
+                isEditing = true
+            }
         }
+        .background(parsedFormat.backgroundColor)
     }
     
     private func makeConflictedCellView() -> some View {

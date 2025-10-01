@@ -18,6 +18,7 @@ final class SheetContentViewModel: ObservableObject {
     @Published var sheetContentDTO: SheetContentDTO = .empty
     @Published var showSaveButton = false
     @Published var cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO] = []
+    @Published var scrollToRow: Int?
         
     // MARK: Private Properties
     
@@ -54,17 +55,28 @@ final class SheetContentViewModel: ObservableObject {
                 self?.cachedSheetHasUpdatesToPublishDTO = result
             })
             .store(in: &cancellables)
-        
-//        sheetService.sheetDiscussionToPublishDTOMemoryRepo
-//            .receive(on: DispatchQueue.main)
-//            .removeDuplicates()
-//            .sink(receiveValue: { [weak self] result in
-//                self?.showSaveButton = result.first(where: { $0.parentId == self?.sheetContentDTO.id }) != nil
-//            })
-//            .store(in: &cancellables)
     }
     
     // MARK: - Public Methods
+    
+    func addEmptyRow(sheetId: Int) {
+        saveSheetContent(sheetId: sheetId) {
+            let newCells = self.sheetContentDTO.columns.map {
+                CellDTO(
+                    columnId: $0.id,
+                    conditionalFormat: nil,
+                    value: "",
+                    displayValue: "",
+                    format: nil
+                )
+            }
+            let rowNumber = self.sheetContentDTO.rows.count + 1
+            let newRow = RowDTO(id: -rowNumber, dateTime: Date(), rowNumber: rowNumber, cells: newCells)
+            self.sheetContentDTO.rows.append(newRow)
+            self.scrollToRow = self.sheetContentDTO.rows.count - 1
+            self.objectWillChange.send()
+        }
+    }
     
     func loadSheetContent(sheetId: Int) {
         Task {
