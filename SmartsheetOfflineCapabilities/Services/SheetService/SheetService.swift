@@ -59,18 +59,15 @@ struct CellUpdate: Codable {
 }
 
 struct RowUpdate: Codable {
-    var id: String? = nil
-    var dateTime: Date
+    var id: Int?
     var cells: [CellUpdate]
     
-    init(id: String, dateTime: Date, cells: [CellUpdate]) {
+    init(id: Int, cells: [CellUpdate]) {
         self.id = id
-        self.dateTime = dateTime
         self.cells = cells
     }
     
-    init(dateTime: Date, cells: [CellUpdate]) {
-        self.dateTime = dateTime
+    init(cells: [CellUpdate]) {
         self.cells = cells
     }
 }
@@ -538,17 +535,19 @@ public final class SheetService: SheetServiceProtocol {
         // Prepare final payload, sorted by row id
         // Sending the id only when the rowId is not zero, this means a new row was created locally
         let rowsPayload: [RowUpdate] = rows
-            .sorted { $0.key < $1.key }
+            .sorted {
+                $0.key > $1.key
+            }
             .map { (rowId, cells) in
                 if rowId <= 0 {
-                    RowUpdate(dateTime: Date(), cells: cells)
+                    RowUpdate(cells: cells)
                 } else {
-                    RowUpdate(id: String(rowId), dateTime: Date(), cells: cells)
+                    RowUpdate(id: rowId, cells: cells)
                 }
             }
 
         // Split into new and existing rows
-        let newRowsPayload = rowsPayload.filter { $0.id == nil }.sorted(by: { $0.dateTime > $1.dateTime })
+        let newRowsPayload = rowsPayload.filter { $0.id == nil }
         let existingRowsPayload = rowsPayload.filter { $0.id != nil }
 
         let encoder = JSONEncoder()
@@ -1088,7 +1087,7 @@ public final class SheetService: SheetServiceProtocol {
                 /// The only sheet that should show on the App
                 let sheetListFiltered = sheetListResponse.data
                 .filter({
-                    $0.id == 4576181282099076 || $0.id == 7642812506918788
+                    $0.id == 4576181282099076
                 })
                 .sorted { $0.name < $1.name }
                 
@@ -1177,13 +1176,15 @@ public final class SheetService: SheetServiceProtocol {
                 )
             }.sorted { $0.rowNumber < $1.rowNumber }
 
-            // Add new row from local updates where rowId < 0
-            let pendingInserts = protectedSheetHasUpdatesToPublishStorageRepo.filter { $0.sheetId == sheetId && $0.rowId < 0 }
-            if !pendingInserts.isEmpty {
-                // For each unique columnId, use the latest update for that columnId
-                let uniqueByColumnId: [Int: CachedSheetHasUpdatesToPublishDTO] = Dictionary(uniqueKeysWithValues: pendingInserts.reversed().map { ($0.rowNumber, $0) })
-                
-                let cells: [CellDTO] = uniqueByColumnId.values.map {
+            // Add new row from local updates where rowId < 0, which means the row was added locally
+            let pendingInserts = protectedSheetHasUpdatesToPublishStorageRepo
+                .filter { $0.sheetId == sheetId && $0.rowId <= 0 }
+                .sorted(by: { $0.rowNumber < $1.rowNumber })
+
+            let groupedInserts = Dictionary(grouping: pendingInserts, by: { $0.rowId }).sorted(by: { $0.key > $1.key })
+
+            for (rowId, updates) in groupedInserts {
+                let cells = updates.map {
                     CellDTO(
                         columnId: $0.columnId,
                         conditionalFormat: nil,
@@ -1192,8 +1193,13 @@ public final class SheetService: SheetServiceProtocol {
                         format: nil
                     )
                 }
-                
-                let newRow = RowDTO(id: 0, rowNumber: rowsDTO.count + 1, cells: cells)
+
+                let newRow = RowDTO(
+                    id: rowId,
+                    rowNumber: rowId * -1,
+                    cells: cells
+                )
+
                 rowsDTO.append(newRow)
             }
 

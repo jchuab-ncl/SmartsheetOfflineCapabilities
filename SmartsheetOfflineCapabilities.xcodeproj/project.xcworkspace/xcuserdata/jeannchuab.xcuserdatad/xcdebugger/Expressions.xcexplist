@@ -163,6 +163,9 @@
             <PersistentString
                value = "scrollToRow">
             </PersistentString>
+            <PersistentString
+               value = "sheetContentDTO.rows">
+            </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState

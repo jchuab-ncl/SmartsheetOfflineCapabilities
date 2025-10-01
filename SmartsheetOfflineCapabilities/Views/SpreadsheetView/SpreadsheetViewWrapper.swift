@@ -55,7 +55,7 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
         
         if let row = scrollToRow {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                uiView.scrollToItem(at: IndexPath(row: row + 1, column: 0), at: .bottom, animated: true)
+                uiView.scrollToItem(at: IndexPath(row: sheetContentDTO.rows.count, column: 0), at: .bottom, animated: true)
             }
         }
         
@@ -196,7 +196,7 @@ extension Coordinator: CustomEditableCellDelegate {
                     name: sheetContentDTO.name,
                     newValue: value,
                     oldValue: oldValue,
-                    rowNumber: rowIndex,
+                    rowNumber: rowIndex + 1,
                     rowId: rowId,
                     columnName: self.sheetContentDTO.columns.first(where: { $0.id == columnId })?.title ?? "",
                     columnId: columnId,
