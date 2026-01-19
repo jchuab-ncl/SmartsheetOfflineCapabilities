@@ -332,7 +332,7 @@ class AuthenticationService: AuthenticationServiceProtocol {
                     
                     await getCurrentLoggedUserOnline()
                     
-                    publish(.credentialsSuccessfullyValidated, .success)
+                    publish(.credentialsSuccessfullyValidated, .loading)
                 }
             case .failure(_):
                 //TODO: Handle case where user doesn't give permissions

@@ -15,13 +15,13 @@
 			</array>
 		</dict>
 	</array>
+	<key>SMARTSHEETS_AUTH_URL</key>
+	<string>https://app.smartsheet.com</string>
+	<key>SMARTSHEETS_BASE_URL</key>
+	<string>https://api.smartsheet.com/2.0</string>
 	<key>SMARTSHEETS_CLIENT_ID</key>
 	<string>hz3m5jsezpv67czzuc3</string>
 	<key>SMARTSHEETS_SECRET</key>
 	<string>dtotr8udgs7ogrljcjj</string>
-	<key>SMARTSHEETS_BASE_URL</key>
-	<string>https://api.smartsheet.com/2.0</string>
-	<key>SMARTSHEETS_AUTH_URL</key>
-	<string>https://app.smartsheet.com</string>
 </dict>
 </plist>

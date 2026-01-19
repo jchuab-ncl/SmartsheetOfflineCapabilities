@@ -36,7 +36,7 @@ struct SheetListView: View {
             GeometryReader { geometry in
                 VStack {
                     if viewModel.status == .loading {
-                        ProgressView()
+                        ProgressView("Loading sheets...")
                             .frame(width: geometry.size.width)
                             .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                     } else if viewModel.status == .error {

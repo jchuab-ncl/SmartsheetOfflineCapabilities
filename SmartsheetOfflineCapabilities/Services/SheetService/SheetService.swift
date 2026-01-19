@@ -228,9 +228,20 @@ public final class SheetService: SheetServiceProtocol {
     /// - Throws: An error if both the network request and local fetch fail.
     public func getSheetList() async throws -> [CachedSheetDTO] {
         let isInternetAvailable = await httpApiClient.isInternetAvailable()
-                
+
+        /// The only sheet displayed
+//        let idSheetFilter = 0
+         let idSheetFilter = 6397878290304900 // Sheet 10
+        // 1310043925335940 // Sheet 05
+        // 4576181282099076 // Main Sheet
+        
         if isInternetAvailable {
-            return try await getSheetListOnline()
+            
+            if idSheetFilter == 0 {
+                return try await getSheetListOnline()
+            } else {
+                return try await getSheetOnline(sheetId: idSheetFilter)
+            }
         } else {
             return try await getSheetListFromStorage()
         }
@@ -1062,6 +1073,46 @@ public final class SheetService: SheetServiceProtocol {
         return baseUrl + path
     }
     
+    private func getSheetOnline(sheetId: Int) async throws -> [CachedSheetDTO] {
+        let result = await httpApiClient.request(
+            url: try baseSheetsURL(path: "/sheets/\(sheetId)"),
+            method: .GET,
+            headers: makeHeaders(),
+            queryParameters: nil
+        )
+        
+        switch result {
+        case .success(let data):
+            do {
+                let sheetResponse = try JSONDecoder().decode(Sheet.self, from: data)
+                
+                let sheetData = [
+                    Sheet(
+                        id: sheetId,
+                        accessLevel: "",
+                        createdAt: sheetResponse.createdAt,
+                        modifiedAt: sheetResponse.modifiedAt,
+                        name: sheetResponse.name,
+                        permalink: "",
+                        version: nil,
+                        source: nil
+                    )
+                ]
+                
+                try await storeSheetList(sheetList: sheetData)
+
+                return [CachedSheetDTO(id: sheetId, modifiedAt: sheetResponse.modifiedAt, name: sheetResponse.name)]
+                
+            } catch {
+                print("⚠️ Decoding error: \(error)")
+                throw NSError(domain: error.localizedDescription, code: 0)
+            }
+        case .failure(let error):
+            print("❌ Failed to list sheets: \(error)")
+            throw NSError(domain: error.localizedDescription, code: 0)
+        }
+    }
+    
     private func getSheetListOnline() async throws -> [CachedSheetDTO] {
         let result = await httpApiClient.request(
             url: try baseSheetsURL(path: "/sheets"),
@@ -1084,16 +1135,9 @@ public final class SheetService: SheetServiceProtocol {
                 print("✅ Fetched \(sheetListResponse.data.count) sheets on page \(sheetListResponse.pageNumber)")
                 sheetListResponse.data.forEach { print("- \($0.name)") }
                 
-                /// The only sheet that should show on the App
-                let sheetListFiltered = sheetListResponse.data
-                .filter({
-                    $0.id == 4576181282099076
-                })
-                .sorted { $0.name < $1.name }
-                
-                try await storeSheetList(sheetList: sheetListFiltered)
+                try await storeSheetList(sheetList: sheetListResponse.data)
 
-                let result = sheetListFiltered.map {
+                let result = sheetListResponse.data.map {
                     CachedSheetDTO(id: $0.id, modifiedAt: $0.modifiedAt, name: $0.name)
                 }
                 return result

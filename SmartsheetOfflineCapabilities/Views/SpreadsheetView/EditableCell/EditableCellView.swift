@@ -13,7 +13,6 @@ struct EditableCellView: View {
     
     @StateObject private var viewModel = EditableCellViewModel()
     
-    @FocusState private var isFocused: Bool
     @State private var isEditing: Bool = false
 
     // Stage edits here; commit to `text` on Done
@@ -22,7 +21,7 @@ struct EditableCellView: View {
     @State private var showConflictResolutionSheet: Bool = false
     
     @Binding var conflict: Conflict?
-
+    
     var isEditable: Bool = false
     var isClickable: Bool = false
     var pickListValues: [String] = []
