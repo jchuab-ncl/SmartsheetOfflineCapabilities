@@ -55,4 +55,4 @@ open SmartsheetsOfflineCapabilities.xcodeproj
 
 ---
 
-> Internal tool built by the NCL iOS team. Not intended for public distribution
+> Internal tool built by the NCL iOS team. Not intended for public distribution.
