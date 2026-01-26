@@ -137,6 +137,9 @@ extension Coordinator: CustomEditableCellDelegate {
         rowId: Int,
         columnId: Int
     ) {
+        /// When there's no content change we should not mark the cell to be pushed.
+        guard newValue != oldValue else { return }
+        
         /// Saving the changes that the user mades in memory so this could be saved if the user clicks on Save button
         var value = ""
         var selectedContactsArray: [CachedSheetContactUpdatesToPublishDTO] = []
@@ -188,21 +191,33 @@ extension Coordinator: CustomEditableCellDelegate {
             )
             sheetContentDTO.rows[rowIndex].cells.append(newCell)
         }
-        
-        sheetService.addSheetWithUpdatesToPublishInMemoryRepo(sheet:
-                .init(
-                    columnType: columnType.rawValue,
-                    sheetId: sheetContentDTO.id,
-                    name: sheetContentDTO.name,
-                    newValue: value,
-                    oldValue: oldValue,
-                    rowNumber: rowIndex + 1,
-                    rowId: rowId,
-                    columnName: self.sheetContentDTO.columns.first(where: { $0.id == columnId })?.title ?? "",
-                    columnId: columnId,
-                    contacts: selectedContactsArray
+            
+        Task {
+//            status = .loading
+            do {
+                sheetService.addSheetWithUpdatesToPublishInMemoryRepo(sheet:
+                        .init(
+                            columnType: columnType.rawValue,
+                            sheetId: sheetContentDTO.id,
+                            name: sheetContentDTO.name,
+                            newValue: value,
+                            oldValue: oldValue,
+                            rowNumber: rowIndex + 1,
+                            rowId: rowId,
+                            columnName: self.sheetContentDTO.columns.first(where: { $0.id == columnId })?.title ?? "",
+                            columnId: columnId,
+                            contacts: selectedContactsArray
+                        )
                 )
-        )
+                
+                try await sheetService.commitMemoryToStorage(sheetId: sheetContentDTO.id)
+                //TODO: Dismiss the screen
+//                status = .success
+//                completion()
+            } catch {
+//                status = .error
+            }
+        }
     }
     
     func solvedConflict(conflict: Conflict) {
