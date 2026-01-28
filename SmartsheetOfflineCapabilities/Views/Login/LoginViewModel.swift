@@ -43,7 +43,7 @@ final class LoginViewModel: ObservableObject {
             .sink(receiveValue: { [weak self] result in
                 self?.status = result.status
                 
-                if result.message == .storedCredentialsFound || result.status == .success {
+                if result.message == .storedCredentialsFound || result.message == .credentialsSuccessfullyValidated {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                         self?.presentNextScreen = true
                     }

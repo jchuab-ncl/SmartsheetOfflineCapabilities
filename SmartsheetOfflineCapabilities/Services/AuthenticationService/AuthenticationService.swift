@@ -25,6 +25,7 @@ enum GrantType: String {
 
 public struct AuthenticationServiceResultType: Equatable {
     var message: AuthenticationServiceMessage
+    var url: URL?
     var status: ProgressStatus
 }
 
@@ -124,6 +125,8 @@ class AuthenticationService: AuthenticationServiceProtocol {
             publish(.smartsheetBaseURLNotFound, .error)
             return
         }
+        
+        publish(.openBrowse, url: authURL, .loading)
         
         //TODO: Move that to viewModel
         await UIApplication.shared.open(authURL)
@@ -350,9 +353,9 @@ class AuthenticationService: AuthenticationServiceProtocol {
         try self.exchangeCodeForToken(code: "", refreshToken: refreshTokenSaved, grantType: .refreshToken)
     }
     
-    private func publish(_ msg: AuthenticationServiceMessage, _ type: ProgressStatus) {
-        print("\(type.icon) AuthenticationService: \(msg.description)")
-        currentResult = .init(message: msg, status: type)
+    private func publish(_ msg: AuthenticationServiceMessage, url: URL? = nil, _ status: ProgressStatus) {
+        print("\(status.icon) AuthenticationService: \(msg.description)")
+        currentResult = .init(message: msg, url: url, status: status)
     }
     
     private func publishError(_ msg: AuthenticationServiceMessage) throws {

@@ -22,6 +22,7 @@ enum AuthenticationServiceMessage: String, Error {
     case smartsheetBaseURLNotFound = "Smartsheet Base URL not found in Info.plist."
     case storedCredentialsFound = "Stored credentials found. Loading spreadsheet data..."
     case tokenRequestFailed = "Token request failed."
+    case openBrowse = "Opening web browser"
     
     var description: String {
         self.rawValue
