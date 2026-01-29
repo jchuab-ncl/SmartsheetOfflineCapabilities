@@ -62,6 +62,9 @@ struct LoginView: View {
             }
             
             Spacer()
+            
+            Text(AppInfo.versionBuildFormatted)
+                .font(.footnote)
         }
     }
     

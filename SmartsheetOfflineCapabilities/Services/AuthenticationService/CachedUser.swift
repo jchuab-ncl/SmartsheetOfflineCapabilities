@@ -63,12 +63,12 @@ public struct GroupDTO: Hashable, Codable, Sendable {
 
 public struct UserGroupDTO: Identifiable, Hashable, Sendable, Codable {
     public var id: Int
-    public var name: String
-    public var description: String
-    public var owner: String
-    public var ownerId: Int
-    public var createdAt: Date
-    public var modifiedAt: Date
+    public var name: String?
+    public var description: String?
+    public var owner: String?
+    public var ownerId: Int?
+    public var createdAt: Date?
+    public var modifiedAt: Date?
 }
 
 @Model
@@ -228,12 +228,12 @@ public final class Group {
 @Model
 public final class UserGroup {
     @Attribute(.unique) public var id: Int
-    public var name: String
+    public var name: String?
 //    public var description: String
-    public var owner: String
-    public var ownerId: Int
-    public var createdAt: Date
-    public var modifiedAt: Date
+    public var owner: String?
+    public var ownerId: Int?
+    public var createdAt: Date?
+    public var modifiedAt: Date?
 
     init(id: Int, name: String, description: String, owner: String, ownerId: Int, createdAt: Date, modifiedAt: Date) {
         self.id = id
