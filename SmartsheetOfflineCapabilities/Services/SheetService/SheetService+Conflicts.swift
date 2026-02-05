@@ -75,7 +75,14 @@ extension SheetService {
             let serverValue = serverValues[rowId]?[columnId] ?? nil
             // If the server value is different from original, and also different from the local newValue, it's a conflict.
             // If the server value == original, then it's mergeable (not changed remotely).
-            if let server = serverValue, update.oldValue != server {
+            
+            var oldValueFormatted = update.oldValue
+            
+            if update.columnType == ColumnType.date.rawValue {
+                oldValueFormatted = update.oldValue.asFormattedDate(inputFormat: "MM/dd/yy", outputFormat: "yyyy-MM-dd")
+            }
+            
+            if let server = serverValue, oldValueFormatted != server {
                 // The cell was changed remotely since we last cached it
                 if server != update.newValue {
                     

@@ -127,6 +127,7 @@ public final class CachedCell {
         self.conditionalFormat = conditionalFormat
         self.value = value
         self.displayValue = displayValue
+        self.format = format
     }
 }
 

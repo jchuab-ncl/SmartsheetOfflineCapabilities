@@ -72,13 +72,6 @@ final class SheetListViewModel: ObservableObject {
                 self?.conflicts = result
             })
             .store(in: &cancellables)
-        
-        sheetService.conflictResultMemoryRepo
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] result in
-                self?.conflicts = result
-            })
-            .store(in: &cancellables)
     }
 
     // MARK: - Public Methods
@@ -146,7 +139,7 @@ final class SheetListViewModel: ObservableObject {
                 try await sheetService.checkForConflicts(sheetId: sheetId)
                 print("LOG: Conflict result: ", conflicts)
                 
-                if !conflicts.isNotEmpty {
+                if conflicts.isEmpty {
                     try await sheetService.pushSheetContentToApi(sheetId: sheetId)
                     try await sheetService.pushDiscussionsToApi(sheetId: sheetId)
                     

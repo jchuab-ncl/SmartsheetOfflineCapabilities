@@ -1214,7 +1214,7 @@ public final class SheetService: SheetServiceProtocol {
                             conditionalFormat: cell.conditionalFormat,
                             value: cell.value,
                             displayValue: cell.displayValue,
-                            format: cell.conditionalFormat
+                            format: cell.format
                         )
                     }
                 )
@@ -1405,10 +1405,9 @@ public final class SheetService: SheetServiceProtocol {
             do {
                 try context.save()
             } catch {
-                print("✅ Error storing sheet content: \(sheetListResponse.name) in SwiftData. Error: \(error)")
+                print("❌ Error storing sheet content: \(sheetListResponse.name) in SwiftData. Error: \(error)")
+                throw error
             }
-            print("✅ Sheet content: \(sheetListResponse.name) stored in SwiftData")
-            print("✅ Sheet discussions for: \(sheetListResponse.name) stored in SwiftData")
         }
     }
 }

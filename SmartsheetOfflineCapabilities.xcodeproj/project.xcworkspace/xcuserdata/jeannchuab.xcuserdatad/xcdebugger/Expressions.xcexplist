@@ -36,19 +36,19 @@
                value = "sheetContentDTO.rows[0]">
             </PersistentString>
             <PersistentString
-               value = "sheetContentDTO">
+               value = "sheetContentDTO.rows[1]">
             </PersistentString>
             <PersistentString
-               value = "conflictResult">
+               value = "sheetContentDTO">
             </PersistentString>
             <PersistentString
                value = "column.systemColumnType">
             </PersistentString>
             <PersistentString
-               value = "sheetContentDTO.rows[1]">
+               value = "sheetContentDTO.rows[2]">
             </PersistentString>
             <PersistentString
-               value = "sheetContentDTO.rows[2]">
+               value = "conflictResult">
             </PersistentString>
             <PersistentString
                value = "indexPath.column">
@@ -65,15 +65,18 @@
          contextName = "closure #1 in closure #2 in closure #1 in DiscussionView.body.getter:DiscussionView.swift">
       </ContextState>
       <ContextState
-         contextName = "closure #1 in closure #1 in closure #1 in closure #2 in closure #1 in DiscussionView.body.getter:DiscussionView.swift">
-      </ContextState>
-      <ContextState
-         contextName = "closure #1 in closure #1 in closure #2 in closure #1 in SheetListView.makeCardSyncView(sheet:):SheetListView.swift">
+         contextName = "closure #2 in EditableCellView.makeCellView():EditableCellView.swift">
          <PersistentStrings>
             <PersistentString
-               value = "viewModel.statusSync">
+               value = "rowId">
+            </PersistentString>
+            <PersistentString
+               value = "isRowNumber">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #1 in closure #1 in closure #2 in closure #1 in DiscussionView.body.getter:DiscussionView.swift">
       </ContextState>
       <ContextState
          contextName = "EditableCellView.tapGestureAction(contact:):EditableCellView.swift">
@@ -131,13 +134,10 @@
          contextName = "SpreadsheetViewWrapper.init(sheetContentDTO:cachedSheetHasUpdatesToPublishDTO:conflictResult:scrollToRow:):SpreadsheetViewWrapper.swift">
       </ContextState>
       <ContextState
-         contextName = "closure #2 in EditableCellView.makeCellView():EditableCellView.swift">
+         contextName = "closure #1 in closure #1 in closure #2 in closure #1 in SheetListView.makeCardSyncView(sheet:):SheetListView.swift">
          <PersistentStrings>
             <PersistentString
-               value = "rowId">
-            </PersistentString>
-            <PersistentString
-               value = "isRowNumber">
+               value = "viewModel.statusSync">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -400,6 +400,20 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #5 in closure #1 in SheetService.getSheetContentFromStorage(sheetId:):SheetService.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "row.cells">
+            </PersistentString>
+            <PersistentString
+               value = "row.id">
+            </PersistentString>
+            <PersistentString
+               value = "row.rowNumber">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "SpreadsheetViewWrapper.Coordinator.init(cachedSheetContentDTO:):SpreadsheetViewWrapper.swift">
       </ContextState>
       <ContextState
@@ -426,9 +440,22 @@
       </ContextState>
       <ContextState
          contextName = "SheetService.checkForConflicts(sheetId:):SheetService+Conflicts.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "update.newValue">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "EditableCellView.buildDiscussionSheet():EditableCellView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #5 in SheetListViewModel.init(sheetService:):SheetListViewModel.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self?.conflicts">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "CustomEditableCell.updateContent():CustomEditableCell.swift">
@@ -492,6 +519,9 @@
                value = "indexPath.row">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Coordinator.init(sheetContentDTO:cachedSheetHasUpdatesToPublishDTO:conflictResult:sheetService:serverInfoFormatParser:):SpreadsheetViewWrapper.swift">
       </ContextState>
       <ContextState
          contextName = "DiscussionView.commentsList(for:):DiscussionView.swift">
@@ -637,6 +667,9 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "RowDTO.init(id:rowNumber:cells:):CachedSheetContent.swift">
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in SelectFileViewModel.loadSheets():SelectFileViewModel.swift">
          <PersistentStrings>
             <PersistentString
@@ -648,13 +681,13 @@
          contextName = "SpreadsheetViewWrapper.Coordinator.spreadsheetView(_:cellForItemAt:):SpreadsheetViewWrapper.swift">
          <PersistentStrings>
             <PersistentString
+               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })?">
+            </PersistentString>
+            <PersistentString
                value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells">
             </PersistentString>
             <PersistentString
                value = "self.sheetContentDTO?.columns[indexPath.column - 1]">
-            </PersistentString>
-            <PersistentString
-               value = "self.sheetContentDTO?.rows[indexPath.row - 1].cells.first(where: { $0.columnId == columnId })?">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -700,6 +733,9 @@
                value = "self.sheetDetailResponse?.columns?[column]">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #4 in SheetListViewModel.init(sheetService:):SheetListViewModel.swift">
       </ContextState>
       <ContextState
          contextName = "SheetService.addSheetWithUpdatesToPublish_Storage(columnType:sheetId:name:newValue:oldValue:rowId:columnId:contacts:):SheetService.swift">
