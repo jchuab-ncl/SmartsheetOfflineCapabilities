@@ -540,40 +540,10 @@
             filePath = "SmartsheetOfflineCapabilities/Views/SheetContent/SheetContentView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "118"
-            endingLineNumber = "118"
+            startingLineNumber = "107"
+            endingLineNumber = "107"
             landmarkName = "makeSaveButton()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "2F657AA2-B2D0-4129-866F-325F36C8A5CF - c93679b4f60f1555"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 @Swift.MainActor () -&gt; () in SmartsheetOfflineCapabilities.SheetContentView.makeSaveButton() -&gt; some"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities_OLD/SmartsheetOfflineCapabilities/Views/SheetContent/SheetContentView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "118"
-                  endingLineNumber = "118">
-               </Location>
-               <Location
-                  uuid = "2F657AA2-B2D0-4129-866F-325F36C8A5CF - 9b64de04d3f818e5"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; () in closure #1 @Swift.MainActor () -&gt; () in SmartsheetOfflineCapabilities.SheetContentView.makeSaveButton() -&gt; some"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities_OLD/SmartsheetOfflineCapabilities/Views/SheetContent/SheetContentView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "119"
-                  endingLineNumber = "119">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy

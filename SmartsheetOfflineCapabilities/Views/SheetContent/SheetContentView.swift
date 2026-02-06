@@ -14,6 +14,7 @@ struct SheetContentView: View {
     @StateObject private var viewModel = SheetContentViewModel()
     
     @State private var showDiscardAlert = false
+    @State private var showLogs = false
     
     private let cachedSheetDTO: CachedSheetDTO
     private let conflictResult: [Conflict]
@@ -30,24 +31,6 @@ struct SheetContentView: View {
                         conflictResult: self.conflictResult,
                         scrollToRow: $viewModel.scrollToRow
                     )
-                    
-                    if self.conflictResult.isEmpty {
-                        Button(action: {
-                            viewModel.addEmptyRow(sheetId: cachedSheetDTO.id)
-                        }) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Colors.blueNCL)
-                                    .frame(height: 44)
-
-                                Text("Add new row")
-                                    .foregroundColor(.white)
-                                    .fontWeight(.medium)
-                            }
-                        }
-                        .frame(maxWidth: 300)
-                        .padding()
-                    }
                 }
             }
         }
@@ -57,6 +40,12 @@ struct SheetContentView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 makeBackButton()
+            }
+            
+            if self.conflictResult.isEmpty {
+                ToolbarItem(placement: .topBarTrailing) {
+                    makeMenu()
+                }
             }
             
             if viewModel.showSaveButton {
@@ -122,6 +111,16 @@ struct SheetContentView: View {
             HStack {
                 Text("Save")
             }
+        }
+    }
+    
+    private func makeMenu() -> some View {
+        Menu {
+            Button("Add new row") {
+                viewModel.addEmptyRow(sheetId: cachedSheetDTO.id)
+            }
+        } label: {
+            Image(systemName: "ellipsis")
         }
     }
 
