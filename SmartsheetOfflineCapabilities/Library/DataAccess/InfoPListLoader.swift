@@ -33,8 +33,7 @@ final class InfoPlistLoader: InfoPlistLoaderProtocol {
     /// (such as API keys, base URLs, and secrets) stored in the application's
     /// `Info.plist` at runtime.
     ///
-    /// - Parameter logService: A logging service used to record warnings or
-    ///   diagnostics related to missing or misconfigured plist values.
+    /// - Parameter logService: A logging service used to record warnings or diagnostics
     ///   Defaults to `Dependencies.shared.logService`.
     init(logService: LogServiceProtocol = Dependencies.shared.logService) {
         self.infoDict = Bundle.main.infoDictionary ?? [:]

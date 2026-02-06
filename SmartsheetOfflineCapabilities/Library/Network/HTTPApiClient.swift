@@ -17,6 +17,12 @@ public enum BodyEncoding {
     case urlEncoded
 }
 
+public enum HTTPApiClientError: Error {
+    case invalidResponse
+    case transport(Error)
+    case server(statusCode: Int, body: Data?)
+}
+
 /// Protocol for HTTP API Client functionality.
 public protocol HTTPApiClientProtocol {
     func request(
@@ -91,9 +97,17 @@ public class HTTPApiClient: HTTPApiClientProtocol {
         do {
             let (data, response) = try await session.data(for: urlRequest)
 
-            guard let httpResponse = response as? HTTPURLResponse,
-                  200..<300 ~= httpResponse.statusCode else {
-                return .failure(URLError(.badServerResponse))
+            guard let httpResponse = response as? HTTPURLResponse else {
+                return .failure(HTTPApiClientError.invalidResponse)
+            }
+
+            guard 200..<300 ~= httpResponse.statusCode else {
+                return .failure(
+                    HTTPApiClientError.server(
+                        statusCode: httpResponse.statusCode,
+                        body: data
+                    )
+                )
             }
 
             return .success(data)

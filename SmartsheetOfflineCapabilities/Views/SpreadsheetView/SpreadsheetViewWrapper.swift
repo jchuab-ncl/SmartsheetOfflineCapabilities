@@ -352,7 +352,7 @@ extension Coordinator: SpreadsheetViewDataSource {
         self.textSize[row.id] = value.count > (self.textSize[row.id] ?? 0) ? value.count : self.textSize[row.id] ?? 0
 
         cell.columnType = column.type
-        cell.isEditable = column.systemColumnType.isEmpty
+        cell.isEditable = column.systemColumnType.isEmpty && (column.locked == false || column.locked == nil)
         cell.isHeader = false
         cell.contactOptions = column.contactOptions
         cell.pickListValues = []

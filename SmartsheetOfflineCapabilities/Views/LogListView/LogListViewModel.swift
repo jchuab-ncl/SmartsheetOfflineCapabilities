@@ -23,8 +23,15 @@ final class LogListViewModel: ObservableObject {
     @Published var isLoading: Bool = false
 
     /// Currently selected log type filter.
-    /// Defaults to `.error`.
-    @Published var selectedType: LogEntryType = .error {
+    /// Defaults to `.all`.
+    @Published var selectedType: LogEntryType = .all {
+        didSet {
+            applyFilter()
+        }
+    }
+
+    /// Text used to search logs.
+    @Published var searchText: String = "" {
         didSet {
             applyFilter()
         }
@@ -72,8 +79,24 @@ final class LogListViewModel: ObservableObject {
 
     // MARK: - Private Helpers
 
-    /// Applies the selected type filter to the loaded logs.
+    /// Applies the selected type and search text filters to the loaded logs.
     private func applyFilter() {
-        filteredLogs = logs.filter { $0.type == selectedType }
+        var result = logs
+
+        // Filter by type
+        if selectedType != .all {
+            result = result.filter { $0.type == selectedType }
+        }
+
+        // Filter by search text
+        if !searchText.isEmpty {
+            let lowercasedQuery = searchText.lowercased()
+            result = result.filter {
+                $0.message.lowercased().contains(lowercasedQuery) ||
+                $0.context.lowercased().contains(lowercasedQuery)
+            }
+        }
+
+        filteredLogs = result
     }
 }

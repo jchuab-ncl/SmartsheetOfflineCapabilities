@@ -152,6 +152,7 @@ public final class SheetService: SheetServiceProtocol {
     var modelContext: ModelContext
     private let infoPListLoader: InfoPlistLoaderProtocol
     private let keychainService: KeychainServiceProtocol
+    private let logService: LogServiceProtocol
         
     /// Used to set the value locally
     @Protected private(set) var protectedSheetHasUpdatesToPublishStorageRepo: [CachedSheetHasUpdatesToPublishDTO] = []
@@ -199,21 +200,31 @@ public final class SheetService: SheetServiceProtocol {
     
     // MARK: Initializers
 
-    /// Initializes the SheetService with dependencies for secure storage, HTTP communication, and local data persistence.
+    /// Initializes a new `SheetService`.
+    ///
+    /// This service coordinates all sheet-related operations, including:
+    /// - Fetching sheet lists and content (online and offline)
+    /// - Managing pending updates and discussions
+    /// - Persisting and syncing data with the Smartsheet API
+    /// - Handling conflict detection and resolution
+    ///
     /// - Parameters:
-    ///   - httpApiClient: The client responsible for making HTTP requests. Defaults to the shared dependency.
-    ///   - infoPlistLoader: The loader responsible for fetching configuration values from Info.plist. Defaults to the shared dependency.
-    ///   - keychainService: The service responsible for accessing secure credentials. Defaults to the shared dependency.
-    ///   - modelContext: The SwiftData model context used to initialize the sheet service.
+    ///   - httpApiClient: Client responsible for performing HTTP requests.
+    ///   - infoPListLoader: Loader used to read configuration values from `Info.plist`.
+    ///   - keychainService: Service used to securely access authentication tokens.
+    ///   - logService: Logging service used to record diagnostics, warnings, and errors.
+    ///   - modelContext: SwiftData context used for local persistence.
     public init(
         httpApiClient: HTTPApiClientProtocol = Dependencies.shared.httpApiClient,
         infoPListLoader: InfoPlistLoaderProtocol = Dependencies.shared.infoPlistLoader,
         keychainService: KeychainServiceProtocol = Dependencies.shared.keychainService,
+        logService: LogServiceProtocol = Dependencies.shared.logService,
         modelContext: ModelContext
     ) {
         self.httpApiClient = httpApiClient
         self.infoPListLoader = infoPListLoader
         self.keychainService = keychainService
+        self.logService = logService
         self.modelContext = modelContext
     }
     
@@ -271,9 +282,17 @@ public final class SheetService: SheetServiceProtocol {
             }
 
             if sheetDTOs.isEmpty {
-                print("ℹ️ No sheets with updates to publish found")
+                logService.add(
+                    text: "No sheets with updates to publish found",
+                    type: .info,
+                    context: String(describing: type(of: self))
+                )
             } else {
-                print("📦 Loaded sheets with updates to publish (\(sheetDTOs.count))")
+                logService.add(
+                    text: "Loaded \(sheetDTOs.count) sheets with updates to publish ",
+                    type: .debug,
+                    context: String(describing: type(of: self))
+                )
             }
             protectedSheetHasUpdatesToPublishStorageRepo = sheetDTOs
 
@@ -283,9 +302,17 @@ public final class SheetService: SheetServiceProtocol {
                 .sorted { $0.name < $1.name }
 
             if contactDTOs.isEmpty {
-                print("ℹ️ No contact updates to publish found")
+                logService.add(
+                    text: "No contact updates to publish found",
+                    type: .info,
+                    context: String(describing: type(of: self))
+                )
             } else {
-                print("📦 Loaded contact updates to publish (\(contactDTOs.count))")
+                logService.add(
+                    text: "Loaded contact updates to publish (\(contactDTOs.count))",
+                    type: .debug,
+                    context: String(describing: type(of: self))
+                )
             }
             protectedSheetContactToPublishStorageRepo = contactDTOs
         }
@@ -338,7 +365,11 @@ public final class SheetService: SheetServiceProtocol {
             if let existing = existingItems.first {
                 // Update its newValue
                 existing.newValue = newValue
-                print("ℹ️ Updated existing sheet update record in storage for SheetID: \(sheetId), RowID: \(rowId), ColumnID: \(columnId) with new value: \(newValue)")
+                logService.add(
+                    text: "Updated existing sheet update record in storage for SheetID: \(sheetId), RowID: \(rowId), ColumnID: \(columnId) with new value: \(newValue)",
+                    type: .info,
+                    context: String(describing: type(of: self))
+                )
             } else {
                 // Not found: insert new
                 let newItem = CachedSheetHasUpdatesToPublish(
@@ -353,7 +384,11 @@ public final class SheetService: SheetServiceProtocol {
                     columnId: columnId
                 )
                 modelContext.insert(newItem)
-                print("ℹ️ Inserted new sheet update record in storage for SheetID: \(sheetId), RowID: \(rowId), ColumnID: \(columnId) with value: \(newValue)")
+                logService.add(
+                    text: "Inserted new sheet update record in storage for SheetID: \(sheetId), RowID: \(rowId), ColumnID: \(columnId) with value: \(newValue)",
+                    type: .info,
+                    context: String(describing: type(of: self))
+                )
             }
 
             // Upsert contacts: remove existing entries for this (sheetId,rowId,columnId), then insert the new ones
@@ -378,9 +413,17 @@ public final class SheetService: SheetServiceProtocol {
 
             /// Calling this method to publish the changes
             try await getSheetListHasUpdatesToPublish()
-            print("✅ Added/Updated sheet with pending updates: Name: \(name) SheetID: \(sheetId)")
+            logService.add(
+                text: "Added/Updated sheet with pending updates: Name: \(name) SheetID: \(sheetId)",
+                type: .debug,
+                context: String(describing: type(of: self))
+            )
         } catch {
-            print("❌ Failed to add sheet with pending updates: Name: \(error) SheetID: \(sheetId)")
+            logService.add(
+                text: "Failed to add sheet with pending updates: Name: \(error) SheetID: \(sheetId)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             throw error
         }
     }
@@ -402,9 +445,17 @@ public final class SheetService: SheetServiceProtocol {
             
             /// Calling this method to publish the changes
             try await getSheetListHasUpdatesToPublish()
-            print("✅ Added discussion(s) with pending updates: SheetID: \(item.parentId)")
+            logService.add(
+                text: "Added discussion(s) with pending updates: SheetID: \(item.parentId)",
+                type: .debug,
+                context: String(describing: type(of: self))
+            )
         } catch {
-            print("❌ Failed to add sheet discussions with pending updates: Name: \(error) SheetID: \(item.parentId)")
+            logService.add(
+                text: "Failed to add sheet discussions with pending updates: Name: \(error) SheetID: \(item.parentId)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             throw error
         }
     }
@@ -420,11 +471,19 @@ public final class SheetService: SheetServiceProtocol {
         }) {
             // Update only the newValue; keep the rest intact
             protectedSheetHasUpdatesToPublishMemoryRepo[idx].newValue = sheet.newValue
-            print("ℹ️ Updated existing in-memory record for SheetID: \(sheet.sheetId), RowID: \(sheet.rowId), ColumnID: \(sheet.columnId), OldValue: \(sheet.oldValue) with new value: \(sheet.newValue)")
+            logService.add(
+                text: "Updated existing in-memory record for SheetID: \(sheet.sheetId), RowID: \(sheet.rowId), ColumnID: \(sheet.columnId), OldValue: \(sheet.oldValue) with new value: \(sheet.newValue)",
+                type: .debug,
+                context: String(describing: type(of: self))
+            )
         } else {
             // Not found: append new record
             protectedSheetHasUpdatesToPublishMemoryRepo.append(sheet)
-            print("ℹ️ Added new in-memory record for SheetID: \(sheet.sheetId), RowID: \(sheet.rowId), ColumnID: \(sheet.columnId), OldValue: \(sheet.oldValue) with value: \(sheet.newValue)")
+            logService.add(
+                text: "Added new in-memory record for SheetID: \(sheet.sheetId), RowID: \(sheet.rowId), ColumnID: \(sheet.columnId), OldValue: \(sheet.oldValue) with value: \(sheet.newValue)",
+                type: .debug,
+                context: String(describing: type(of: self))
+            )
         }
     }
         
@@ -432,7 +491,11 @@ public final class SheetService: SheetServiceProtocol {
     public func addDiscussionToPublishInMemoryRepo(sheet: CachedSheetDiscussionToPublishDTO) {
         // Append new record
         protectedDiscussionToPublishDTOMemoryRepo.append(sheet)
-        print("ℹ️ Added new in-memory discussion record for SheetID: \(sheet.parentId), Value: \(sheet.comment)")
+        logService.add(
+            text: "Added new in-memory discussion record for SheetID: \(sheet.parentId), Value: \(sheet.comment)",
+            type: .debug,
+            context: String(describing: type(of: self))
+        )
     }
     
     public func removeSheetHasUpdatesToPublish(sheetId: Int, rowId: Int? = nil, columnId: Int? = nil) async throws {
@@ -470,7 +533,11 @@ public final class SheetService: SheetServiceProtocol {
             let results = try modelContext.fetch(descriptor)
             
             guard !results.isEmpty else {
-                print("ℹ️ No matching updates found for SheetID: \(sheetId), RowID: \(String(describing: rowId)), ColumnID: \(String(describing: columnId))")
+                logService.add(
+                    text: "No matching updates found for SheetID: \(sheetId), RowID: \(String(describing: rowId)), ColumnID: \(String(describing: columnId))",
+                    type: .info,
+                    context: String(describing: type(of: self))
+                )
                 return
             }
             
@@ -480,9 +547,17 @@ public final class SheetService: SheetServiceProtocol {
             // Refresh local list after removal
             try await getSheetListHasUpdatesToPublish()
             
-            print("✅ Removed \(results.count) pending updates for SheetID: \(sheetId), RowID: \(String(describing: rowId)), ColumnID: \(String(describing: columnId))")
+            logService.add(
+                text: "Removed \(results.count) pending updates for SheetID: \(sheetId), RowID: \(String(describing: rowId)), ColumnID: \(String(describing: columnId))",
+                type: .debug,
+                context: String(describing: type(of: self))
+            )
         } catch {
-            print("❌ Failed to remove sheet updates for SheetID: \(sheetId). Error: \(error)")
+            logService.add(
+                text: "Failed to remove sheet updates for SheetID: \(sheetId). Error: \(error)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             throw error
         }
     }
@@ -494,7 +569,11 @@ public final class SheetService: SheetServiceProtocol {
             let results = try modelContext.fetch(descriptor)
                        
             guard let itemToDelete = results.first(where: { discussionDTO.id == $0.id }) else {
-                print("ℹ️ No matching discussion found for removal: \(discussionDTO)")
+                logService.add(
+                    text: "No matching discussion found for removal: \(discussionDTO)",
+                    type: .info,
+                    context: String(describing: type(of: self))
+                )
                 return
             }
             
@@ -503,9 +582,17 @@ public final class SheetService: SheetServiceProtocol {
             try modelContext.save()
 
             try await getSheetListHasUpdatesToPublish()
-            print("✅ Removed discussion from storage for sheetId: \(discussionDTO.parentId ?? 0)")
+            logService.add(
+                text: "Removed discussion from storage for sheetId: \(discussionDTO.parentId ?? 0)",
+                type: .debug,
+                context: String(describing: type(of: self))
+            )
         } catch {
-            print("❌ Error removing discussion: \(error)")
+            logService.add(
+                text: "Error removing discussion: \(error)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             throw error
         }
     }
@@ -520,7 +607,11 @@ public final class SheetService: SheetServiceProtocol {
         let items = protectedSheetHasUpdatesToPublishStorageRepo.filter { $0.sheetId == sheetId }
         let contactItems = protectedSheetContactToPublishStorageRepo.filter { $0.sheetId == sheetId }
         guard !items.isEmpty || !contactItems.isEmpty else {
-            print("ℹ️ No in-memory changes to push for sheet \(sheetId).")
+            logService.add(
+                text: "No in-memory changes to push for sheet \(sheetId).",
+                type: .info,
+                context: String(describing: type(of: self))
+            )
             return
         }
 
@@ -563,6 +654,7 @@ public final class SheetService: SheetServiceProtocol {
         let url = try baseSheetsURL(path: "/sheets/\(sheetId)/rows")
 
         var succeeded = true
+        var errors: [String] = []
 
         // POST new rows (rowId == 0)
         if !newRowsPayload.isEmpty {
@@ -577,9 +669,19 @@ public final class SheetService: SheetServiceProtocol {
             )
             switch postResult {
             case .success(let data):
-                print("✅ POSTed \(newRowsPayload.count) new row(s) to sheet \(sheetId). Response: \(String(data: data, encoding: .utf8) ?? "N/A")")
+                logService.add(
+                    text: "POSTED \(newRowsPayload.count) new row(s) to sheet \(sheetId). Response: \(String(data: data, encoding: .utf8) ?? "N/A")",
+                    type: .debug,
+                    context: String(describing: type(of: self))
+                )
             case .failure(let error):
-                print("❌ Failed to POST new rows: \(error)")
+                let msg = "Failed to POST new rows for sheetId \(sheetId): \(describeHTTPError(error))"
+                logService.add(
+                    text: msg,
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
+                errors.append(msg)
                 succeeded = false
             }
         }
@@ -597,15 +699,33 @@ public final class SheetService: SheetServiceProtocol {
             )
             switch putResult {
             case .success(let data):
-                print("✅ PUT \(existingRowsPayload.count) existing row(s) to sheet \(sheetId). Response: \(String(data: data, encoding: .utf8) ?? "N/A")")
+                logService.add(
+                    text: "PUT \(existingRowsPayload.count) existing row(s) to sheet \(sheetId). Response: \(String(data: data, encoding: .utf8) ?? "N/A")",
+                    type: .debug,
+                    context: String(describing: type(of: self))
+                )
             case .failure(let error):
-                print("❌ Failed to PUT existing rows: \(error)")
+                let msg = "Failed to PUT existing rows for sheetId \(sheetId): \(describeHTTPError(error))"
+                logService.add(
+                    text: msg,
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
+                errors.append(msg)
                 succeeded = false
             }
         }
 
         if succeeded {
             try await removePendingSheetContentFromStorage(sheetId: sheetId)
+        } else if !errors.isEmpty {
+            throw NSError(
+                domain: "PushSheetContentError",
+                code: 0,
+                userInfo: [
+                    NSLocalizedDescriptionKey: errors.joined(separator: "\n")
+                ]
+            )
         }
     }
     
@@ -616,7 +736,11 @@ public final class SheetService: SheetServiceProtocol {
             .sorted(by: { $0.dateTime < $1.dateTime })
         
         guard !discussionsToPublish.isEmpty else {
-            print("ℹ️ No pending discussions to push for sheet \(sheetId).")
+            logService.add(
+                text: "No pending discussions to push for sheet \(sheetId).",
+                type: .info,
+                context: String(describing: type(of: self))
+            )
             return
         }
 
@@ -640,8 +764,12 @@ public final class SheetService: SheetServiceProtocol {
             do {
                 body = try encoder.encode(payload)
             } catch {
-                let msg = "❌ Failed to encode discussion payload (id: \(dto.id)) for sheet \(sheetId): \(error)"
-                print(msg)
+                let msg = "Failed to encode discussion payload (id: \(dto.id)) for sheet \(sheetId): \(error)"
+                logService.add(
+                    text: msg,
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 errors.append(msg)
                 continue
             }
@@ -659,8 +787,12 @@ public final class SheetService: SheetServiceProtocol {
             do {
                 url = try baseSheetsURL(path: path)
             } catch {
-                let msg = "❌ Failed to build URL for discussion (id: \(dto.id)) — \(error)"
-                print(msg)
+                let msg = "Failed to build URL for discussion (id: \(dto.id)) — \(error)"
+                logService.add(
+                    text: msg,
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 errors.append(msg)
                 continue
             }
@@ -677,14 +809,26 @@ public final class SheetService: SheetServiceProtocol {
             switch result {
             case .success(let data):
                 if let str = String(data: data, encoding: .utf8) {
-                    print("✅ Pushed discussion id=\(dto.id) to \(path). Response: \(str)")
+                    logService.add(
+                        text: "Pushed discussion id=\(dto.id) to \(path). Response: \(str)",
+                        type: .debug,
+                        context: String(describing: type(of: self))
+                    )
                 } else {
-                    print("✅ Pushed discussion id=\(dto.id) to \(path).")
+                    logService.add(
+                        text: "Pushed discussion id=\(dto.id) to \(path).",
+                        type: .debug,
+                        context: String(describing: type(of: self))
+                    )
                 }
                 succeededIDs.insert(dto.id)
             case .failure(let error):
-                let msg = "❌ Failed to push discussion id=\(dto.id) to \(path): \(error)"
-                print(msg)
+                let msg = "Failed to push discussion id=\(dto.id) to \(path): \(describeHTTPError(error))"
+                logService.add(
+                    text: msg,
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 errors.append(msg)
             }
         }
@@ -708,11 +852,19 @@ public final class SheetService: SheetServiceProtocol {
                     protectedDiscussionToPublishStorageRepo.removeAll {
                         succeededIDsSnapshot.contains($0.id)
                     }
-                    print("🧹 Removed \(toDelete.count) successfully posted discussion(s) from storage for sheetId \(sheetId).")
+                    logService.add(
+                        text: "Removed \(toDelete.count) successfully posted discussion(s) from storage for sheetId \(sheetId).",
+                        type: .debug,
+                        context: String(describing: type(of: self))
+                    )
                 }
             } catch {
-                let msg = "❌ Failed to clean up discussions after post for sheetId \(sheetId): \(error)"
-                print(msg)
+                let msg = "Failed to clean up discussions after post for sheetId \(sheetId): \(error)"
+                logService.add(
+                    text: msg,
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 errors.append(msg)
             }
         }
@@ -756,6 +908,7 @@ public final class SheetService: SheetServiceProtocol {
                         title: $0.title,
                         type: $0.type,
                         primary: $0.primary,
+                        locked: $0.locked ?? false,
                         systemColumnType: $0.systemColumnType ?? "",
                         hidden: $0.hidden ?? false,
                         width: $0.width,
@@ -794,14 +947,26 @@ public final class SheetService: SheetServiceProtocol {
                 )
             } catch {
                 if let raw = String(data: data, encoding: .utf8) {
-                    print("❌ Decoding error: \(error)\nRaw: \(raw)")
+                    logService.add(
+                        text: "Decoding error: \(error)\nRaw: \(raw)",
+                        type: .error,
+                        context: String(describing: type(of: self))
+                    )
                 } else {
-                    print("❌ Decoding error: \(error)")
+                    logService.add(
+                        text: "Decoding error: \(error)",
+                        type: .error,
+                        context: String(describing: type(of: self))
+                    )
                 }
                 throw error
             }
         case .failure(let error):
-            print("❌ Failed to get sheet: \(error)")
+            logService.add(
+                text: "Failed to get sheet: \(describeHTTPError(error))",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             throw NSError(domain: error.localizedDescription, code: 0)
         }
     }
@@ -823,7 +988,11 @@ public final class SheetService: SheetServiceProtocol {
         let discussionToPublish = protectedDiscussionToPublishDTOMemoryRepo.filter({ $0.parentId == parentId })
         
         guard discussionToPublish.isNotEmpty else {
-            print("ℹ️ No in-memory sheet discussions updates to commit.")
+            logService.add(
+                text: "No in-memory sheet discussions updates to commit.",
+                type: .info,
+                context: String(describing: type(of: self))
+            )
             return
         }
         
@@ -844,7 +1013,11 @@ public final class SheetService: SheetServiceProtocol {
             }
         } catch {
             if let currentItem = currentItem {
-                print("❌ Failed to persist in-memory DISCUSSION update — SheetID: \(currentItem.parentId), Value: \(currentItem.comment.text). Error: \(error)")
+                logService.add(
+                    text: "Failed to persist in-memory DISCUSSION update — SheetID: \(currentItem.parentId), Value: \(currentItem.comment.text). Error: \(error)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
             }
         }
     }
@@ -859,7 +1032,11 @@ public final class SheetService: SheetServiceProtocol {
                 try await getServerInfoFromStorage()
             }
         } catch {
-            print("❌ ServerInfo data could not be retrieved. Error: \(error)")
+            logService.add(
+                text: "ServerInfo data could not be retrieved. Error: \(error)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
         }
     }
     
@@ -883,22 +1060,38 @@ public final class SheetService: SheetServiceProtocol {
                     try await addServerInfoIntoStorage(serverInfo)
                 } catch {
                     if let raw = String(data: data, encoding: .utf8) {
-                        print("❌ ServerInfo decode error: \(error)\nRaw: \(raw)")
+                        logService.add(
+                            text: "ServerInfo decode error: \(error)\nRaw: \(raw)",
+                            type: .error,
+                            context: String(describing: type(of: self))
+                        )
                     } else {
-                        print("❌ ServerInfo decode error: \(error)")
+                        logService.add(
+                            text: "ServerInfo decode error: \(error)",
+                            type: .error,
+                            context: String(describing: type(of: self))
+                        )
                     }
                     throw NSError(domain: "ServerInfoDecodeError", code: 0, userInfo: [
                         NSLocalizedDescriptionKey: "Failed to decode ServerInfo: \(error.localizedDescription)"
                     ])
                 }
             case .failure(let error):
-                print("❌ Failed to fetch ServerInfo: \(error)")
+                logService.add(
+                    text: "Failed to fetch ServerInfo: \(describeHTTPError(error))",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 throw NSError(domain: "ServerInfoNetworkError", code: 0, userInfo: [
-                    NSLocalizedDescriptionKey: "Failed to fetch server info: \(error)"
+                    NSLocalizedDescriptionKey: "Failed to fetch server info: \(describeHTTPError(error))"
                 ])
             }
         } catch {
-            print("❌ Unexpected error in getServerInfoOnline: \(error)")
+            logService.add(
+                text: "Unexpected error in getServerInfoOnline: \(error)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             throw NSError(domain: "ServerInfoUnexpectedError", code: 0, userInfo: [
                 NSLocalizedDescriptionKey: "Unexpected error retrieving server info: \(error.localizedDescription)"
             ])
@@ -915,7 +1108,11 @@ public final class SheetService: SheetServiceProtocol {
             if let first = results.first {
                 protectedServerInfoDTOMemoryRepo = first.toDTO()
             } else {
-                print("❌ No cached ServerInfo found in storage.")
+                logService.add(
+                    text: "No cached ServerInfo found in storage.",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 throw NSError(domain: "NoCachedServerInfo", code: 0, userInfo: [
                     NSLocalizedDescriptionKey: "No cached ServerInfo found in storage."
                 ])
@@ -934,9 +1131,17 @@ public final class SheetService: SheetServiceProtocol {
             context.insert(cache)
             do {
                 try context.save()
-                print("✅ ServerInfo stored in SwiftData")
+                logService.add(
+                    text: "ServerInfo stored in SwiftData",
+                    type: .debug,
+                    context: String(describing: type(of: self))
+                )
             } catch {
-                print("❌ Error storing ServerInfo in SwiftData: \(error)")
+                logService.add(
+                    text: "Error storing ServerInfo in SwiftData: \(error)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 throw error
             }
         }
@@ -956,16 +1161,24 @@ public final class SheetService: SheetServiceProtocol {
                 let decoded = try JSONDecoder().decode(DiscussionListResponse.self, from: data)
                 return decoded.data
             } catch {
-                print("⚠️ Decoding discussions failed: \(error)")
+                logService.add(
+                    text: "Decoding discussions failed: \(error)",
+                    type: .warning,
+                    context: String(describing: type(of: self))
+                )
                 throw NSError(domain: "DecodingError", code: 0, userInfo: [
                     NSLocalizedDescriptionKey: "Failed to decode discussions: \(error.localizedDescription)"
                 ])
             }
 
         case .failure(let error):
-            print("❌ Failed to fetch discussions for sheet \(sheetId): \(error)")
+            logService.add(
+                text: "Failed to fetch discussions for sheet \(sheetId): \(describeHTTPError(error))",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             throw NSError(domain: "NetworkError", code: 0, userInfo: [
-                NSLocalizedDescriptionKey: "Failed to fetch discussions: \(error)"
+                NSLocalizedDescriptionKey: "Failed to fetch discussions: \(describeHTTPError(error))"
             ])
         }
     }
@@ -978,11 +1191,19 @@ public final class SheetService: SheetServiceProtocol {
             let results = try context.fetch(descriptor)
 
             guard !results.isEmpty else {
-                print("❌ No discussions to publish found for SheetId \(sheetId)")
+                logService.add(
+                    text: "No discussions to publish found for SheetId \(sheetId)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 return []
             }
 
-            print("📦 Loaded cached sheets (\(results.count))")
+            logService.add(
+                text: "Loaded cached sheets (\(results.count))",
+                type: .debug,
+                context: String(describing: type(of: self))
+            )
                                     
             let resultMap: [CachedSheetDiscussionToPublishDTO] = results
                 .map { CachedSheetDiscussionToPublishDTO(
@@ -1009,11 +1230,19 @@ public final class SheetService: SheetServiceProtocol {
         // Snapshot current in-memory items
         let sheetToPublish = protectedSheetHasUpdatesToPublishMemoryRepo.filter({ $0.sheetId == sheetId })
         guard sheetToPublish.isNotEmpty else {
-            print("ℹ️ No in-memory sheet content updates to commit.")
+            logService.add(
+                text: "No in-memory sheet content updates to commit.",
+                type: .info,
+                context: String(describing: type(of: self))
+            )
             return
         }
 
-        print("➡️ Committing \(sheetToPublish.count) in-memory update(s) to storage…")
+        logService.add(
+            text: "Committing \(sheetToPublish.count) in-memory update(s) to storage…",
+            type: .debug,
+            context: String(describing: type(of: self))
+        )
         
         var currentItem: CachedSheetHasUpdatesToPublishDTO?
                 
@@ -1046,11 +1275,18 @@ public final class SheetService: SheetServiceProtocol {
 //            try await updateSheetContentOnStorage(sheetId: sheetId)
         } catch {
             if let currentItem = currentItem {
-                print("❌ Failed to persist in-memory update — SheetID: \(currentItem.sheetId), RowID: \(currentItem.rowId), ColumnID: \(currentItem.columnId). Error: \(error)")
+                logService.add(
+                    text: "Failed to persist in-memory update — SheetID: \(currentItem.sheetId), RowID: \(currentItem.rowId), ColumnID: \(currentItem.columnId). Error: \(error)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
             }
         }
-                        
-        print("✅ Commit complete. Cleared in-memory repo.")
+        logService.add(
+            text: "Commit complete. Cleared in-memory repo.",
+            type: .debug,
+            context: String(describing: type(of: self))
+        )
     }
     
     private func makeHeaders() -> [String: String] {
@@ -1100,11 +1336,19 @@ public final class SheetService: SheetServiceProtocol {
                 return [CachedSheetDTO(id: sheetId, modifiedAt: sheetResponse.modifiedAt, name: sheetResponse.name)]
                 
             } catch {
-                print("⚠️ Decoding error: \(error)")
+            logService.add(
+                text: "Decoding error: \(error)",
+                type: .warning,
+                context: String(describing: type(of: self))
+            )
                 throw NSError(domain: error.localizedDescription, code: 0)
             }
         case .failure(let error):
-            print("❌ Failed to list sheets: \(error)")
+            logService.add(
+                text: "Failed to list sheets: \(describeHTTPError(error))",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             throw NSError(domain: error.localizedDescription, code: 0)
         }
     }
@@ -1128,8 +1372,18 @@ public final class SheetService: SheetServiceProtocol {
                     totalCount: sheetListResponse.totalCount,
                     data: sheetListResponse.data.sorted(by: { $0.name < $1.name })
                 )
-                print("✅ Fetched \(sheetListResponse.data.count) sheets on page \(sheetListResponse.pageNumber)")
-                sheetListResponse.data.forEach { print("- \($0.name)") }
+                logService.add(
+                    text: "Fetched \(sheetListResponse.data.count) sheets on page \(sheetListResponse.pageNumber)",
+                    type: .debug,
+                    context: String(describing: type(of: self))
+                )
+                sheetListResponse.data.forEach {
+                    logService.add(
+                        text: "- \($0.name)",
+                        type: .debug,
+                        context: String(describing: type(of: self))
+                    )
+                }
                 
                 try await storeSheetList(sheetList: sheetListResponse.data)
 
@@ -1138,11 +1392,19 @@ public final class SheetService: SheetServiceProtocol {
                 }
                 return result
             } catch {
-                print("⚠️ Decoding error: \(error)")
+                logService.add(
+                    text: "Decoding error: \(error)",
+                    type: .warning,
+                    context: String(describing: type(of: self))
+                )
                 throw NSError(domain: error.localizedDescription, code: 0)
             }
         case .failure(let error):
-            print("❌ Failed to list sheets: \(error)")
+            logService.add(
+                text: "Failed to list sheets: \(describeHTTPError(error))",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             throw NSError(domain: error.localizedDescription, code: 0)
         }
     }
@@ -1162,7 +1424,11 @@ public final class SheetService: SheetServiceProtocol {
                 context.insert(cache)
             }
             
-            print("✅ SheetList stored on SwiftData")
+            logService.add(
+                text: "SheetList stored on SwiftData",
+                type: .debug,
+                context: String(describing: type(of: self))
+            )
         }
     }
     
@@ -1176,7 +1442,11 @@ public final class SheetService: SheetServiceProtocol {
                 throw NSError(domain: "No cached sheets found", code: 0)
             }
 
-            print("📦 Loaded cached sheets (\(results.count))")
+            logService.add(
+                text: "Loaded cached sheets (\(results.count))",
+                type: .debug,
+                context: String(describing: type(of: self))
+            )
             return results
                 .map { CachedSheetDTO(id: $0.id, modifiedAt: $0.modifiedAt, name: $0.name) }
                 .sorted { $0.name < $1.name }
@@ -1189,7 +1459,11 @@ public final class SheetService: SheetServiceProtocol {
 
             let descriptor = FetchDescriptor<CachedSheetContent>(predicate: #Predicate { $0.id == sheetId })
             guard let cachedSheet = try context.fetch(descriptor).first else {
-                print("❌ No cached sheet content found for id \(sheetId)")
+                logService.add(
+                    text: "No cached sheet content found for id \(sheetId)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 throw NSError(domain: "No cached sheet content found for id \(sheetId)", code: 0)
             }
 
@@ -1269,7 +1543,11 @@ public final class SheetService: SheetServiceProtocol {
         // Work only with items for this sheet
         let items = protectedSheetHasUpdatesToPublishStorageRepo.filter { $0.sheetId == sheetId }
         guard !items.isEmpty else {
-            print("ℹ️ No stored updates to apply for sheet \(sheetId).")
+            logService.add(
+                text: "No stored updates to apply for sheet \(sheetId).",
+                type: .info,
+                context: String(describing: type(of: self))
+            )
             return
         }
 
@@ -1279,7 +1557,11 @@ public final class SheetService: SheetServiceProtocol {
             // Fetch the cached sheet content
             let descriptor = FetchDescriptor<CachedSheetContent>(predicate: #Predicate { $0.id == sheetId })
             guard let cachedSheet = try? context.fetch(descriptor).first else {
-                print("❌ CachedSheetContent not found for sheetId \(sheetId).")
+                logService.add(
+                    text: "CachedSheetContent not found for sheetId \(sheetId).",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 return
             }
 
@@ -1288,7 +1570,11 @@ public final class SheetService: SheetServiceProtocol {
             for item in items {
                 // Find the row
                 guard let row = cachedSheet.rows.first(where: { $0.id == item.rowId }) else {
-                    print("⚠️ Row not found (rowId: \(item.rowId)) for sheetId \(sheetId). Skipping.")
+                    logService.add(
+                        text: "Row not found (rowId: \(item.rowId)) for sheetId \(sheetId). Skipping.",
+                        type: .warning,
+                        context: String(describing: type(of: self))
+                    )
                     continue
                 }
 
@@ -1297,17 +1583,33 @@ public final class SheetService: SheetServiceProtocol {
                     cell.value = item.newValue
                     cell.displayValue = item.newValue
                     appliedCount += 1
-                    print("✅ Updated cell — sheetId: \(sheetId), rowId: \(item.rowId), columnId: \(item.columnId) -> \"\(item.newValue)\"")
+                    logService.add(
+                        text: "Updated cell — sheetId: \(sheetId), rowId: \(item.rowId), columnId: \(item.columnId) -> \"\(item.newValue)\"",
+                        type: .debug,
+                        context: String(describing: type(of: self))
+                    )
                 } else {
-                    print("⚠️ Cell not found (columnId: \(item.columnId)) for rowId \(item.rowId) in sheetId \(sheetId). Skipping.")
+                    logService.add(
+                        text: "Cell not found (columnId: \(item.columnId)) for rowId \(item.rowId) in sheetId \(sheetId). Skipping.",
+                        type: .warning,
+                        context: String(describing: type(of: self))
+                    )
                 }
             }
 
             do {
                 try context.save()
-                print("💾 Saved \(appliedCount) cell update(s) to SwiftData for sheetId \(sheetId).")
+                logService.add(
+                    text: "Saved \(appliedCount) cell update(s) to SwiftData for sheetId \(sheetId).",
+                    type: .debug,
+                    context: String(describing: type(of: self))
+                )
             } catch {
-                print("❌ Failed saving updated sheet content for sheetId \(sheetId): \(error)")
+                logService.add(
+                    text: "Failed saving updated sheet content for sheetId \(sheetId): \(error)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 throw error
             }
         }
@@ -1323,7 +1625,11 @@ public final class SheetService: SheetServiceProtocol {
             do {
                 let toDelete = try context.fetch(descriptor)
                 guard !toDelete.isEmpty else {
-                    print("ℹ️ No pending sheet content found in storage for sheetId \(sheetId). Nothing to remove.")
+                    logService.add(
+                        text: "No pending sheet content found in storage for sheetId \(sheetId). Nothing to remove.",
+                        type: .info,
+                        context: String(describing: type(of: self))
+                    )
                     protectedSheetHasUpdatesToPublishStorageRepo.removeAll { $0.sheetId == sheetId }
                     return
                 }
@@ -1332,9 +1638,17 @@ public final class SheetService: SheetServiceProtocol {
                 try context.save()
                 
                 ///TODO: Fix for some reason is throwing an error when saving
-                print("✅ Removed \(toDelete.count) pending update record(s) from storage for sheetId \(sheetId).")
+                logService.add(
+                    text: "Removed \(toDelete.count) pending update record(s) from storage for sheetId \(sheetId).",
+                    type: .debug,
+                    context: String(describing: type(of: self))
+                )
             } catch {
-                print("❌ Failed to remove pending sheet content from storage for sheetId \(sheetId): \(error)")
+                logService.add(
+                    text: "Failed to remove pending sheet content from storage for sheetId \(sheetId): \(error)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 throw error
             }
 
@@ -1364,6 +1678,7 @@ public final class SheetService: SheetServiceProtocol {
                     title: column.title,
                     type: column.type.rawValue,
                     primary: column.primary ?? false,
+                    locked: column.locked ?? false,
                     systemColumnType: column.systemColumnType ?? "",
                     hidden: column.hidden ?? false,
                     width: column.width,
@@ -1401,9 +1716,38 @@ public final class SheetService: SheetServiceProtocol {
             do {
                 try context.save()
             } catch {
-                print("❌ Error storing sheet content: \(sheetListResponse.name) in SwiftData. Error: \(error)")
+                logService.add(
+                    text: "Error storing sheet content: \(sheetListResponse.name) in SwiftData. Error: \(error)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
                 throw error
             }
+        }
+    }
+}
+
+// MARK: - HTTP Error Description Helper
+
+extension SheetService {
+    /// Helper to describe HTTPApiClientError (status, body, etc) for better logging.
+    private func describeHTTPError(_ error: Error) -> String {
+        guard let apiError = error as? HTTPApiClientError else {
+            return "\(error)"
+        }
+
+        switch apiError {
+        case .server(let statusCode, let body):
+            if let body,
+               let bodyString = String(data: body, encoding: .utf8) {
+                return "status=\(statusCode) | body=\(bodyString)"
+            } else {
+                return "status=\(statusCode)"
+            }
+        case .transport(let underlying):
+            return "transport error: \(underlying)"
+        case .invalidResponse:
+            return "invalid HTTP response"
         }
     }
 }

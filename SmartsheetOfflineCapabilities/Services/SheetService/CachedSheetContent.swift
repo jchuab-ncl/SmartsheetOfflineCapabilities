@@ -67,6 +67,7 @@ public final class CachedColumn {
     public var title: String
     public var type: String
     public var primary: Bool?
+    public var locked: Bool?
     public var systemColumnType: String?
     public var hidden: Bool?
     public var width: Int
@@ -79,6 +80,7 @@ public final class CachedColumn {
         title: String,
         type: String = "",
         primary: Bool?,
+        locked: Bool?,
         systemColumnType: String,
         hidden: Bool,
         width: Int = 0,
@@ -92,6 +94,7 @@ public final class CachedColumn {
         self.title = title
         self.type = type
         self.primary = primary
+        self.locked = locked
         self.systemColumnType = systemColumnType
         self.hidden = hidden
         self.width = width
@@ -195,11 +198,12 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
     public var title: String
     public var type: ColumnType
     public let primary: Bool?
+    public let locked: Bool?
     public var systemColumnType: String
     public var hidden: Bool
     public var width: Int
     public var options: [String]
-    public var contactOptions: [ContactDTO]
+    public var contactOptions: [ContactDTO] //TODO: Add the field locked
 
     public init(
         id: Int,
@@ -207,6 +211,7 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         title: String,
         type: ColumnType,
         primary: Bool?,
+        locked: Bool?,
         systemColumnType: String,
         hidden: Bool,
         width: Int,
@@ -220,6 +225,7 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         self.title = title
         self.type = type
         self.primary = primary
+        self.locked = locked
         self.systemColumnType = systemColumnType
         self.hidden = hidden
         self.width = width
@@ -234,6 +240,7 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         self.title = value.title
         self.type = .init(rawValue: value.type) ?? .textNumber
         self.primary = value.primary
+        self.locked = value.locked
         self.systemColumnType = value.systemColumnType ?? ""
         self.hidden = value.hidden ?? false
         self.width = value.width

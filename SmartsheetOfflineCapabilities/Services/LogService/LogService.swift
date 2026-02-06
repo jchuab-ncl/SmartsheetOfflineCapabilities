@@ -8,6 +8,7 @@
 import Foundation
 
 public enum LogEntryType: String, Codable, CaseIterable {
+    case all
     case debug
     case info
     case warning
@@ -55,6 +56,8 @@ final class LogService: LogServiceProtocol {
             icon = "⚠️"
         case .error:
             icon = "❌"
+        case .all:
+            icon = ""
         }
 
         print("\(icon) \(log.dateTime.formatted()) [\(log.type.rawValue.uppercased())] [\(log.context)] \(log.message)")

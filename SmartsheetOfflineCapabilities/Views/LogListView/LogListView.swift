@@ -11,6 +11,7 @@ struct LogListView: View {
     
     /// A flag Indicating if the share view must be presented or not.
     @State private var isShareViewPresented = false
+    @State private var showClearLogsConfirmation = false
     
     @StateObject private var viewModel = LogListViewModel()
     
@@ -23,7 +24,8 @@ struct LogListView: View {
                 VStack {
                     Picker("Filter", selection: $viewModel.selectedType) {
                         ForEach(LogEntryType.allCases, id: \.self) { type in
-                            Text(type.rawValue.capitalized).tag(type)
+                            Text(type == .all ? "All" : type.rawValue.capitalized)
+                                .tag(type)
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
@@ -46,11 +48,16 @@ struct LogListView: View {
                         .padding()
                 }
                 .navigationTitle("Logs")
+                .searchable(
+                    text: $viewModel.searchText,
+                    placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: "Search logs"
+                )
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Menu {
-                            Button("Clear all logs") {
-                                viewModel.clearAllLogs()
+                            Button("Clear all logs", role: .destructive) {
+                                showClearLogsConfirmation = true
                             }
                             Button("Share logs") {
                                 isShareViewPresented = true
@@ -67,6 +74,18 @@ struct LogListView: View {
         }
         .sheet(isPresented: $isShareViewPresented) {
             ShareSheetComponent(items: [viewModel.shareText()])
+        }
+        .confirmationDialog(
+            "Clear all logs?",
+            isPresented: $showClearLogsConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Clear all logs", role: .destructive) {
+                viewModel.clearAllLogs()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This action will permanently remove all logs and cannot be undone.")
         }
     }
 }
