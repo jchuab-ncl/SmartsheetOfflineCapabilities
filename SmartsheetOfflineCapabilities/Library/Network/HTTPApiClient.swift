@@ -42,11 +42,16 @@ public protocol HTTPApiClientProtocol {
 /// Supports injection of custom URLSessionProtocol for testability.
 public class HTTPApiClient: HTTPApiClientProtocol {
     private let session: URLSessionProtocol
+    private let logService: LogServiceProtocol
 
     /// Creates a new instance of HTTPApiClient.
     /// - Parameter session: A URLSession-like instance for performing requests. Defaults to URLSession.shared.
-    public init(session: URLSessionProtocol = URLSession.shared) {
+    public init(
+        session: URLSessionProtocol = URLSession.shared,
+        logService: LogServiceProtocol = Dependencies.shared.logService
+    ) {
         self.session = session
+        self.logService = logService
     }
 
     /// Sends an HTTP request and returns the result asynchronously.
@@ -130,9 +135,17 @@ public class HTTPApiClient: HTTPApiClientProtocol {
             monitor.pathUpdateHandler = { path in
                 let isConnected = path.status == .satisfied
                 if isConnected {
-                    print("✅ Internet connection is available.")
+                    self.logService.add(
+                        text: "Internet connection is available.",
+                        type: .info,
+                        context: String(describing: type(of: self))
+                    )
                 } else {
-                    print("❌ No internet connection.")
+                    self.logService.add(
+                        text: "No internet connection.",
+                        type: .info,
+                        context: String(describing: type(of: self))
+                    )
                 }
                 continuation.resume(returning: isConnected)
                 monitor.cancel()

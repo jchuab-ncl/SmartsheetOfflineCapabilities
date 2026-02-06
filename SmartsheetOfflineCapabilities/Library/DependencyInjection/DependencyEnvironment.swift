@@ -7,6 +7,7 @@
 
 struct DependencyEnvironment {
     static func configureDependencies() {
+        Dependencies.shared.logService = LogService()
         Dependencies.shared.httpApiClient = HTTPApiClient()
         Dependencies.shared.infoPlistLoader = InfoPlistLoader()
         Dependencies.shared.keychainService = KeychainService()

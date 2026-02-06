@@ -197,10 +197,6 @@ public final class SheetService: SheetServiceProtocol {
         $protectedConflictResultMemoryRepo
     }
     
-//    public var conflictSolvedMemoryRepo: Protected<[Conflict]> {
-//        $protectedConflictSolvedMemoryRepo
-//    }
-    
     // MARK: Initializers
 
     /// Initializes the SheetService with dependencies for secure storage, HTTP communication, and local data persistence.

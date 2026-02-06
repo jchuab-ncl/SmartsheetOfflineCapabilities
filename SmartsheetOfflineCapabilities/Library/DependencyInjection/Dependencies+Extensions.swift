@@ -82,3 +82,16 @@ extension Dependencies {
         set { self[ServerInfoFormatParserServiceDependencyKey.self] = newValue }
     }
 }
+
+/// Log Service
+public enum LogServiceDependencyKey: DependencyKey {
+    public typealias DataType = LogServiceProtocol
+}
+
+extension Dependencies {
+    /// LogService instance from `Dependencies`.
+    public var logService: LogServiceProtocol {
+        get { self[LogServiceDependencyKey.self] }
+        set { self[LogServiceDependencyKey.self] = newValue }
+    }
+}

@@ -30,7 +30,7 @@ struct SmartsheetOfflineCapabilitiesApp: App {
             CachedServerInfoDTO.self,
             CachedServerInfoFormatsDTO.self,
             CachedCurrency.self,
-            CachedFontFamily.self
+            CachedFontFamily.self,            
         ])
         
         let config = ModelConfiguration("SmartsheetOffline", schema: schema)

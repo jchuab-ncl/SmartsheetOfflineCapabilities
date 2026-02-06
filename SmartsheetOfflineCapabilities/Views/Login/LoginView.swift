@@ -13,6 +13,8 @@ struct LoginView: View {
     
     @State private var isPasswordVisible = false
     @State private var presentNextScreen = false
+    @State private var showMoreOptions = false
+    @State private var showLogs = false
 
     var body: some View {
         NavigationStack {
@@ -24,9 +26,36 @@ struct LoginView: View {
                     SheetListView()
                         .navigationBarBackButtonHidden()
                 }
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Button("View Logs") {
+                                showLogs = true
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                        }
+                    }
+                }
         }
         .onAppear {
             viewModel.onAppear()
+        }
+        .confirmationDialog(
+            "Options",
+            isPresented: $showMoreOptions,
+            titleVisibility: .hidden
+        ) {
+            Button("View Logs") {
+                showLogs = true
+            }
+
+            Button("Cancel", role: .cancel) {
+                // iOS handles dismissal automatically
+            }
+        }
+        .sheet(isPresented: $showLogs) {
+            LogListView()
         }
     }
     

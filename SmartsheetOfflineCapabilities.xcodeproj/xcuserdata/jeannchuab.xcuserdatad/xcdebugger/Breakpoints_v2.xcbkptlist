@@ -190,8 +190,8 @@
             filePath = "SmartsheetOfflineCapabilities/Views/Login/LoginView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "55"
-            endingLineNumber = "55"
+            startingLineNumber = "84"
+            endingLineNumber = "84"
             landmarkName = "makeScreenContent()"
             landmarkType = "7">
          </BreakpointContent>
@@ -485,22 +485,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "33897362-39B9-477D-AE35-98304B8FB7B4"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Views/SheetList/SheetListView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "69"
-            endingLineNumber = "69"
-            landmarkName = "body"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "2F7267DC-5D1D-4ED7-A936-E4C724FDFA83"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
@@ -704,36 +688,6 @@
             endingLineNumber = "118"
             landmarkName = "makeSaveButton()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "2F657AA2-B2D0-4129-866F-325F36C8A5CF - c93679b4f60f1555"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 @Swift.MainActor () -&gt; () in SmartsheetOfflineCapabilities.SheetContentView.makeSaveButton() -&gt; some"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities_OLD/SmartsheetOfflineCapabilities/Views/SheetContent/SheetContentView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "118"
-                  endingLineNumber = "118">
-               </Location>
-               <Location
-                  uuid = "2F657AA2-B2D0-4129-866F-325F36C8A5CF - 9b64de04d3f818e5"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; () in closure #1 @Swift.MainActor () -&gt; () in SmartsheetOfflineCapabilities.SheetContentView.makeSaveButton() -&gt; some"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities_OLD/SmartsheetOfflineCapabilities/Views/SheetContent/SheetContentView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "119"
-                  endingLineNumber = "119">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -765,112 +719,6 @@
             startingLineNumber = "144"
             endingLineNumber = "144"
             landmarkName = "didChangeText(columnType:newValue:oldValue:selectedContacts:rowId:columnId:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "21DC9DAE-FE28-491D-A6B7-075901713754"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Services/AuthenticationService/AuthenticationService.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "132"
-            endingLineNumber = "132"
-            landmarkName = "login()"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "21DC9DAE-FE28-491D-A6B7-075901713754 - 5eb80eadd729198c"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(3) suspend resume partial function for SmartsheetOfflineCapabilities.AuthenticationService.login() async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities_OLD/SmartsheetOfflineCapabilities/Services/AuthenticationService/AuthenticationService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "132"
-                  endingLineNumber = "132">
-               </Location>
-               <Location
-                  uuid = "21DC9DAE-FE28-491D-A6B7-075901713754 - c629cd86007abb8f"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(4) suspend resume partial function for SmartsheetOfflineCapabilities.AuthenticationService.login() async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities_OLD/SmartsheetOfflineCapabilities/Services/AuthenticationService/AuthenticationService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "132"
-                  endingLineNumber = "132">
-               </Location>
-               <Location
-                  uuid = "21DC9DAE-FE28-491D-A6B7-075901713754 - 6d998b7f6dd65d8e"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(5) suspend resume partial function for SmartsheetOfflineCapabilities.AuthenticationService.login() async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities_OLD/SmartsheetOfflineCapabilities/Services/AuthenticationService/AuthenticationService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "132"
-                  endingLineNumber = "132">
-               </Location>
-               <Location
-                  uuid = "21DC9DAE-FE28-491D-A6B7-075901713754 - c9d8885a7fd1c497"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(6) await resume partial function for SmartsheetOfflineCapabilities.AuthenticationService.login() async throws -&gt; ()"
-                  moduleName = "SmartsheetOfflineCapabilities.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jeannchuab/Projects/NCL/SmartsheetOfflineCapabilities_OLD/SmartsheetOfflineCapabilities/Services/AuthenticationService/AuthenticationService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "132"
-                  endingLineNumber = "132">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "3133E74A-4675-4B04-8AA4-9957FCEF38EF"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Services/AuthenticationService/AuthenticationService.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "164"
-            endingLineNumber = "164"
-            landmarkName = "handleOAuthCallback(url:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "ADDB74B8-A4FD-41DF-8194-977204703DFF"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "SmartsheetOfflineCapabilities/Services/AuthenticationService/AuthenticationService.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "342"
-            endingLineNumber = "342"
-            landmarkName = "exchangeCodeForToken(code:refreshToken:grantType:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1064,6 +912,38 @@
             endingLineNumber = "72"
             landmarkName = "init(sheetService:)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "241C7F5F-20C3-4BF8-9637-BF1C312987B8"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SmartsheetOfflineCapabilities/AppDelegate.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "27"
+            endingLineNumber = "27"
+            landmarkName = "application(_:didFinishLaunchingWithOptions:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1BC17020-E2CA-42AB-A250-94133768A943"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SmartsheetOfflineCapabilities/Views/InitialView/InitialView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "12"
+            endingLineNumber = "12"
+            landmarkName = "body"
+            landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

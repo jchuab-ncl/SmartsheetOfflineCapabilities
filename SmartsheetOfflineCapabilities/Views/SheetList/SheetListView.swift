@@ -17,8 +17,10 @@ struct SheetListView: View {
     @State private var selectedFile: CachedSheetDTO?
     @State private var searchText = ""
     @State private var showDiscardAlert = false
+    @State private var showMoreOptions = false
     
     @State private var selectedSheet: CachedSheetDTO?
+    @State private var showLogs = false
     
     var filteredFiles: [CachedSheetDTO] {
         if searchText.isEmpty {
@@ -64,9 +66,20 @@ struct SheetListView: View {
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button("View Logs") {
+                            showLogs = true
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                    }
+                }
+            }
             .alert("Discard all changes?", isPresented: $showDiscardAlert) {
                 Button("Yes", role: .destructive) {
-                    viewModel.discardLocalChanges(sheetId: selectedSheet?.id ?? 0)                    
+                    viewModel.discardLocalChanges(sheetId: selectedSheet?.id ?? 0)
                 }
                 Button("No", role: .cancel) {
                    showDiscardAlert = false
@@ -80,6 +93,9 @@ struct SheetListView: View {
         }
         .navigationDestination(item: $selectedFile) { file in
             SheetContentView(cachedSheetDTO: file, conflictResult: viewModel.conflicts)
+        }
+        .sheet(isPresented: $showLogs) {
+            LogListView()
         }
     }
     

@@ -41,6 +41,7 @@ class AuthenticationService: AuthenticationServiceProtocol {
     private let infoPListLoader: InfoPlistLoaderProtocol
     private let keychainService: KeychainServiceProtocol
     private var code: String = "EMPTY"
+    private let logService: LogServiceProtocol
     
     /// Used to set the value locally
     @Protected private(set) var currentResult: AuthenticationServiceResultType = .init(message: .empty, status: .initial)
@@ -61,14 +62,17 @@ class AuthenticationService: AuthenticationServiceProtocol {
     ///   - httpApiClient: The client responsible for performing network requests. Defaults to the shared dependency.
     ///   - infoPListLoader: The loader responsible for fetching configuration values from Info.plist. Defaults to the shared dependency.
     ///   - keychainService: The service used for securely storing authentication tokens. Defaults to the shared dependency.
+    ///   - logService: A logging service used to record warnings or diagnostics
     init(
         httpApiClient: HTTPApiClientProtocol = Dependencies.shared.httpApiClient,
         infoPListLoader: InfoPlistLoaderProtocol = Dependencies.shared.infoPlistLoader,
-        keychainService: KeychainServiceProtocol = Dependencies.shared.keychainService
+        keychainService: KeychainServiceProtocol = Dependencies.shared.keychainService,
+        logService: LogServiceProtocol = Dependencies.shared.logService
     ) {
         self.infoPListLoader = infoPListLoader
         self.keychainService = keychainService
         self.httpApiClient = httpApiClient
+        self.logService = logService
         self.currentResult.message = .empty
     }
     
@@ -121,7 +125,12 @@ class AuthenticationService: AuthenticationServiceProtocol {
         ]
         
         guard let authURL = components?.url else {
-            print("Invalid auth URL")
+            logService.add(
+                text: "Invalid auth URL",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
+                
             publish(.smartsheetBaseURLNotFound, .error)
             return
         }
@@ -130,8 +139,8 @@ class AuthenticationService: AuthenticationServiceProtocol {
         
         //TODO: Move that to viewModel
         await UIApplication.shared.open(authURL)
-        
-        print(authURL)
+                
+        logService.add(text: "Auth URL: \(authURL)", type: .info, context: String(describing: type(of: self)))
     }
     
     func autoLogin() {
@@ -173,7 +182,7 @@ class AuthenticationService: AuthenticationServiceProtocol {
     
     private func getCurrentLoggedUserOnline() async {
         guard let accessToken = keychainService.load(for: .smartsheetAccessToken) else {
-            print("❌ AuthenticationService: Access token not found")
+            logService.add(text: "Access token not found", type: .error, context: String(describing: type(of: self)))
             return
         }
         
@@ -191,12 +200,24 @@ class AuthenticationService: AuthenticationServiceProtocol {
                 /// Store the current user
                 storeCurrentLoggedUser(user)
                 
-                print("✅ AuthenticationService: Successfully fetched current logged user")
+                logService.add(
+                    text: "Successfully fetched current logged user",
+                    type: .info,
+                    context: String(describing: type(of: self))
+                )
             } catch {
-                print("❌ AuthenticationService: Failed to decode user data - \(error.localizedDescription)")
+                logService.add(
+                    text: "Failed to decode user data - \(error.localizedDescription)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
             }
         case .failure(let error):
-            print("❌ AuthenticationService: Failed to fetch current logged user - \(error.localizedDescription)")
+            logService.add(
+                text: "Failed to fetch current logged user - \(error.localizedDescription)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
         }
     }
     
@@ -207,7 +228,11 @@ class AuthenticationService: AuthenticationServiceProtocol {
                 let results = try modelContext?.fetch(descriptor)
 
                 guard let cachedUser = results?.first else {
-                    print("⚠️ No CachedUser found in storage.")
+                    logService.add(
+                        text: "No CachedUser found in storage.",
+                        type: .warning,
+                        context: String(describing: type(of: self))
+                    )
                     return
                 }
 
@@ -243,7 +268,11 @@ class AuthenticationService: AuthenticationServiceProtocol {
                 )
             }
         } catch {
-            print("❌ Error fetching current user from storage: \(error)")
+            logService.add(
+                text: "Error fetching current user from storage: \(error)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
             return
         }
     }
@@ -267,9 +296,17 @@ class AuthenticationService: AuthenticationServiceProtocol {
                 )
                 modelContext?.insert(cachedUser)
                 try modelContext?.save()
-                print("✅ Stored current logged user in SwiftData")
+                logService.add(
+                    text: "Stored current logged user in SwiftData",
+                    type: .info,
+                    context: String(describing: type(of: self))
+                )
             } catch {
-                print("❌ Failed to store current logged user in SwiftData: \(error)")
+                logService.add(
+                    text: "Failed to store current logged user in SwiftData: \(error)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
             }
         }
     }
@@ -319,7 +356,11 @@ class AuthenticationService: AuthenticationServiceProtocol {
             switch result {
             case .success(let data):
                 if let tokenResponse = try? JSONDecoder().decode(SmartsheetTokenResponse.self, from: data) {
-                    print("Token response: \(tokenResponse)")
+                    logService.add(
+                        text: "Token response: \(tokenResponse)",
+                        type: .debug,
+                        context: String(describing: type(of: self))
+                    )
                     let accessTokenSaved = keychainService.save(tokenResponse.accessToken, for: .smartsheetAccessToken)
                     let refreshTokenSaved = keychainService.save(tokenResponse.refreshToken, for: .smartsheetRefreshToken)
                                         
@@ -354,12 +395,20 @@ class AuthenticationService: AuthenticationServiceProtocol {
     }
     
     private func publish(_ msg: AuthenticationServiceMessage, url: URL? = nil, _ status: ProgressStatus) {
-        print("\(status.icon) AuthenticationService: \(msg.description)")
+        logService.add(
+            text: msg.description,
+            type: .info,
+            context: String(describing: type(of: self))
+        )
         currentResult = .init(message: msg, url: url, status: status)
     }
     
     private func publishError(_ msg: AuthenticationServiceMessage) throws {
-        print("❌ AuthenticationService: \(msg.description)")
+        logService.add(
+            text: msg.description,
+            type: .error,
+            context: String(describing: type(of: self))
+        )
         currentResult = .init(message: msg, status: .error)
         throw msg
     }
