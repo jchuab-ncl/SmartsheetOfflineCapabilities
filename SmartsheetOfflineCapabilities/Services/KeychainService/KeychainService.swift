@@ -19,6 +19,25 @@ public protocol KeychainServiceProtocol {
 /// A service responsible for securely storing and retrieving data using the iOS Keychain.
 /// Provides support for storing plain strings and Codable objects.
 final class KeychainService: KeychainServiceProtocol {
+    
+    // MARK: Private Properties
+    
+    private let logService: LogServiceProtocol
+    
+    // MARK: Initializer
+    
+    /// Initializes a new `KeychainService`.
+    ///
+    /// This service provides a secure wrapper around the iOS Keychain APIs
+    /// for storing, retrieving, and deleting sensitive values such as tokens
+    /// and credentials.
+    ///
+    /// - Parameter logService: A logging service used to record keychain
+    ///   operation failures and diagnostics. Defaults to
+    ///   `Dependencies.shared.logService`.
+    init(logService: LogServiceProtocol = Dependencies.shared.logService) {
+        self.logService = logService
+    }
 
     /// Saves a string value to the Keychain under the specified key.
     /// - Parameters:
@@ -44,7 +63,17 @@ final class KeychainService: KeychainServiceProtocol {
         
         let status = SecItemAdd(query as CFDictionary, nil)
         if status != errSecSuccess {
-            print("❌ SecItemAdd failed with status: \(status)")
+            logService.add(
+                text: "SecItemAdd failed with status: \(status)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
+        } else if status == errSecSuccess {
+            logService.add(
+                text: "SecItemAdd succeeded for key: \(key.rawValue)",
+                type: .info,
+                context: String(describing: type(of: self))
+            )
         }
         return status == errSecSuccess
     }
@@ -65,6 +94,12 @@ final class KeychainService: KeychainServiceProtocol {
               let data = dataTypeRef as? Data,
               let result = String(data: data, encoding: .utf8) else { return nil }
 
+        logService.add(
+            text: "Load key: \(key.rawValue) successfully." ,
+            type: .info,
+            context: String(describing: type(of: self))
+        )
+        
         return result
     }
 
@@ -79,7 +114,17 @@ final class KeychainService: KeychainServiceProtocol {
         ]
         let status = SecItemDelete(query as CFDictionary)
         if status != errSecSuccess {
-            print("❌ SecItemDelete failed with status: \(status)")
+            logService.add(
+                text: "SecItemDelete failed with status: \(status)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
+        } else if status == errSecSuccess {
+            logService.add(
+                text: "SecItemDelete succeeded for key: \(key.rawValue)",
+                type: .info,
+                context: String(describing: type(of: self))
+            )
         }
         
         return status == errSecSuccess
@@ -94,7 +139,17 @@ final class KeychainService: KeychainServiceProtocol {
         ]
         let status = SecItemDelete(query as CFDictionary)
         if status != errSecSuccess {
-            print("❌ SecItemDelete (all) failed with status: \(status)")
+            logService.add(
+                text: "SecItemDelete (all) failed with status: \(status)",
+                type: .error,
+                context: String(describing: type(of: self))
+            )
+        } else if status == errSecSuccess {
+            logService.add(
+                text: "SecItemDelete (all) succeeded",
+                type: .info,
+                context: String(describing: type(of: self))
+            )
         }
         return status == errSecSuccess
     }
