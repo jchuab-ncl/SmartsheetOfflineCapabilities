@@ -13,18 +13,25 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        DependencyEnvironment.configureDependencies()
         
         if let url = launchOptions?[.url] as? URL {
-            print("Deep Link URL: \(url)")
+            Dependencies.shared.logService.add(
+                text: "Deep Link URL: \(url)",
+                type: .info,
+                context: String(describing: type(of: self))
+            )
             
             do {
                 try Dependencies.shared.authenticationService.handleOAuthCallback(url: url)
             } catch {
-                // TODO: Handle error
+                Dependencies.shared.logService.add(
+                    text: "Error handling OAuth callback for URL: \(url) / Error: \(error.localizedDescription)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
             }
         }
-        
-        DependencyEnvironment.configureDependencies()
         return true
     }
 }

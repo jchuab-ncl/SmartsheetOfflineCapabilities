@@ -44,7 +44,11 @@ struct SmartsheetOfflineCapabilitiesApp: App {
                     do {
                         try Dependencies.shared.authenticationService.handleOAuthCallback(url: url)
                     } catch {
-                        //TODO: Handle error
+                        Dependencies.shared.logService.add(
+                            text: "Error handling OAuth callback for URL: \(url) / Error: \(error.localizedDescription)",
+                            type: .error,
+                            context: String(describing: type(of: self))
+                        )
                     }
                 }
                 .preferredColorScheme(.light)

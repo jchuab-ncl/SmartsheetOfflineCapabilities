@@ -192,7 +192,6 @@ public struct ContactDTO: Hashable, Sendable {
 }
 
 public struct ColumnDTO: Identifiable, Hashable, Sendable {
-    public var format: String?
     public var id: Int
     public var index: Int
     public var title: String
@@ -203,8 +202,10 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
     public var hidden: Bool
     public var width: Int
     public var options: [String]
-    public var contactOptions: [ContactDTO] //TODO: Add the field locked
-
+    public var contactOptions: [ContactDTO]
+    public var format: String?
+    public var formula: String?
+    
     public init(
         id: Int,
         index: Int,
@@ -217,9 +218,9 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         width: Int,
         options: [String],
         contactOptions: [ContactDTO] = [],
-        format: String? = nil
+        format: String? = nil,
+        formula: String? = nil
     ) {
-        self.format = format
         self.id = id
         self.index = index
         self.title = title
@@ -231,10 +232,11 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         self.width = width
         self.options = options
         self.contactOptions = contactOptions
+        self.format = format
+        self.formula = formula
     }
     
     public init(from value: CachedColumn) {
-        self.format = value.format
         self.id = value.id
         self.index = value.index
         self.title = value.title
@@ -246,6 +248,8 @@ public struct ColumnDTO: Identifiable, Hashable, Sendable {
         self.width = value.width
         self.options = value.options.map { $0.value }
         self.contactOptions = value.contactOptions.asDTOs
+        self.format = value.format
+        self.formula = nil
     }
 }
 

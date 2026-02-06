@@ -139,7 +139,6 @@ extension Array where Element == Contact {
 //}
 
 public struct Column: Codable, Equatable {
-    public let format: String?
     public let id: Int
     public let index: Int
     public let title: String
@@ -152,9 +151,10 @@ public struct Column: Codable, Equatable {
     public let width: Int
     public let systemColumnType: String?
     public let contactOptions: [Contact]?
+    public let format: String?
+    public let formula: String?
     
     public enum CodingKeys: CodingKey {
-        case format
         case id
         case index
         case title
@@ -167,11 +167,12 @@ public struct Column: Codable, Equatable {
         case width
         case systemColumnType
         case contactOptions
+        case format
+        case formula
     }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.format = try container.decodeIfPresent(String.self, forKey: .format)
         self.id = try container.decode(Int.self, forKey: .id)
         self.index = try container.decode(Int.self, forKey: .index)
         self.title = try container.decode(String.self, forKey: .title)
@@ -191,6 +192,8 @@ public struct Column: Codable, Equatable {
         self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 0
         self.systemColumnType = try container.decodeIfPresent(String.self, forKey: .systemColumnType)
         self.contactOptions = try container.decodeIfPresent([Contact].self, forKey: .contactOptions)
+        self.format = try container.decodeIfPresent(String.self, forKey: .format)
+        self.formula = try container.decodeIfPresent(String.self, forKey: .formula)
     }
 }
 

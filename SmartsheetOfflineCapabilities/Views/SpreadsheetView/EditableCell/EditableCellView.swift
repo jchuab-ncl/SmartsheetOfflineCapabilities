@@ -142,7 +142,7 @@ struct EditableCellView: View {
                     makeMyChangeView(conflict: conflict)
                 }
                 
-                Spacer()
+//                Spacer()
             }
         }
         .padding()
@@ -172,7 +172,7 @@ struct EditableCellView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Colors.blueNCL)
-                        .frame(height: 50)
+                        .frame(height: 40)
                     HStack {
                         if viewModel.status == .initial {
                             Text("Keep someone else's change")
@@ -191,6 +191,7 @@ struct EditableCellView: View {
                 }
             })
             .frame(height: 40)
+            .frame(maxWidth: 300)
             .buttonStyle(.plain)
             .padding(.top)
         }
@@ -219,7 +220,7 @@ struct EditableCellView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Colors.blueNCL)
-                        .frame(height: 50)
+                        .frame(height: 44)
                     HStack {
                         Text("Keep my change")
                             .padding()
@@ -228,7 +229,8 @@ struct EditableCellView: View {
                     }
                 }
             })
-            .frame(height: 40)
+//            .frame(height: 40)
+            .frame(maxWidth: 300)
             .buttonStyle(.plain)
             .padding(.top)
         }

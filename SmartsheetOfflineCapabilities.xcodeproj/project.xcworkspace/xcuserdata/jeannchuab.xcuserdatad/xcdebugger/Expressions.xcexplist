@@ -252,6 +252,14 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #1 in closure #1 in SmartsheetOfflineCapabilitiesApp.body.getter:SpreadsheetConceptsApp.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "Dependencies.shared.logService">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in DiscussionViewModel.init(authenticationService:sheetService:):DiscussionViewModel.swift">
       </ContextState>
       <ContextState

@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @MainActor
-final class SheetListViewModel: ObservableObject {            
+final class SheetListViewModel: ObservableObject {
     // MARK: - Published Properties
 
     @Published var isInternetAvailable: Bool = true
@@ -22,11 +22,11 @@ final class SheetListViewModel: ObservableObject {
     @Published var statusSync: [Int: ProgressStatus] = [:]
     @Published var statusDiscard: [Int: ProgressStatus] = [:]
     @Published var conflicts: [Conflict] = []
-//    @Published var conflictSolved: [Conflict] = []
     
     // MARK: Private Properties
     
     private let sheetService: SheetServiceProtocol
+    private let logService: LogServiceProtocol
     private var networkMonitor: NetworkMonitor = NetworkMonitor()
     private var cancellables = Set<AnyCancellable>()
     
@@ -34,15 +34,19 @@ final class SheetListViewModel: ObservableObject {
 
     /// Initializes the `SelectFileViewModel`, setting up dependencies and bindings.
     ///
-    /// - Parameter sheetService: The service used to fetch sheets and updates. Defaults to `Dependencies.shared.sheetService`.
+    /// - Parameters:
+    ///     - sheetService: The service used to fetch sheets and updates. Defaults to `Dependencies.shared.sheetService`
+    ///     - logService: A logging service used to record warnings or diagnostics
     ///
     /// This initializer sets up:
     /// - A `NetworkMonitor` to observe real-time internet connectivity updates, binding the result to `isInternetAvailable`.
     /// - A subscription to `sheetService.resultSheetHasUpdatesToPublishDTO`, updating the local `sheetsListHasUpdatesToPublish` whenever changes are published.
     init(
-        sheetService: SheetServiceProtocol = Dependencies.shared.sheetService
+        sheetService: SheetServiceProtocol = Dependencies.shared.sheetService,
+        logService: LogServiceProtocol = Dependencies.shared.logService
     ) {
         self.sheetService = sheetService
+        self.logService = logService
         
         // Bind published internet status
         networkMonitor.$isConnected
@@ -105,9 +109,6 @@ final class SheetListViewModel: ObservableObject {
             status = .loading
             
             do {
-                //TODO: Remove ???
-//                guard sheetsList.isEmpty else { return }
-                
                 self.sheetsList.removeAll()
                 self.sheetsList = try await sheetService.getSheetList()
                 
@@ -116,8 +117,6 @@ final class SheetListViewModel: ObservableObject {
                     sheetsContentList.append(sheetContentResult)
                     
                     _ = try await sheetService.getSheetListHasUpdatesToPublish()
-//                    let discussionResult = try await sheetService.getDiscussionForSheet(sheetId: sheet.id)
-//                    discussionList.append(contentsOf: discussionResult)
                 }
                 
                 try await sheetService.getServerInfo()
@@ -137,7 +136,7 @@ final class SheetListViewModel: ObservableObject {
             
             do {
                 try await sheetService.checkForConflicts(sheetId: sheetId)
-                print("LOG: Conflict result: ", conflicts)
+                logService.add(text: "Conflict result: \(conflicts)", type: .info, context: String(describing: type(of: self)))
                 
                 if conflicts.isEmpty {
                     try await sheetService.pushSheetContentToApi(sheetId: sheetId)
@@ -162,11 +161,19 @@ final class SheetListViewModel: ObservableObject {
                 try await sheetService.removeSheetHasUpdatesToPublish(sheetId: sheetId, rowId: nil, columnId: nil)
                 self.conflicts = []
                 
-                print("✅ Changes discarded for sheet id: ", sheetId)
+                logService.add(
+                    text: "Changes discarded for sheet id: \(sheetId)",
+                    type: .info,
+                    context: String(describing: type(of: self))
+                )
                 statusDiscard[sheetId] = .success
             } catch {
                 statusDiscard[sheetId] = .error
-                print("❌ An error occured while discarding changes for sheet id: \(sheetId) error: ", error.localizedDescription)
+                logService.add(
+                    text: "An error occurred while discarding changes for sheet id: \(sheetId). Error: \(error.localizedDescription)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
             }
         }
     }

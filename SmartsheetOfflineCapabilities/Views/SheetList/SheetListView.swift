@@ -206,7 +206,6 @@ struct SheetListView: View {
                 Spacer()
                 
                 Button(action: {
-                    print(">>> Sync now button tapped for sheet: \(sheet.id)")
                     viewModel.syncData(sheetId: sheet.id)
                 }, label: {
                     ZStack {

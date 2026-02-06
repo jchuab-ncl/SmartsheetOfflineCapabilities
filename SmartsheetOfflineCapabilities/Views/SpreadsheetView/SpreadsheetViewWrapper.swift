@@ -15,6 +15,8 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     private var sheetContentDTO: SheetContentDTO
     private var cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO]
     private let conflictResult: [Conflict]
+    private let logService: LogServiceProtocol
+    
     @State private var isFirstLoad = true
     @Binding var scrollToRow: Int?
     
@@ -25,16 +27,18 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     ///  - sheetContentDTO: The data transfer object containing the sheet content to display.
     ///  - cachedSheetHasUpdatesToPublishDTO:
     ///  - conflictResult: Holds the result of a conflict check: conflicts and mergeable updates.
-    ///
+    ///  - logService: A logging service used to record warnings or diagnostics
     init(
         sheetContentDTO: SheetContentDTO,
         cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO],
         conflictResult: [Conflict],
+        logService: LogServiceProtocol = Dependencies.shared.logService,
         scrollToRow: Binding<Int?>
     ) {
         self.sheetContentDTO = sheetContentDTO
         self.cachedSheetHasUpdatesToPublishDTO = cachedSheetHasUpdatesToPublishDTO
         self.conflictResult = conflictResult
+        self.logService = logService
         self._scrollToRow = scrollToRow
     }
         
@@ -44,16 +48,28 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
         spreadsheetView.delegate = context.coordinator
         
         // Setup grid size, layout, etc.
-        print("Log: SpreadsheetView initialized.")
+        logService.add(
+            text: "SpreadsheetView initialized.",
+            type: .debug,
+            context: String(describing: type(of: self))
+        )
         
         return spreadsheetView
     }
 
     func updateUIView(_ uiView: SpreadsheetView, context: Context) {
-        print("Log: updateUIView")
-        print("Log: spreadsheet has \(sheetContentDTO.rows.count) rows")
+        logService.add(
+            text: "updateUIView called.",
+            type: .debug,
+            context: String(describing: type(of: self))
+        )
+        logService.add(
+            text: "Spreadsheet has \(sheetContentDTO.rows.count) rows.",
+            type: .debug,
+            context: String(describing: type(of: self))
+        )
         
-        if let row = scrollToRow {
+        if scrollToRow != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 uiView.scrollToItem(at: IndexPath(row: sheetContentDTO.rows.count, column: 0), at: .bottom, animated: true)
             }
@@ -71,7 +87,11 @@ struct SpreadsheetViewWrapper: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        print("Log: makeCoordinator")
+        logService.add(
+            text: "makeCoordinator called.",
+            type: .debug,
+            context: String(describing: type(of: self))
+        )
         
         return Coordinator(
             sheetContentDTO: self.sheetContentDTO,
@@ -85,28 +105,41 @@ class Coordinator: NSObject, SpreadsheetViewDelegate {
     private var sheetContentDTO: SheetContentDTO
     private let conflictResult: [Conflict]
     private var sheetService: SheetServiceProtocol
+    private let logService: LogServiceProtocol
     private var textSize: [Int: Int] = [:] //RowId / TextSize
     private var serverInfoFormatParser: ServerInfoFormatParserProtocol
     private var cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO]
     var isFirstLoad: Bool = true
     
-    /// Initializes the Coordinator for managing spreadsheet interactions.
+    /// Initializes a new `Coordinator` responsible for managing spreadsheet interactions.
+    ///
+    /// The coordinator acts as the bridge between `SpreadsheetView` (UIKit)
+    /// and the SwiftUI layer, handling:
+    /// - User edits and cell updates
+    /// - Local state synchronization
+    /// - Conflict handling and resolution
+    /// - Spreadsheet layout calculations (row height, column width)
+    ///
     /// - Parameters:
-    ///   - sheetContentDTO: The data transfer object containing the sheet content.
-    ///   - conflictResult:
-    ///   - sheetService: Service protocol for handling sheet updates. Defaults to shared dependency.
-    ///   - serverInfoFormatParser: Service protocol for parsing server info formats. Defaults to shared dependency.
+    ///   - sheetContentDTO: The data transfer object containing the sheet content to be displayed.
+    ///   - cachedSheetHasUpdatesToPublishDTO: Cached local updates that have not yet been pushed to the API.
+    ///   - conflictResult: The result of conflict detection, including conflicts and mergeable updates.
+    ///   - sheetService: Service responsible for managing sheet updates and persistence.
+    ///   - logService: A logging service used to record warnings or diagnostics
+    ///   - serverInfoFormatParser: Service used to parse and apply server-driven formatting rules.
     init(
         sheetContentDTO: SheetContentDTO,
         cachedSheetHasUpdatesToPublishDTO: [CachedSheetHasUpdatesToPublishDTO],
         conflictResult: [Conflict],
         sheetService: SheetServiceProtocol = Dependencies.shared.sheetService,
+        logService: LogServiceProtocol = Dependencies.shared.logService,
         serverInfoFormatParser: ServerInfoFormatParserProtocol = Dependencies.shared.serverInfoFormatParserService
     ) {
         self.sheetContentDTO = sheetContentDTO
         self.cachedSheetHasUpdatesToPublishDTO = cachedSheetHasUpdatesToPublishDTO
         self.conflictResult = conflictResult
         self.sheetService = sheetService
+        self.logService = logService
         self.serverInfoFormatParser = serverInfoFormatParser
         
         for row in sheetContentDTO.rows {
@@ -173,7 +206,11 @@ extension Coordinator: CustomEditableCellDelegate {
         
         guard let rowIndex = sheetContentDTO.rows.firstIndex(where: { $0.id == rowId }) else {
             // You could log if the row isn't found
-            print("⚠️ didChangeText: Row with id \(rowId) not found in sheetContentDTO.")
+            logService.add(
+                text: "didChangeText: Row with id \(rowId) not found in sheetContentDTO.",
+                type: .warning,
+                context: String(describing: type(of: self))
+            )
             return
         }
         
@@ -193,7 +230,6 @@ extension Coordinator: CustomEditableCellDelegate {
         }
             
         Task {
-//            status = .loading
             do {
                 sheetService.addSheetWithUpdatesToPublishInMemoryRepo(sheet:
                         .init(
@@ -211,11 +247,12 @@ extension Coordinator: CustomEditableCellDelegate {
                 )
                 
                 try await sheetService.commitMemoryToStorage(sheetId: sheetContentDTO.id)
-                //TODO: Dismiss the screen
-//                status = .success
-//                completion()
             } catch {
-//                status = .error
+                logService.add(
+                    text: "Error committing sheet updates to storage for sheetId \(sheetContentDTO.id): \(error.localizedDescription)",
+                    type: .error,
+                    context: String(describing: type(of: self))
+                )
             }
         }
     }
@@ -352,7 +389,7 @@ extension Coordinator: SpreadsheetViewDataSource {
         self.textSize[row.id] = value.count > (self.textSize[row.id] ?? 0) ? value.count : self.textSize[row.id] ?? 0
 
         cell.columnType = column.type
-        cell.isEditable = column.systemColumnType.isEmpty && (column.locked == false || column.locked == nil)
+        cell.isEditable = column.systemColumnType.isEmpty && (column.locked == false || column.locked == nil) && (column.formula == nil || (column.formula ?? "").isEmpty)
         cell.isHeader = false
         cell.contactOptions = column.contactOptions
         cell.pickListValues = []

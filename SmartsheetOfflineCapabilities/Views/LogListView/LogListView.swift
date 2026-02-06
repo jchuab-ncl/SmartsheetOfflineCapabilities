@@ -43,9 +43,17 @@ struct LogListView: View {
                         }
                     }
                     
-                    Text("Total logs: \(viewModel.filteredLogs.count)")
-                        .font(.footnote)
-                        .padding()
+                    HStack {
+                        Text("Total logs: \(viewModel.filteredLogs.count)")
+                            .font(.footnote)
+                            .padding()
+                        
+                        Spacer()
+                        
+                        Text(AppInfo.versionBuildFormatted)
+                            .font(.footnote)
+                            .padding()
+                    }                    
                 }
                 .navigationTitle("Logs")
                 .searchable(
